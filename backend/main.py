@@ -1,15 +1,25 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, validator
 import re
 from typing import Dict, Any
 
 app = FastAPI(
-    title="CSAF Provider Scanner API",
+    title="CSAF Provider Scan API",
     description="API for scanning CSAF providers",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json"
+)
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins in development
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (GET, POST, OPTIONS, etc.)
+    allow_headers=["*"],  # Allow all headers
 )
 
 
@@ -46,7 +56,7 @@ class ScanResponse(BaseModel):
 async def root():
     """Root endpoint with API information"""
     return {
-        "name": "CSAF Provider Scanner API",
+        "name": "CSAF Provider Scan API",
         "version": "1.0.0",
         "docs": "/docs",
         "openapi": "/openapi.json"

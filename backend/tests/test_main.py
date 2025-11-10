@@ -15,7 +15,7 @@ class TestRootEndpoint:
         data = response.json()
         assert "name" in data
         assert "version" in data
-        assert data["name"] == "CSAF Provider Scanner API"
+        assert data["name"] == "CSAF Provider Scan API"
         assert data["version"] == "1.0.0"
 
 
@@ -184,7 +184,7 @@ class TestOpenAPIDocumentation:
         data = response.json()
         assert "openapi" in data
         assert "info" in data
-        assert data["info"]["title"] == "CSAF Provider Scanner API"
+        assert data["info"]["title"] == "CSAF Provider Scan API"
 
     def test_swagger_ui_endpoint(self):
         """Swagger UI is accessible"""

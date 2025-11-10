@@ -1,4 +1,4 @@
-# CSAF Provider Scanner Backend
+# CSAF Provider Scan Backend
 
 FastAPI-based backend
 
