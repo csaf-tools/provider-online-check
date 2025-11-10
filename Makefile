@@ -4,15 +4,15 @@
 $(.SERVICE_TARGETS):
 	@echo ""
 
-.FLAGS := no-cache capsule
+.FLAGS := no-cache capsule compose-local-branch
 
 $(.FLAGS):
 	@echo ""
 
 .PHONY: dev
 
-dev dev-help dev-standalone dev-detached dev-attached dev-stop dev-exec dev-enter dev-clean dev-build:
-	@bash dev/make-dev.sh $@ "$(filter-out $@, $(MAKECMDGOALS))" "$(ARGS)"
+dev dev-help dev-standalone dev-detached dev-attached dev-stop dev-exec dev-enter dev-clean dev-build dev-log:
+	@bash dev/make-dev.sh $@ "$(filter-out $@, $(MAKECMDGOALS))"
 
 # Service Tests
 
