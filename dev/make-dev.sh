@@ -248,6 +248,9 @@ log()
 ## Parameters
 TARGET=$1
 SERVICE=$2
+ATTACH_CONTAINER=$2
+EXEC_COMMAND=$2
+LOG_CONTAINER=$2
 
 ## Parameters RUN_ARGS, ATTACH_CONTAINER, EXEC_COMMAND, LOG_CONTAINER are fetched from environment
 
@@ -302,7 +305,7 @@ case "$FUNCTION" in
     "clean")            clean ;;
     "standalone")       build && run && stop ;;
     "detached")         build && run "-d" && info "Containers started" ;;
-    "attached")         build && run "-d" && attach && stop ;;
+    "attached")         build && run "-d" && attach ;;
     "stop")             stop ;;
     "exec")             exec ;;
     "enter")            attach ;;
