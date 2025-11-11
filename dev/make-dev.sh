@@ -48,6 +48,7 @@ Available dev functions:
                           the specific container id you will enter (default value is equal the service name)
     dev-build       : Builds the development image
     dev-log         : Prints log output of given container.
+    dev-restart     : Closes and starts the container (in detached mode)
     "
 }
 
@@ -309,6 +310,7 @@ case "$FUNCTION" in
     "enter")            attach ;;
     "build")            build ;;
     "log")              log ;;
+    "restart")          stop && build && run "-d" ;;
     "media-attached")   build && run "-d" && EXEC_COMMAND='-T tests wait-for-it "media:9006"' && exec "$EXEC_COMMAND" && attach "tests" && stop ;; # Special case for media (for now)
     "")                 build && run ;;
     *)                  warn "No command found matching $FUNCTION" && help ;;

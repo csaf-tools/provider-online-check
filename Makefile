@@ -11,7 +11,7 @@ $(.FLAGS):
 
 .PHONY: dev
 
-dev dev-help dev-standalone dev-detached dev-attached dev-stop dev-exec dev-enter dev-clean dev-build dev-log:
+dev dev-help dev-standalone dev-detached dev-attached dev-stop dev-exec dev-enter dev-clean dev-build dev-log dev-restart:
 	@bash dev/make-dev.sh $@ "$(filter-out $@, $(MAKECMDGOALS))"
 
 # Service Tests

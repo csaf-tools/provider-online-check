@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
-from main import app, ScanRequest
+from main import app
+from http.http import ScanRequest
 
 client = TestClient(app)
 
