@@ -15,7 +15,7 @@ jobs:
         python-version: ${{ env.PYTHON_VERSION }}
 
     - name: Install requirements
-      run: pip install --requirement backend/requirements_development.txt
+      run: pip install --requirement backend/requirements.txt
 
     - name: Build and run
       run: make dev-detached
@@ -37,6 +37,8 @@ jobs:
 
     - name: Run shellcheck
       uses: ludeeus/action-shellcheck@master
+      with:
+        severity: error
 
   check-coding-style:
       name: Check coding style
@@ -52,7 +54,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install requirements
-        run: pip install --requirement backend/requirements_development.txt
+        run: pip install --requirement backend/requirements.txt
 
       - name: Check black
         run: make check-black
