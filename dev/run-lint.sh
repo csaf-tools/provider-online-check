@@ -17,10 +17,10 @@ done
 # Setup
 
 DC="docker compose -f docker-compose.yml"
-PATHS="backend/src/"
+PATHS="./src/"
 
 # Safe Exit
-trap 'if [ -z "$LOCAL" ]; then docker compose -f docker-compose.test.yml down; fi' EXIT
+trap 'if [ -z "$LOCAL" ]; then make dev-stop; fi' EXIT
 
 # Execution
 if [ -z "$LOCAL" ]
@@ -28,19 +28,19 @@ then
     info "Building and running dev container"
 
     # Setup
-    echocmd make dev
+    echocmd make dev-attached
 
     info "Linting"
     # Container Mode
-    echocmd eval "$DC exec black --check --diff ${PATHS}"
-    echocmd eval "$DC exec isort --check-only --diff ${PATHS}"
-    echocmd eval "$DC exec flake8 ${PATHS}"
-    echocmd eval "$DC exec mypy -m ${PATHS}"
+    echocmd eval "$DC exec -T backend black --check --diff ${PATHS}"
+    echocmd eval "$DC exec -T backend isort --check-only --diff ${PATHS}"
+    echocmd eval "$DC exec -T backend flake8 ${PATHS}"
+    echocmd eval "$DC exec -T backend mypy ${PATHS}"
 
 else
     # Local Mode
-    echocmd black --diff ${PATHS}
-    echocmd isort --diff ${PATHS}
+    echocmd black ${PATHS}
+    echocmd isort ${PATHS}
     echocmd flake8 ${PATHS}
-    echocmd mypy -m ${PATHS}
+    echocmd mypy ${PATHS}
 fi

@@ -20,6 +20,9 @@ run-tests:
 	PYTHONPATH=backend/ pytest backend/tests/
 
 lint:
+	bash dev/run-lint.sh -l
+
+lint-containerd:
 	bash dev/run-lint.sh
 
 # DevOps Tests

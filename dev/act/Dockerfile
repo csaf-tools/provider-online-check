@@ -4,8 +4,7 @@ FROM ubuntu:22.04
 WORKDIR /app/
 
 # Installs
-# hadolint ignore=DL3008
-RUN apt-get update && apt-get upgrade && \
+RUN apt-get update && \
     apt-get install --no-install-recommends -y \
     ca-certificates \
     curl \

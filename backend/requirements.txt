@@ -7,3 +7,7 @@ pydantic-settings
 pytest
 pytest-asyncio
 httpx
+black
+isort
+flake8
+mypy

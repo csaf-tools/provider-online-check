@@ -6,18 +6,25 @@ jobs:
   service-tests:
     name: "Test Service"
     runs-on: ubuntu-latest
-    if: false
     steps:
     - uses: actions/checkout@v5
 
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install requirements
+      run: pip install --requirement backend/requirements_development.txt
+
     - name: Build and run
-      run: make dev
+      run: make dev-detached
 
     - name: Run Tests
       run: make run-tests
 
-    - name: Run Lint
-      run: make lint
+    - name: Close container
+      run: make dev-stop
 
   devops-linters:
     name: "Lint DevOps"
@@ -29,6 +36,35 @@ jobs:
       run: make lint-dockerfiles
 
     - name: Run shellcheck
-      run: |
-        sudo apt update && sudo apt install shellcheck
-        make lint-shell-scripts
+      uses: ludeeus/action-shellcheck@master
+
+  check-coding-style:
+      name: Check coding style
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install requirements
+        run: pip install --requirement backend/requirements_development.txt
+
+      - name: Check black
+        run: make check-black
+
+      - name: Check isort
+        run: make check-isort
+
+      - name: Check flake8
+        run: make flake8
+
+      - name: Check mypy
+        run: make mypy
+
+      - name: Check pyupgrade
+        run: make pyupgrade
