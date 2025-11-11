@@ -3,6 +3,9 @@
 # Forwards Error, Progress and Result Messages
 # Involved in: 5, 10, 15
 
+from fastapi import FastAPI
+from pydantic import BaseModel, Field
+
 class ScanResponse(BaseModel):
     # Dummy structure
     status: str = Field(..., description="Status of the scan request")

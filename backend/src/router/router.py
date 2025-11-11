@@ -11,8 +11,8 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field, validator
 from typing import Dict, Any
 
-from validators.request_validator import validate_domain
-from client.client import ScanResponse
+from ..validators.request_validator import validate_domain
+from ..client.client import ScanResponse
 
 router = APIRouter()
 
