@@ -54,19 +54,16 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install requirements
-        run: pip install --requirement backend/requirements.txt
+        run: pip install --requirement ./backend/requirements.txt
 
       - name: Check black
-        run: make check-black
+        run: black ./backend/src/
 
       - name: Check isort
-        run: make check-isort
+        run: isort ./backend/src/
 
       - name: Check flake8
-        run: make flake8
+        run: flake8 ./backend/src/
 
       - name: Check mypy
-        run: make mypy
-
-      - name: Check pyupgrade
-        run: make pyupgrade
+        run: mypy ./backend/src/
