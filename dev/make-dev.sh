@@ -294,9 +294,7 @@ then
 fi
 
 # Helpers
-USER_ID=$(id -u)
-GROUP_ID=$(id -g)
-DC="CONTEXT=dev USER_ID=$USER_ID GROUP_ID=$GROUP_ID COMPOSE_REFERENCE_BRANCH=$COMPOSE_REFERENCE_BRANCH docker compose -f ${COMPOSE_FILE}"
+DC="CONTEXT=dev COMPOSE_REFERENCE_BRANCH=$COMPOSE_REFERENCE_BRANCH docker compose -f ${COMPOSE_FILE}"
 IMAGE_TAG="csfa-checker-dev"
 
 # - Run specific function

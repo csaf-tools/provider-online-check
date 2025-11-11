@@ -9,8 +9,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 COPY . .
 
+RUN chmod 777 -R .
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt && \
+    chmod +x ./dev/run-lint.sh
 
 EXPOSE 8000
 
