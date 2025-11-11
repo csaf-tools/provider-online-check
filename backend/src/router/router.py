@@ -7,20 +7,22 @@
 
 # Involved in: 3, basically everything else too
 
+from typing import Any, Dict
+
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field, validator
-from typing import Dict, Any
 
-from ..validators.request_validator import validate_domain
 from ..client.client import ScanResponse
+from ..validators.request_validator import validate_domain
 
 router = APIRouter()
+
 
 class ScanRequest(BaseModel):
     domain: str = Field(
         ...,
         description="Domain to scan for CSAF provider metadata",
-        example="example.com"
+        example="example.com",
     )
 
     @validator("domain", pre=True)
@@ -36,7 +38,7 @@ async def root():
         "name": "CSAF Provider Scan API",
         "version": "1.0.0",
         "docs": "/docs",
-        "openapi": "/openapi.json"
+        "openapi": "/openapi.json",
     }
 
 
@@ -46,7 +48,7 @@ async def root():
     summary="Start a domain scan",
     description="Initiates a scan for CSAF provider metadata on the specified domain",
     tags=["scan"],
-    status_code=status.HTTP_201_CREATED
+    status_code=status.HTTP_201_CREATED,
 )
 async def start_scan(request: ScanRequest) -> Dict[str, Any]:
     """
@@ -76,5 +78,3 @@ async def start_scan(request: ScanRequest) -> Dict[str, Any]:
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy"}
-
-

@@ -5,22 +5,30 @@
 echo "Run Linters"
 
 # Parameters
-while getopts "lscp" FLAG; do
+while getopts "lib" FLAG; do
     case "${FLAG}" in
-    l) LOCAL=true ;;
+    l) LOCAL=true && shift 1;;
+    i) INSTALL=true && shift 1;;
+    b) NOT_IN_BACKEND=true && shift 1;;
     *) echo "Can't parse flag ${FLAG}" && break ;;
     esac
 done
 
-shift 1
-PREPATH=$1
+if [ -n "$INSTALL" ]
+then
+    pip install --no-cache-dir -r requirements.txt || true
+fi
+
+if [ -n "$NOT_IN_BACKEND" ]
+then
+    PREPATH="/backend"
+fi
 
 # Setup
 
 DC="docker compose -f docker-compose.yml"
 PATHS=".$PREPATH/src/"
 
-echo $LOCAL
 # Execution
 if [ -z "$LOCAL" ]
 then
