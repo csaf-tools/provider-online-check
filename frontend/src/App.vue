@@ -61,7 +61,7 @@
             <div class="card-body">
               <h5 class="card-title">About</h5>
               <p class="card-text">
-                This tool scans domains for <a href="https://www.csaf.io">CSAF</a> (Common Security Advisory Framework)
+                This tool scans domains for <a href="https://www.csaf.io" target="_blank">CSAF</a> (Common Security Advisory Framework)
                 provider metadata and check it's validity.
               </p>
               <p>
