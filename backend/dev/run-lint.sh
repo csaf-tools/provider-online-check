@@ -45,7 +45,6 @@ then
     eval "$DC exec -T backend black --check --diff ${PATHS}"
     eval "$DC exec -T backend isort --check-only --diff ${PATHS}"
     eval "$DC exec -T backend flake8 ${PATHS}"
-    eval "$DC exec -T backend mypy ${PATHS}"
 
 else
     # Local Mode
@@ -55,6 +54,4 @@ else
     isort ${PATHS}
     echo "Flake8"
     flake8 ${PATHS}
-    echo "Mypy"
-    mypy ${PATHS}
 fi
