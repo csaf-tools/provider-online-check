@@ -2,6 +2,10 @@ fastapi
 uvicorn[standard]
 pydantic
 pydantic-settings
+redis
+rq
+python-dotenv
+requests
 
 # Testing
 pytest

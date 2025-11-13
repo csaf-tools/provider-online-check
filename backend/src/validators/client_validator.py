@@ -2,3 +2,27 @@
 # security checks
 
 # Involved in: 4, 19, 20, 21
+
+from ..router.redis import is_session_id_in_blocklist
+
+
+def validate_client_blocklist_check(session_id: str) -> str:
+    """
+    Checks blocklist status of session id
+
+    Throws authentication error, if session id is blocked
+
+    Returns session id as is
+    """
+    if session_id is None:
+        raise ValueError("Session ID cannot be empty")
+
+    if not isinstance(session_id, str) or not value.strip():
+        raise ValueError("Session ID cannot be empty")
+
+    # Redis blocklist check
+    # FIXME
+    if is_session_id_in_blocklist(session_id):
+        raise ValueError("Session ID is blocked")
+
+    return session_id

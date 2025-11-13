@@ -13,12 +13,16 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field, validator
 
 from ..client.client import ScanResponse
+
+from ..validators.client_validator import validate_client_blocklist_check
 from ..validators.request_validator import validate_domain
 
 router = APIRouter()
 
-
 class ScanRequest(BaseModel):
+    session_id: str = Field(
+        description="Unique session id"
+    )
     domain: str = Field(
         ...,
         description="Domain to scan for CSAF provider metadata",
@@ -29,6 +33,12 @@ class ScanRequest(BaseModel):
     def _validate_domain(cls, v):
         # delegate validation to the external validator
         return validate_domain(v)
+    
+
+    @validator("session_id", pre=True)
+    def _validate_client_blocklist_check(cls, v):
+        # delegate validation to the external validator
+        return validate_client_blocklist_check(v)
 
 
 @router.get("/", summary="API root", tags=["main"])
@@ -64,9 +74,28 @@ async def start_scan(request: ScanRequest) -> Dict[str, Any]:
         HTTPException: If the scan cannot be initiated
     """
     try:
+        
         # FIXME: Add real scan logic here
         return {
             "status": "started",
+            "domain": request.domain,
+            "message": f"Scan initiated for domain: {request.domain}",
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")
+
+@router.get(
+    "/scan/get/{slot_id}",
+    summary="Get output of scan",
+    description="Get latest feedback of scan, either from cache or from stream",
+    tags=["scan"],
+    status_code=status.HTTP_200_OK,
+)
+async def get_scan(slot_id: str, request: ScanRequest) -> Dict[str, Any]:
+    try:
+        # FIXME: Add real scan logic here
+        return {
+            "status": f"get {slot_id}",
             "domain": request.domain,
             "message": f"Scan initiated for domain: {request.domain}",
         }
