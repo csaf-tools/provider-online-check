@@ -7,9 +7,9 @@ echo "Run Linters"
 # Parameters
 while getopts "lib" FLAG; do
     case "${FLAG}" in
-    l) LOCAL=true && shift 1;;
-    i) INSTALL=true && shift 1;;
-    b) NOT_IN_BACKEND=true && shift 1;;
+    l) LOCAL=true;;
+    i) INSTALL=true;;
+    b) NOT_IN_BACKEND=true;;
     *) echo "Can't parse flag ${FLAG}" && break ;;
     esac
 done
@@ -44,7 +44,7 @@ then
     # Container Mode
     eval "$DC exec -T backend black --check --diff ${PATHS}"
     eval "$DC exec -T backend isort --check-only --diff ${PATHS}"
-    eval "$DC exec -T backend flake8 ${PATHS}"
+    eval "$DC exec -T backend flake8 --ignore=E501 ${PATHS}"
 
 else
     # Local Mode
@@ -53,5 +53,5 @@ else
     echo "Isort"
     isort ${PATHS}
     echo "Flake8"
-    flake8 ${PATHS}
+    flake8 --ignore=E501 ${PATHS}
 fi

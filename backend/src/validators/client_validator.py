@@ -17,7 +17,7 @@ def validate_client_blocklist_check(session_id: str) -> str:
     if session_id is None:
         raise ValueError("Session ID cannot be empty")
 
-    if not isinstance(session_id, str) or not value.strip():
+    if not isinstance(session_id, str) or not session_id.strip():
         raise ValueError("Session ID cannot be empty")
 
     # Redis blocklist check

@@ -10,13 +10,10 @@
 from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel, Field, validator
 
-from .scan_request import ScanRequest
 from ..client.client import ScanResponse
 from ..slots.slot_manager import Slot_Manager
-from ..validators.client_validator import validate_client_blocklist_check
-from ..validators.request_validator import validate_domain
+from .scan_request import ScanRequest
 
 router = APIRouter()
 
@@ -54,15 +51,16 @@ async def start_scan(request: ScanRequest) -> Dict[str, Any]:
         HTTPException: If the scan cannot be initiated
     """
     try:
-        Slot_Manager().start_domain_task(request)
+        result = await Slot_Manager().start_domain_task(request)
 
         return {
-            "status": "started",
+            "status": f"started {result}",
             "domain": request.domain,
             "message": f"Scan initiated for domain: {request.domain}",
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")
+
 
 @router.get(
     "/scan/get/{slot_id}",

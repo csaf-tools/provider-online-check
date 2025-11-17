@@ -6,18 +6,27 @@
 
 # Involved in: 5, 9, 14, 16, 22
 
-from fastapi import FastAPI
-from typing import Annotated
-from pydantic import BaseModel, Field, WithJsonSchema
+from __future__ import annotations
 
+from typing import Annotated, Optional
+
+from pydantic import Field
+
+from ..router.scan_request import ScanRequest
 from .slot import Slot
-from ..router.router import ScanRequest
+
 
 class Slot_Manager:
-    _instance:      Annotated[Slot_Manager, Field(description="Singleton instance"), Field(default=None)]
+    _instance: Annotated[
+        Optional[Slot_Manager], Field(description="Singleton instance")
+    ] = None
 
-    slot_amount:    Annotated[int, Field(description="Amount of slots that should be available at runtime"), Field(default=10)]
-    slots:          list[Annotated[Slot,  Field(description="List of slots for domain task execution")]]
+    slot_amount: Annotated[
+        int, Field(description="Amount of slots that should be available at runtime")
+    ] = 10
+    slots: list[
+        Annotated[Slot, Field(description="List of slots for domain task execution")]
+    ] = []
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
@@ -25,20 +34,37 @@ class Slot_Manager:
         return cls._instance
 
     def __init__(self, value):
-        # Setup slot manager
-        for i in enumerate(slot_amount):
-            slots[i] = Slot()
-
-    async def start_domain_task(self, request: ScanRequest):
-        # Find available slot
-        available_slot = this.find_first_available_slot()
-        if available_slot == None:
-            # Throw some kind of error
+        # Avoid reinitialization
+        if getattr(self, "_initialized", False):
             return
+        self._initialized = True
+
+        # Setup slot manager
+        self.slots = []
+        for _ in range(self.slot_amount):
+            self.slots.append(Slot())
+
+    async def start_domain_task(self, request: ScanRequest) -> bool:
+        # Find available slot
+        available_slot = await self.find_first_available_slot()
+        if available_slot is None:
+            # Throw some kind of error
+            return False
 
         # Start Checker
-        available_slot.start_domain_task(request)
+        await available_slot.start_domain_task(request)
+
+        return True
 
     async def find_first_available_slot(self) -> Slot:
-        return None
+        # First check if any slot is available outright
+        for slot in self.slots:
+            if slot.is_available():
+                return slot
 
+        # Next check if any slot has a running task that is orphaned
+        for slot in self.slots:
+            if slot.is_task_orphaned():
+                return slot
+
+        return None
