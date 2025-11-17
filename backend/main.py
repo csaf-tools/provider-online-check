@@ -1,5 +1,6 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from src.router.router import router
 
 app = FastAPI(
     title="CSAF Provider Scan API",
@@ -19,10 +20,8 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-from src.router.router import router
 app.include_router(router)
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-

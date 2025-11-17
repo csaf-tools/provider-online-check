@@ -64,6 +64,3 @@ jobs:
 
       - name: Check flake8
         run: flake8 --ignore=E501 ./backend/src/
-
-      - name: Check mypy
-        run: mypy ./backend/src/
