@@ -190,9 +190,9 @@ attach()
     if [ "$CONTAINER_STATUS" != 0 ]; then warn "Container exit status: $CONTAINER_STATUS"; fi
 }
 
-exec()
+dev_exec()
 {
-    local FUNC=$EXEC_COMMAND
+    local FUNC="$EXEC_COMMAND"
     if [ -n "$COMPOSE_FILE" ]
     then
         # Compose
@@ -250,7 +250,6 @@ log()
 TARGET=$1
 SERVICE=$2
 ATTACH_CONTAINER=$2
-EXEC_COMMAND=$2
 LOG_CONTAINER=$2
 
 ## Parameters RUN_ARGS, ATTACH_CONTAINER, EXEC_COMMAND, LOG_CONTAINER are fetched from environment
@@ -306,12 +305,11 @@ case "$FUNCTION" in
     "detached")         build && run "-d" && info "Containers started" ;;
     "attached")         build && run "-d" && attach ;;
     "stop")             stop ;;
-    "exec")             exec ;;
+    "exec")             dev_exec ;;
     "enter")            attach ;;
     "build")            build ;;
     "log")              log ;;
     "restart")          stop && build && run "-d" ;;
-    "media-attached")   build && run "-d" && EXEC_COMMAND='-T tests wait-for-it "media:9006"' && exec "$EXEC_COMMAND" && attach "tests" && stop ;; # Special case for media (for now)
     "")                 build && run ;;
     *)                  warn "No command found matching $FUNCTION" && help ;;
 esac

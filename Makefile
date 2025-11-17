@@ -20,7 +20,7 @@ run-tests:
 	PYTHONPATH=backend/ pytest backend/tests/
 
 run-tests-containerd:
-	make dev-exec "backend pytest tests/"
+	make dev-exec backend EXEC_COMMAND="backend pytest tests"
 
 lint:
 	bash backend/dev/run-lint.sh -l -b
