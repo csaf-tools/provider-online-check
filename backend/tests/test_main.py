@@ -1,7 +1,7 @@
 import pytest
-from fastapi.testclient import TestClient
 from main import app
-from http.http import ScanRequest
+from src.router.scan_request import ScanRequest
+from fastapi.testclient import TestClient
 
 client = TestClient(app)
 

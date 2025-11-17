@@ -19,6 +19,9 @@ dev dev-help dev-standalone dev-detached dev-attached dev-stop dev-exec dev-ente
 run-tests:
 	PYTHONPATH=backend/ pytest backend/tests/
 
+run-tests-containerd:
+	make dev-exec "backend pytest tests/"
+
 lint:
 	bash backend/dev/run-lint.sh -l -b
 

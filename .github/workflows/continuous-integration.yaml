@@ -21,7 +21,7 @@ jobs:
       run: make dev-detached
 
     - name: Run Tests
-      run: make run-tests
+      run: make run-tests-containerd
 
     - name: Close container
       run: make dev-stop
