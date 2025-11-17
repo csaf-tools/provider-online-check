@@ -12,33 +12,13 @@ from typing import Any, Dict
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field, validator
 
+from .scan_request import ScanRequest
 from ..client.client import ScanResponse
-
+from ..slots.slot_manager import Slot_Manager
 from ..validators.client_validator import validate_client_blocklist_check
 from ..validators.request_validator import validate_domain
 
 router = APIRouter()
-
-class ScanRequest(BaseModel):
-    session_id: str = Field(
-        description="Unique session id"
-    )
-    domain: str = Field(
-        ...,
-        description="Domain to scan for CSAF provider metadata",
-        example="example.com",
-    )
-
-    @validator("domain", pre=True)
-    def _validate_domain(cls, v):
-        # delegate validation to the external validator
-        return validate_domain(v)
-    
-
-    @validator("session_id", pre=True)
-    def _validate_client_blocklist_check(cls, v):
-        # delegate validation to the external validator
-        return validate_client_blocklist_check(v)
 
 
 @router.get("/", summary="API root", tags=["main"])
@@ -74,8 +54,8 @@ async def start_scan(request: ScanRequest) -> Dict[str, Any]:
         HTTPException: If the scan cannot be initiated
     """
     try:
-        
-        # FIXME: Add real scan logic here
+        Slot_Manager().start_domain_task(request)
+
         return {
             "status": "started",
             "domain": request.domain,

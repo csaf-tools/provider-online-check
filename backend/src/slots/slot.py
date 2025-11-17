@@ -7,10 +7,11 @@
 
 from fastapi import FastAPI
 from typing import Annotated
-from pydantic import BaseModel, Fields, WithJsonSchema
+from pydantic import BaseModel, Field, WithJsonSchema
 from enum import Enum
 
 from ..router.redis import get_redis
+from ..router.router import ScanRequest
 
 class Domain_Task_Status(Enum):
     UNDEFINED = 0          # No status set yet
@@ -24,25 +25,29 @@ class Domain_Task_Status(Enum):
 
 
 class Slot(BaseModel):
-    running_task_id: Annotated[str, Field(description="Redis ID of currently running domain task for this slot")] 
+    running_task_id: Annotated[str, Field(description="Redis ID of currently running domain task for this slot")]
+
+    def start_domain_task(self, request: ScanRequest) -> bool:
+
+        return True
 
 class Domain_Task(BaseModel):
-    status: Annotated[Domain_Task_Status, Field(description="Status of the scan request"), Field(default=Domain_Task_Status.UNDEFINED)]
-    watching_clients: list[Annotated[str,  Field(description="List of session IDs for each client who is currently following this tasks progress")]]
-    start_time: Annotated[int, Field(description="Timestamp of this tasks initiziation"), Field(gt=0)]
-    domain: Annotated[string, Field(description="HTML domain that is queried")]
+    status:             Annotated[Domain_Task_Status, Field(description="Status of the scan request"), Field(default=Domain_Task_Status.UNDEFINED)]
+    watching_clients:   list[Annotated[str,  Field(description="List of session IDs for each client who is currently following this tasks progress")]]
+    start_time:         Annotated[int, Field(description="Timestamp of this tasks initiziation"), Field(gt=0)]
+    domain:             Annotated[str, Field(description="HTML domain that is queried")]
 
-    csaf_checker_output: list[Annotated[str, Field(description="Log line printed by csaf checker")]]
-    csaf_validator_output: list(Annotated[str, Field(description="Log line printed by csaf validator")])
+    csaf_checker_output:    list[Annotated[str, Field(description="Log line printed by csaf checker")]]
+    csaf_validator_output:  list[Annotated[str, Field(description="Log line printed by csaf validator")]]
 
     def is_orphaned(self) -> bool:
         # FIXME
         # Check if all watching_clients are disconnected
         return False
-    
+
     def setup(self):
         status = Domain_Task_Status.STARTED
-    
+
     def start_checker(self):
         status = Domain_Task_Status.RUNNING_CHECKER
 
@@ -56,9 +61,9 @@ class Domain_Task(BaseModel):
 
     def on_validator_done(self):
         status = Domain_Task_Status.DONE
-    
+
     def interrupt(self):
         status = Domain_Task_Status.INTERRUPTED
-    
+
     def on_error(self):
         status = Domain_Task_Status.ERROR
