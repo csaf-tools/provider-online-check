@@ -9,6 +9,8 @@ services:
     volumes:
       - ./backend:/app
     restart: unless-stopped
+    depends_on:
+      - redis
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s

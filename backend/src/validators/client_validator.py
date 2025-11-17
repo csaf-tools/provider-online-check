@@ -3,7 +3,7 @@
 
 # Involved in: 4, 19, 20, 21
 
-from ..router.redis import is_session_id_in_blocklist
+from ..router.redis import Redis
 
 
 def validate_client_blocklist_check(session_id: str) -> str:
@@ -22,7 +22,7 @@ def validate_client_blocklist_check(session_id: str) -> str:
 
     # Redis blocklist check
     # FIXME
-    if is_session_id_in_blocklist(session_id):
+    if Redis().is_session_id_in_blocklist(session_id):
         raise ValueError("Session ID is blocked")
 
     return session_id

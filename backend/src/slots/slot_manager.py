@@ -33,7 +33,7 @@ class Slot_Manager:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, value):
+    def __init__(self):
         # Avoid reinitialization
         if getattr(self, "_initialized", False):
             return
