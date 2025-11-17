@@ -44,19 +44,19 @@ class Slot_Manager:
         for _ in range(self.slot_amount):
             self.slots.append(Slot())
 
-    async def start_domain_task(self, request: ScanRequest) -> bool:
+    def start_domain_task(self, request: ScanRequest) -> bool:
         # Find available slot
-        available_slot = await self.find_first_available_slot()
+        available_slot = self.find_first_available_slot()
         if available_slot is None:
             # Throw some kind of error
             return False
 
         # Start Checker
-        await available_slot.start_domain_task(request)
+        available_slot.start_domain_task(request)
 
         return True
 
-    async def find_first_available_slot(self) -> Slot:
+    def find_first_available_slot(self) -> Slot:
         # First check if any slot is available outright
         for slot in self.slots:
             if slot.is_available():

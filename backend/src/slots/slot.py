@@ -29,8 +29,7 @@ class Domain_Task(BaseModel):
     status: Annotated[
         Domain_Task_Status,
         Field(description="Status of the scan request"),
-        Field(default=Domain_Task_Status.UNDEFINED),
-    ]
+    ] = Domain_Task_Status.UNDEFINED
     watching_clients: list[
         Annotated[
             str,
@@ -88,7 +87,7 @@ class Domain_Task(BaseModel):
 class Slot(BaseModel):
     running_task: Annotated[
         Domain_Task, Field(description="Currently running domain task for this slot")
-    ] = ""
+    ] = None
 
     def start_domain_task(self, request: ScanRequest) -> bool:
         return True

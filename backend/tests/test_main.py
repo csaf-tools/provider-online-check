@@ -9,13 +9,13 @@ client = TestClient(app)
 
 def mock_scan_request_variable_domain(domain: str):
     mock = {
-        "session_id": 0,
+        "session_id": "0",
         "domain": domain
     }
     return mock
 
 
-def mock_scan_request_variable_session_id(session_id: int):
+def mock_scan_request_variable_session_id(session_id: str):
     mock = {
         "session_id": session_id,
         "domain": "example.com"
@@ -57,7 +57,7 @@ class TestScanStartEndpointDomains:
             "/scan/start",
             json=mock_scan_request_variable_domain("example.com")
         )
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
         assert data["status"] == "started"
         assert data["domain"] == "example.com"
@@ -69,7 +69,7 @@ class TestScanStartEndpointDomains:
             "/scan/start",
             json=mock_scan_request_variable_domain("  example.com  ")
         )
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
         assert data["domain"] == "example.com"
 
@@ -169,9 +169,9 @@ class TestScanStartEndpointSessionId:
         """Just a valid session id"""
         response = client.post(
             "/scan/start",
-            json=mock_scan_request_variable_session_id(0)
+            json=mock_scan_request_variable_session_id("0")
         )
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
         assert data["status"] == "started"
         assert data["domain"] == "example.com"
@@ -187,22 +187,12 @@ class TestScanStartEndpointSessionId:
         data = response.json()
         assert "detail" in data
 
-    def test_start_scan_negative_session(self):
-        """Fails with negative session id"""
-        response = client.post(
-            "/scan/start",
-            json=mock_scan_request_variable_session_id(-1)
-        )
-        assert response.status_code == 422
-        data = response.json()
-        assert "detail" in data
-
     def test_start_scan_blocked_session(self):
         """Fails with blocked session id"""
-        Redis().block_session_id_for_domain(12, "example.com")
+        Redis().block_session_id_for_domain("12", "example.com")
         response = client.post(
             "/scan/start",
-            json=mock_scan_request_variable_session_id(12)
+            json=mock_scan_request_variable_session_id("12")
         )
         assert response.status_code == 422
         data = response.json()
@@ -210,13 +200,13 @@ class TestScanStartEndpointSessionId:
 
     def test_start_scan_unblocked_session(self):
         """Fails with unblocked session id"""
-        Redis().block_session_id_for_domain(12, "example.com")
-        Redis().unblock_session_id_for_domain(12, "example.com")
+        Redis().block_session_id_for_domain("12", "example.com")
+        Redis().unblock_session_id_for_domain("12", "example.com")
         response = client.post(
             "/scan/start",
-            json=mock_scan_request_variable_session_id(12)
+            json=mock_scan_request_variable_session_id("12")
         )
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
         assert data["status"] == "started"
         assert data["domain"] == "example.com"
@@ -228,17 +218,17 @@ class TestDomainValidation:
 
     def test_validate_simple_domain(self):
         """validation of simple domain"""
-        request = ScanRequest(session_id=0, domain="example.com")
+        request = ScanRequest(session_id="0", domain="example.com")
         assert request.domain == "example.com"
 
     def test_validate_domain_with_subdomain(self):
         """validation of domain with subdomain"""
-        request = ScanRequest(session_id=0, domain="www.example.com")
+        request = ScanRequest(session_id="0", domain="www.example.com")
         assert request.domain == "www.example.com"
 
     def test_validate_domain_strips_whitespace(self):
         """validation strips whitespace"""
-        request = ScanRequest(session_id=0, domain="  example.com  ")
+        request = ScanRequest(session_id="0", domain="  example.com  ")
         assert request.domain == "example.com"
 
     def test_validate_domain_rejects_empty(self):

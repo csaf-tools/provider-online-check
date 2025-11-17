@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, model_validator
 
 from ..validators.client_validator import validate_client_blocklist_check
 from ..validators.request_validator import validate_domain
@@ -13,11 +13,24 @@ class ScanRequest(BaseModel):
     )
 
     @validator("domain", pre=True)
-    def _validate_domain(cls, v):
+    def _validate_domain(cls, value):
+        """
+        Validate domain for correctness.
+        """
         # delegate validation to the external validator
-        return validate_domain(v)
+        return validate_domain(value)
 
-    @validator("session_id", pre=True)
-    def _validate_client_blocklist_check(cls, v):
-        # delegate validation to the external validator
-        return validate_client_blocklist_check(v)
+    @model_validator(mode='after')
+    def _validate_session_in_blocklist(cls, values):
+        """
+        Validate session_id against the client blocklist for the given domain.
+        """
+        session_id = values.session_id
+        domain = values.domain
+
+        if session_id is None or domain is None:
+            return values
+
+        values.session_id = validate_client_blocklist_check(session_id, domain)
+
+        return values

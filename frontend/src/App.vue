@@ -92,6 +92,7 @@ export default {
   name: 'App',
   data() {
     return {
+      session_id: '1',
       domain: '',
       loading: false,
       result: null,
@@ -121,7 +122,8 @@ export default {
 
       try {
         const response = await axios.post(`${this.backendUrl}/scan/start`, {
-          domain: this.domain
+          domain: this.domain,
+          session_id: this.session_id
         })
         this.result = response.data
       } catch (err) {

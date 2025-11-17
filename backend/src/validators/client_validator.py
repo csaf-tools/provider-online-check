@@ -6,7 +6,7 @@
 from ..router.redis import Redis
 
 
-def validate_client_blocklist_check(session_id: str) -> str:
+def validate_client_blocklist_check(session_id: str, domain: str) -> str:
     """
     Checks blocklist status of session id
 
@@ -22,7 +22,7 @@ def validate_client_blocklist_check(session_id: str) -> str:
 
     # Redis blocklist check
     # FIXME
-    if Redis().is_session_id_in_blocklist(session_id):
+    if Redis().is_session_id_in_blocklist(session_id, domain):
         raise ValueError("Session ID is blocked")
 
     return session_id
