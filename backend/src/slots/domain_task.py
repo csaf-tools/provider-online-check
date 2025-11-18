@@ -2,17 +2,12 @@ from typing import Annotated
 from pydantic import BaseModel, Field
 from enum import Enum
 
-from ..database.csaf_domain_task_data import CSAF_Domain_Task_Data
+from ..csaf.csaf_checker import CSAF_Checker
+from ..database.domain_task_data import Domain_Task_Data
 
-import asyncio
 import logging
-import os
 
 logger = logging.getLogger(__name__)
-
-CSAF_BINARY_PATH = "./bin/csaf-binary/bin-linux-amd64/"
-CSAF_CHECKER_BINARY = "csaf_checker"
-CSAF_VALIDATOR_BINARY = "csaf_validator"
 
 
 class Domain_Task_Status(Enum):
@@ -39,14 +34,14 @@ class Domain_Task(BaseModel):
     ] = Field(default_factory=list)
 
     data: Annotated[
-        CSAF_Domain_Task_Data,
+        Domain_Task_Data,
         Field(description="Data concerning this domain task. Will be saved persistently on task completion")
     ] = None
 
     @classmethod
     def create(cls, domain: str, session_id: str) -> "Domain_Task":
         data = {
-            "data": CSAF_Domain_Task_Data.create(domain),
+            "data": Domain_Task_Data.create(domain),
             "watching_clients": [session_id],
             "status": Domain_Task_Status.INITIALIZED,
         }
@@ -80,65 +75,19 @@ class Domain_Task(BaseModel):
         """
         self.status = Domain_Task_Status.RUNNING_CHECKER
 
-        csaf_checker_path = CSAF_BINARY_PATH + CSAF_CHECKER_BINARY
-
         try:
-            # create subprocess, merge stderr into stdout for unified streaming
-            args = ["--verbose", self.data.domain]
-            task_checker = await asyncio.create_subprocess_exec(
-                os.path.abspath(csaf_checker_path),
-                *args,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.STDOUT,
-                cwd=CSAF_BINARY_PATH,
-                env=None,
-            )
-            logger.info("Async task started")
+            result = await CSAF_Checker().run(self.data)
 
-            # Stream output lines as they come
-            assert task_checker.stdout is not None
-            while True:
-                line = await task_checker.stdout.readline()
-                if not line:
-                    break
-                decoded = line.decode(errors="replace").rstrip("\n")
-                # append to logs
-                self.data.csaf_checker_output.append(decoded)
-                logger.info(decoded)
-
-                # FIXME
-                # Notify client socket
-
-            logger.info("Task done")
-            returncode = await task_checker.wait()
-            logger.info(f"Task has returncode {returncode}")
-
-            # On normal completion, call on_checker_done (which currently sets DONE)
-            if returncode == 0:
+            if result is True:
                 self.on_checker_done()
                 return True
             else:
-                # record non-zero exit code and mark error
-                self.on_error(f"CSAF Checker exited with code {returncode}")
+                self.on_error("CSAF Checker exited")
                 return False
-
-        except asyncio.CancelledError:
-            # If the coroutine is cancelled, try to terminate the process
-            try:
-                task_checker.terminate()
-            except Exception:
-                pass
-            self.interrupt()
-            raise  # re-raise so callers know cancellation happened
-
-        except FileNotFoundError:
-            # binary not found
-            self.on_error(f"CSAF Checker Binary not found: {csaf_checker_path}")
-            return False
 
         except Exception as e:
             # Unexpected error running the process
-            self.on_error(f"CSAF Checker error: {e}")
+            self.on_error(f"Domain Task Error while running CSAF Checker: {e}")
             return False
 
     async def run_validator(self):

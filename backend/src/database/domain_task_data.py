@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 import time
 
 
-class CSAF_Domain_Task_Data(BaseModel):
+class Domain_Task_Data(BaseModel):
     domain: Annotated[str, Field(description="HTML domain that is queried")]
     start_time: Annotated[
         int, Field(description="Timestamp of this tasks initiziation")
@@ -19,7 +19,7 @@ class CSAF_Domain_Task_Data(BaseModel):
     ] = []
 
     @classmethod
-    def create(cls, domain: str) -> "CSAF_Domain_Task_Data":
+    def create(cls, domain: str) -> "Domain_Task_Data":
         data = {
             "domain": domain,
             "start_time": int(time.time()),
