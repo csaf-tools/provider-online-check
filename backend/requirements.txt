@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+redis
+rq
+python-dotenv
+requests
+
+# Testing
+pytest
+pytest-asyncio
+httpx
+black
+isort
+flake8
+mypy

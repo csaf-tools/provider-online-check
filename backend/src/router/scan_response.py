@@ -1,0 +1,8 @@
+from pydantic import BaseModel, Field
+
+
+class ScanResponse(BaseModel):
+    # Dummy structure
+    status: str = Field(..., description="Status of the scan request")
+    domain: str = Field(..., description="Domain being scanned")
+    message: str = Field(..., description="Additional information about the scan")

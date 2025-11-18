@@ -1,0 +1,66 @@
+name: CI - Build and Test Service
+
+on: [ push, pull_request ]
+
+jobs:
+  service-tests:
+    name: "Test Service"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install requirements
+      run: pip install --requirement backend/requirements.txt
+
+    - name: Build and run
+      run: make dev-detached
+
+    - name: Run Tests
+      run: make run-tests-containerd
+
+    - name: Close container
+      run: make dev-stop
+
+  devops-linters:
+    name: "Lint DevOps"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Run hadolint
+      run: make lint-dockerfiles
+
+    - name: Run shellcheck
+      uses: ludeeus/action-shellcheck@master
+      with:
+        severity: error
+
+  check-coding-style:
+      name: Check coding style
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install requirements
+        run: pip install --requirement ./backend/requirements.txt
+
+      - name: Check black
+        run: black ./backend/src/
+
+      - name: Check isort
+        run: isort ./backend/src/
+
+      - name: Check flake8
+        run: flake8 --ignore=E501 ./backend/src/
