@@ -14,9 +14,21 @@ from .domain_task import Domain_Task, Domain_Task_Status
 
 
 class Slot(BaseModel):
+    id: Annotated[
+        int,
+        Field(description="Slot identifier, mostly for debugging purposes")
+    ] = 0
+
     running_task: Annotated[
         Domain_Task, Field(description="Currently running domain task for this slot")
     ] = None
+
+    @classmethod
+    def create(cls, id: int) -> "Slot":
+        data = {
+            "id": id,
+        }
+        return cls(**data)
 
     async def start_domain_task(self, request: ScanRequest) -> bool:
         # FIXME

@@ -15,6 +15,10 @@ from pydantic import Field
 from ..router.scan_request import ScanRequest
 from .slot import Slot
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class Slot_Manager:
     _instance: Annotated[
@@ -41,8 +45,8 @@ class Slot_Manager:
 
         # Setup slot manager
         self.slots = []
-        for _ in range(self.slot_amount):
-            self.slots.append(Slot())
+        for i in range(self.slot_amount):
+            self.slots.append(Slot.create(i))
 
     async def start_domain_task(self, request: ScanRequest) -> Slot:
         # Find available slot
@@ -51,6 +55,7 @@ class Slot_Manager:
             # Throw some kind of error
             return None
 
+        logger.info(f"For scan request of domain {request.domain}, slot {available_slot.id} is available")
         # Start Checker
         await available_slot.start_domain_task(request)
 

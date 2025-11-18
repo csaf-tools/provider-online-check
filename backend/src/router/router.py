@@ -51,13 +51,23 @@ async def start_scan(request: ScanRequest) -> Dict[str, Any]:
         HTTPException: If the scan cannot be initiated
     """
     try:
-        result = await Slot_Manager().start_domain_task(request)
-        slot_status = result.running_task.status
+        slot = await Slot_Manager().start_domain_task(request)
+
+        if slot is None:
+            # No slot is available
+            return {
+                "status": "full",
+                "domain": request.domain,
+                "message": "Server is over capacity, try again later",
+                "slot_id": -1,
+            }
+        slot_status = slot.running_task.status
 
         return {
             "status": "started",
             "domain": request.domain,
             "message": f"Scan initiated for domain: {request.domain} with result {slot_status}",
+            "slot_id": slot.id,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")
@@ -77,6 +87,7 @@ async def get_scan(slot_id: str, request: ScanRequest) -> Dict[str, Any]:
             "status": f"get {slot_id}",
             "domain": request.domain,
             "message": f"Scan initiated for domain: {request.domain}",
+            "slot_id": 0,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")

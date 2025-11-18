@@ -4,8 +4,8 @@
 from ..database.domain_task_data import Domain_Task_Data
 
 import asyncio
-import logging
 import os
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class CSAF_Checker():
                 cwd=CSAF_BINARY_PATH,
                 env=None,
             )
-            logger.info("Async task started")
+            logger.info(f"Async Domain Task for domain {data.domain}")
 
             # Stream output lines as they come
             assert task_checker.stdout is not None
@@ -42,14 +42,13 @@ class CSAF_Checker():
                 decoded = line.decode(errors="replace").rstrip("\n")
                 # append to logs
                 data.csaf_checker_output.append(decoded)
-                logger.info(decoded)
+                # logger.info(decoded)
 
                 # FIXME
                 # Notify client socket
 
-            logger.info("Task done")
             returncode = await task_checker.wait()
-            logger.info(f"Task has returncode {returncode}")
+            logger.info(f"Task done with returncode {returncode}")
 
             if returncode == 0:
                 return True

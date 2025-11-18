@@ -93,7 +93,7 @@ class Domain_Task(BaseModel):
     async def run_validator(self):
         self.status = Domain_Task_Status.RUNNING_VALIDATOR
 
-        self.on_validator_done
+        self.on_validator_done()
 
     def on_checker_done(self):
         # FIXME
