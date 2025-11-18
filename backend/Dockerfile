@@ -1,6 +1,11 @@
-FROM python:3.11-slim
+FROM ubuntu:22.04
 
 WORKDIR /app
+
+# Install python
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends python3 python3-pip curl && \
+    rm -rf /var/lib/apt/lists/*
 
 # for development, don't cache and optimize anything
 ENV PYTHONDONTWRITEBYTECODE=1 \

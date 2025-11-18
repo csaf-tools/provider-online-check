@@ -11,9 +11,9 @@ from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, status
 
-from ..client.client import ScanResponse
 from ..slots.slot_manager import Slot_Manager
 from .scan_request import ScanRequest
+from .scan_response import ScanResponse
 
 router = APIRouter()
 

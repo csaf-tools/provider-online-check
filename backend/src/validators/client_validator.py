@@ -21,8 +21,7 @@ def validate_client_blocklist_check(session_id: str, domain: str) -> str:
         raise ValueError("Session ID cannot be empty")
 
     # Redis blocklist check
-    # FIXME
-    if Redis().is_session_id_in_blocklist(session_id, domain):
+    if Redis().is_session_id_in_client_blocklist(session_id, domain):
         raise ValueError("Session ID is blocked")
 
     return session_id
