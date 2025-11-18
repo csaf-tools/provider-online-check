@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.router.router import router
+import logging
+import os
+import sys
 
 app = FastAPI(
     title="CSAF Provider Scan API",
@@ -21,6 +24,14 @@ app.add_middleware(
 )
 
 app.include_router(router)
+
+
+level = os.getenv("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(
+    level=getattr(logging, level, logging.INFO),
+    format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+    stream=sys.stderr,
+)
 
 if __name__ == "__main__":
     import uvicorn

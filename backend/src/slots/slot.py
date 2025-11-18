@@ -10,11 +10,14 @@ from typing import Annotated
 from pydantic import BaseModel, Field
 import asyncio
 import time
-
+import logging
+import os
 # from ..router.redis import get_redis
 from ..router.scan_request import ScanRequest
 
-CSAF_BINARY_PATH = "../../bin/csaf-binary/bin-linux-amd64/"
+logger = logging.getLogger(__name__)
+
+CSAF_BINARY_PATH = "./bin/csaf-binary/bin-linux-amd64/"
 CSAF_CHECKER_BINARY = "csaf_checker"
 CSAF_VALIDATOR_BINARY = "csaf_validator"
 
@@ -42,7 +45,7 @@ class Domain_Task(BaseModel):
         ),
     ] = Field(default_factory=list)
     start_time: Annotated[
-        int, Field(description="Timestamp of this tasks initiziation"), Field(gt=0)
+        int, Field(description="Timestamp of this tasks initiziation")
     ]
     domain: Annotated[str, Field(description="HTML domain that is queried")]
 
@@ -83,16 +86,20 @@ class Domain_Task(BaseModel):
 
         csaf_checker_path = CSAF_BINARY_PATH + CSAF_CHECKER_BINARY
 
+        logger.info("Starting check on " + self.domain + " for user id " + self.watching_clients[0])
+
         try:
             # create subprocess, merge stderr into stdout for unified streaming
+            args = ["--verbose", self.domain]
             task_checker = await asyncio.create_subprocess_exec(
-                csaf_checker_path,
-                ["--verbose"],
+                os.path.abspath(csaf_checker_path),
+                *args,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.STDOUT,
                 cwd=CSAF_BINARY_PATH,
-                env="",
+                env=None,
             )
+            logger.info("Async task started")
 
             # Stream output lines as they come
             assert task_checker.stdout is not None
@@ -103,11 +110,14 @@ class Domain_Task(BaseModel):
                 decoded = line.decode(errors="replace").rstrip("\n")
                 # append to logs
                 self.csaf_checker_output.append(decoded)
+                logger.info(decoded)
 
                 # FIXME
                 # Notify client socket
 
+            logger.info("Task done")
             returncode = await task_checker.wait()
+            logger.info(f"Task has returncode {returncode}")
 
             # On normal completion, call on_checker_done (which currently sets DONE)
             if returncode == 0:
@@ -115,8 +125,7 @@ class Domain_Task(BaseModel):
                 return True
             else:
                 # record non-zero exit code and mark error
-                self.csaf_checker_output.append(f"CSAF Checker exited with code {returncode}")
-                self.on_error()
+                self.on_error(f"CSAF Checker exited with code {returncode}")
                 return False
 
         except asyncio.CancelledError:
@@ -130,14 +139,12 @@ class Domain_Task(BaseModel):
 
         except FileNotFoundError:
             # binary not found
-            self.csaf_checker_output.append(f"CSAF Checker Binary not found: {csaf_checker_path}")
-            self.on_error()
+            self.on_error(f"CSAF Checker Binary not found: {csaf_checker_path}")
             return False
 
         except Exception as e:
             # Unexpected error running the process
-            self.csaf_checker_output.append(f"CSAF Checker error: {e}")
-            self.on_error()
+            self.on_error(f"CSAF Checker error: {e}")
             return False
 
     async def start_validator(self):
@@ -154,8 +161,10 @@ class Domain_Task(BaseModel):
     def interrupt(self):
         self.status = Domain_Task_Status.INTERRUPTED
 
-    def on_error(self):
+    def on_error(self, string):
         self.status = Domain_Task_Status.ERROR
+
+        logger.error(f"Domain Task Error: {string}")
 
 
 class Slot(BaseModel):
