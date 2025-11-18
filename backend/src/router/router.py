@@ -51,12 +51,13 @@ async def start_scan(request: ScanRequest) -> Dict[str, Any]:
         HTTPException: If the scan cannot be initiated
     """
     try:
-        result = Slot_Manager().start_domain_task(request)
+        result = await Slot_Manager().start_domain_task(request)
+        slot_status = result.running_task.status
 
         return {
             "status": "started",
             "domain": request.domain,
-            "message": f"Scan initiated for domain: {request.domain} with result {result}",
+            "message": f"Scan initiated for domain: {request.domain} with result {slot_status}",
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")

@@ -7,8 +7,8 @@ pip install -r requirements.txt
 # Install csaf binary as well
 CSAF_VERSION="3.4.0"
 (
-    mkdir .csaf || true
-    cd .csaf || exit 1
+    mkdir bin || true
+    cd bin || exit 1
 
     # Download from GitHub
     curl -LO "https://github.com/gocsaf/csaf/releases/download/v${CSAF_VERSION}/csaf-${CSAF_VERSION}-gnulinux-amd64.tar.gz"

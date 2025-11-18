@@ -51,3 +51,4 @@ Thumbs.db
 
 # CSAF Checker Binary
 backend/.csaf/*
+backend/bin/*
