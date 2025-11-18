@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field, validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
+from typing_extensions import Self
 
 from ..validators.client_validator import validate_client_blocklist_check
 from ..validators.request_validator import validate_domain
@@ -9,10 +10,10 @@ class ScanRequest(BaseModel):
     domain: str = Field(
         ...,
         description="Domain to scan for CSAF provider metadata",
-        example="example.com",
+        json_schema_extra={"example": "example.com"},
     )
 
-    @validator("domain", pre=True)
+    @field_validator("domain")
     def _validate_domain(cls, value):
         """
         Validate domain for correctness.
@@ -21,16 +22,16 @@ class ScanRequest(BaseModel):
         return validate_domain(value)
 
     @model_validator(mode='after')
-    def _validate_session_in_blocklist(cls, values):
+    def _validate_session_in_blocklist(self) -> Self:
         """
         Validate session_id against the client blocklist for the given domain.
         """
-        session_id = values.session_id
-        domain = values.domain
+        session_id = self.session_id
+        domain = self.domain
 
         if session_id is None or domain is None:
-            return values
+            return self
 
-        values.session_id = validate_client_blocklist_check(session_id, domain)
+        self.session_id = validate_client_blocklist_check(session_id, domain)
 
-        return values
+        return self
