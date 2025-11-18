@@ -5,13 +5,15 @@
 
 # Involved in: 7, 8, 9, 12
 
-from enum import Enum
-from typing import Annotated
-from pydantic import BaseModel, Field
 import asyncio
-import time
 import logging
 import os
+import time
+from enum import Enum
+from typing import Annotated
+
+from pydantic import BaseModel, Field
+
 # from ..router.redis import get_redis
 from ..router.scan_request import ScanRequest
 
@@ -62,7 +64,7 @@ class Domain_Task(BaseModel):
             "domain": domain,
             "watching_clients": [session_id],
             "start_time": int(time.time()),
-            "status": Domain_Task_Status.INITIALIZED
+            "status": Domain_Task_Status.INITIALIZED,
         }
         return cls(**data)
 
@@ -85,8 +87,6 @@ class Domain_Task(BaseModel):
         self.status = Domain_Task_Status.RUNNING_CHECKER
 
         csaf_checker_path = CSAF_BINARY_PATH + CSAF_CHECKER_BINARY
-
-        logger.info("Starting check on " + self.domain + " for user id " + self.watching_clients[0])
 
         try:
             # create subprocess, merge stderr into stdout for unified streaming

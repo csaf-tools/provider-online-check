@@ -27,7 +27,7 @@ class Redis:
         self._initialized = True
 
         # Setup Redis
-        self._redis = redis.Redis(host='redis', port=6379, db=0)
+        self._redis = redis.Redis(host="redis", port=6379, db=0)
 
     # Client Blocklist
 
@@ -54,4 +54,3 @@ class Redis:
 
     def unblock_domain(self, domain: str):
         self._redis.srem(BLOCKLIST_DOMAIN_DB_FIELD + domain)
-

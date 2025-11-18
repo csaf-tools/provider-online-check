@@ -21,7 +21,7 @@ class ScanRequest(BaseModel):
         # delegate validation to the external validator
         return validate_domain(value)
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def _validate_session_in_blocklist(self) -> Self:
         """
         Validate session_id against the client blocklist for the given domain.
