@@ -74,9 +74,9 @@ class Domain_Task(BaseModel):
         True on successful run, False otherwise.
         """
         self.status = Domain_Task_Status.RUNNING_CHECKER
-
+        csaf_checker = CSAF_Checker()
         try:
-            result = await CSAF_Checker().run(self.data)
+            result = await csaf_checker.run(self.data)
 
             if result is True:
                 self.on_checker_done()
