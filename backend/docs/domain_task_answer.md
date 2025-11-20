@@ -2,15 +2,16 @@
 
 Response from backend to frontend after payload has been sent
 
-{
-    domain: string      // URL domain to check
-    status: string      // Current status of the domain task
-    slot_id: int        // ID of the thread-slot dedicated to the associated domain task. -1 on error
-    error: string       // Error message. Empty if no error occured
+    {
 
-    verbose_output: string[] // Continuous output provided by CSAF Checker in verbose mode
-    results_checker: json    // Results of CSAF Checker
-}
+        domain: string      // URL domain to check
+        status: string      // Current status of the domain task
+        slot_id: int        // ID of the thread-slot dedicated to the associated domain task. -1 on error
+        error: string       // Error message. Empty if no error occured
+
+        verbose_output: string[] // Continuous output provided by CSAF Checker in verbose mode
+        results_checker: json    // Results of CSAF Checker
+    }
 
 Status can be one of the following:
 - UNDEFINED:         No status has been set for some reason or another. Default value and likely caused by an error
