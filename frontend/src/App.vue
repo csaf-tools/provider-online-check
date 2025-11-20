@@ -39,8 +39,23 @@
 
               <div v-if="result" class="mt-4">
                 <div :class="['alert', resultClass]" role="alert">
-                  <h5 class="alert-heading">{{ result.status === 'started' ? 'Scan Started' : 'Error' }}</h5>
-                  <p class="mb-0">{{ result.message }}</p>
+                  <div v-if="result.status === 'ERROR'">
+                    <h5 class="alert-heading">Error</h5>
+                    <p class="mb-0">{{ result.error }}</p>
+                  </div>
+                  <div v-if="result.status != 'ERROR'">
+                    <h5 class="alert-heading">Scan Done</h5>
+                    <pre>{{ result.results_checker }}</pre>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="result.runtime_output" class="mt-4">
+                <div :class="['alert', resultClass]" role="alert">
+                  <h5 class="alert-heading">Details</h5>
+                  <li v-for="(item, index) in result.runtime_output" :key="index">
+                  <p class="mb-0">{{ item }}</p>
+                  </li>
                 </div>
               </div>
 
@@ -101,7 +116,7 @@ export default {
   },
   computed: {
     resultClass() {
-      return this.result?.status === 'started' ? 'alert-success' : 'alert-danger'
+      return this.result?.status != 'ERROR' ? 'alert-success' : 'alert-danger'
     },
     backendUrl() {
       // Use the same protocol and host as the client, but with backend port

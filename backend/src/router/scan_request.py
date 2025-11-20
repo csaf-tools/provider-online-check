@@ -1,3 +1,5 @@
+
+from typing import Annotated
 from pydantic import BaseModel, Field, field_validator, model_validator
 from typing_extensions import Self
 
@@ -6,12 +8,15 @@ from ..validators.request_validator import validate_domain
 
 
 class ScanRequest(BaseModel):
-    session_id: str = Field(description="Unique session id")
-    domain: str = Field(
-        ...,
-        description="Domain to scan for CSAF provider metadata",
-        json_schema_extra={"example": "example.com"},
-    )
+    session_id: Annotated[
+        str,
+        Field(description="Unique session id"),
+    ]
+    domain: Annotated[
+        str,
+        Field(description="Domain to scan for CSAF provider metadata"),
+        Field(json_schema_extra={"example": "example.com"}),
+    ]
 
     @field_validator("domain")
     def _validate_domain(cls, value):

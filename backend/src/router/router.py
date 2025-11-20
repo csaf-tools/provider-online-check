@@ -13,7 +13,7 @@ from fastapi import APIRouter, HTTPException, status
 
 from ..slots.slot_manager import Slot_Manager
 from .scan_request import ScanRequest
-from .scan_response import ScanResponse
+from .scan_response import ScanResponse, ScanResponseStatus
 
 router = APIRouter()
 
@@ -56,17 +56,18 @@ async def start_scan(request: ScanRequest) -> Dict[str, Any]:
         if slot is None:
             # No slot is available
             return {
-                "status": "full",
+                "status": ScanResponseStatus.ERROR,
                 "domain": request.domain,
-                "message": "Server is over capacity, try again later",
-                "slot_id": -1,
+                "error": "Server is over capacity, try again later",
             }
-        slot_status = slot.running_task.status
+
+        json_result = slot.running_task.data.results_to_json()
 
         return {
-            "status": "started",
+            "status": ScanResponseStatus.INITIALIZED,
             "domain": request.domain,
-            "message": f"Scan initiated for domain: {request.domain} with result {slot_status}",
+            "runtime_output": slot.running_task.data.csaf_checker_output_runtime_log,
+            "results_checker": json_result,
             "slot_id": slot.id,
         }
     except Exception as e:
@@ -84,10 +85,9 @@ async def get_scan(slot_id: str, request: ScanRequest) -> Dict[str, Any]:
     try:
         # FIXME: Add real scan logic here
         return {
-            "status": f"get {slot_id}",
+            "status": ScanResponseStatus.ERROR,
             "domain": request.domain,
-            "message": f"Scan initiated for domain: {request.domain}",
-            "slot_id": 0,
+            "error": "Path not implemented yet",
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")

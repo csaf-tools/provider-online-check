@@ -35,14 +35,21 @@ class CSAF_Checker():
 
             # Stream output lines as they come
             assert task_checker.stdout is not None
+            inJSONStructure = False
             while True:
                 line = await task_checker.stdout.readline()
                 if not line:
                     break
-                decoded = line.decode(errors="replace").rstrip("\n")
-                # append to logs
-                data.csaf_checker_output.append(decoded)
-                # logger.info(decoded)
+                decoded_line = line.decode(errors="replace").rstrip("\n")
+
+                # Once a single '{' is read, it is assumed that the csaf results are printed out
+                inJSONStructure = (inJSONStructure or (decoded_line == "{"))
+                if inJSONStructure:
+                    # Result Line
+                    data.csaf_checker_output_result += (decoded_line + "\n")
+                else:
+                    # Runtime Line
+                    data.csaf_checker_output_runtime_log.append(decoded_line)
 
                 # FIXME
                 # Notify client socket
