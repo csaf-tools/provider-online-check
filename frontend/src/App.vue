@@ -48,14 +48,13 @@
                     <pre>{{ result.results_checker }}</pre>
                   </div>
                 </div>
-              </div>
-
-              <div v-if="result.runtime_output" class="mt-4">
-                <div :class="['alert', resultClass]" role="alert">
-                  <h5 class="alert-heading">Details</h5>
-                  <li v-for="(item, index) in result.runtime_output" :key="index">
-                  <p class="mb-0">{{ item }}</p>
-                  </li>
+                <div v-if="result.runtime_output" class="mt-4">
+                  <div :class="['alert', resultClass]" role="alert">
+                    <h5 class="alert-heading">Details</h5>
+                    <li v-for="(item, index) in result.runtime_output" :key="index">
+                    <p class="mb-0">{{ item }}</p>
+                    </li>
+                  </div>
                 </div>
               </div>
 
