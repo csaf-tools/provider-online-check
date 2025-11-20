@@ -31,6 +31,11 @@ lint-containerd:
 lint-containerd-standalone:
 	bash backend/dev/run-lint.sh
 
+# CSAF
+
+csaf-check:
+	make dev-exec EXEC_COMMAND="backend ./bin/csaf-binary/bin-linux-amd64/csaf_checker --verbose $(SITE)"
+
 # DevOps Tests
 
 lint-dockerfiles:
