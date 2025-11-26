@@ -24,6 +24,14 @@ Considerations:
 
  * When in doubt, too much stress on the CSAF Providers will be prevented.
 
+## Running the Application
+
+We recommend using Docker to start the services:
+```
+docker compose up -d
+```
+
+In the README files of `backend` and `frontend`, you can find instructions on the components and how to run them without Docker.
 
 ## License
 
