@@ -19,9 +19,9 @@ CSAF_VALIDATOR_BINARY = "csaf_validator"
 
 class CSAF_Checker():
 
-    _signal_paused: bool
-    _signal_stop: bool
-    _signal_restart: bool
+    _signal_paused: bool = False
+    _signal_stop: bool = False
+    _signal_restart: bool = False
 
     _running_task_checker: Optional[asyncio.subprocess.Process] = None
 
@@ -57,7 +57,7 @@ class CSAF_Checker():
         )
         assert self._running_task_checker.stdout is not None
 
-    def __terminate_asyncio_task(self):
+    async def __terminate_asyncio_task(self):
         if self._running_task_checker is None:
             return
 
@@ -164,7 +164,7 @@ class CSAF_Checker():
             else:
                 return False
 
-        except asyncio.CancelledError:
+        except asyncio.CancelledError as e:
             # If the coroutine is cancelled, try to terminate the process
             try:
                 self.__terminate_asyncio_task()
@@ -173,13 +173,16 @@ class CSAF_Checker():
 
             # FIXME
             # Throw Interrupt
+            logger.warn(f"Interrupted {e}")
 
-            raise  # re-raise so callers know cancellation happened
+            return False
 
-        except FileNotFoundError:
+        except FileNotFoundError as e:
             # binary not found
-            raise (f"CSAF Checker Binary not found: {self.__csaf_checker_path()}")
+            logger.error(f"CSAF Checker Binary not found: {self.__csaf_checker_path()}, error: {e}")
+            return False
 
         except Exception as e:
             # Unexpected error running the process
-            raise (f"CSAF Checker error: {e}")
+            logger.error(f"CSAF Checker errror: {e}")
+            return False
