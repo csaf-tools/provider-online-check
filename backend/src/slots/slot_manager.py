@@ -8,14 +8,14 @@
 
 from __future__ import annotations
 
+import logging
+import os
 from typing import Annotated, Optional
 
 from pydantic import Field
 
 from ..router.scan_request import ScanRequest
 from .slot import Slot
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class Slot_Manager:
 
     slot_amount: Annotated[
         int, Field(description="Amount of slots that should be available at runtime")
-    ] = 10
+    ] = int(os.environ.get("SCAN_SLOTS", "10"))
     slots: list[
         Annotated[Slot, Field(description="List of slots for domain task execution")]
     ] = []

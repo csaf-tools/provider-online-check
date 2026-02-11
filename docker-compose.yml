@@ -5,9 +5,11 @@ services:
       dockerfile: Dockerfile
     container_name: backend
     ports:
-      - "48090:8000"
+      - "${PORT_BACKEND:-48090}:8000"
     volumes:
       - ./backend:/app
+    environment:
+      - SCAN_SLOTS=${SCAN_SLOTS:-10}
     restart: unless-stopped
     depends_on:
       - redis
@@ -24,12 +26,13 @@ services:
       dockerfile: Dockerfile
     container_name: frontend
     ports:
-      - "48091:8080"
+      - "${PORT_FRONTEND:-48091}:8080"
     volumes:
       - ./frontend:/app
       - /app/node_modules
     environment:
       - VITE_FOOTER_TEXT=${FOOTER_TEXT:-}
+      - VITE_BACKEND_PORT=${PORT_BACKEND:-48090}
     restart: unless-stopped
     depends_on:
       - backend
@@ -39,7 +42,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+
   redis:
     image: redis:alpine
-    ports:
-      - '6379:6379'

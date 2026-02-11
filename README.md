@@ -106,15 +106,38 @@ This repository uses the [Conventional Commits](https://www.conventionalcommits.
 
 ### Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `FOOTER_TEXT` | No | Custom HTML content appended to the footer of the frontend. Can contain HTML tags. |
+All variables are configured in the `.env` file in the project root.
+Docker Compose reads this file automatically.
 
-Example in a `.env` file in the project root:
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT_BACKEND` | `48090` | Host port for the backend API. |
+| `PORT_FRONTEND` | `48091` | Host port for the frontend. |
+| `SCAN_SLOTS` | `10` | Maximum number of concurrent scans. |
+| `FOOTER_TEXT` | _empty_ | Custom HTML content appended to the footer of the frontend. |
 
-```html
+Example `.env`:
+
+```
+PORT_BACKEND=8080
+PORT_FRONTEND=8081
+SCAN_SLOTS=5
 FOOTER_TEXT=Hosted by <a href="https://example.com">Example Corp</a>
 ```
+
+### Reverse Proxy
+
+In production, place a reverse proxy in front of the services to terminate TLS and route traffic.
+
+### Restrict Network Access
+
+The application allows users to scan external targets.
+To prevent data exfiltration, restrict the access to internal and forbidden networks.
+
+### Note on Current Docker Images
+
+The provided Dockerfiles run development servers (`npm run dev`, `uvicorn --reload`).
+For production, consider building optimized images with a production web server and disabling hot-reloading.
 
 ## License
 

@@ -122,7 +122,7 @@ export default {
       // Use the same protocol and host as the client, but with backend port
       const protocol = window.location.protocol
       const hostname = window.location.hostname
-      const backendPort = 48090
+      const backendPort = import.meta.env.VITE_BACKEND_PORT || 48090
       return `${protocol}//${hostname}:${backendPort}`
     },
     apiDocsUrl() {
