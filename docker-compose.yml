@@ -28,6 +28,8 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    environment:
+      - VITE_FOOTER_TEXT=${FOOTER_TEXT:-}
     restart: unless-stopped
     depends_on:
       - backend

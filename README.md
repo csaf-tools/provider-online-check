@@ -102,6 +102,20 @@ This repository uses the [Conventional Commits](https://www.conventionalcommits.
 - npm or yarn
 - Vue 3, Vite, Bootstrap, Axios (see [frontend/package.json](frontend/package.json))
 
+## Production Deployment
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `FOOTER_TEXT` | No | Custom HTML content appended to the footer of the frontend. Can contain HTML tags. |
+
+Example in a `.env` file in the project root:
+
+```html
+FOOTER_TEXT=Hosted by <a href="https://example.com">Example Corp</a>
+```
+
 ## License
 
 SPDX-License-Identifier: Apache-2.0

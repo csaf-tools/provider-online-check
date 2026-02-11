@@ -91,6 +91,7 @@
                 Software-Engineering: <a href="https://intevation.de">Intevation GmbH</a><br />
                 Software License: Apache-2.0
               </p>
+              <p v-if="footerText" v-html="footerText"></p>
             </div>
           </div>
         </div>
@@ -126,6 +127,9 @@ export default {
     },
     apiDocsUrl() {
       return `${this.backendUrl}/docs`
+    },
+    footerText() {
+      return import.meta.env.VITE_FOOTER_TEXT || ''
     }
   },
   methods: {
