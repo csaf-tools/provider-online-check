@@ -24,4 +24,3 @@ CSAF_VERSION="3.4.0"
 
 # Start uvicorn daemon
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-

@@ -20,6 +20,21 @@ jobs:
     - name: Build and run
       run: make dev-detached
 
+    - name: Wait for backend to be ready
+      run: |
+        echo "Waiting for backend health check..."
+        for i in $(seq 1 60); do
+          if curl -sf http://localhost:48090/health > /dev/null 2>&1; then
+            echo "Backend is ready!"
+            exit 0
+          fi
+          echo "Attempt $i/60 - waiting 5s..."
+          sleep 5
+        done
+        echo "Backend failed to become ready"
+        docker compose logs backend
+        exit 1
+
     - name: Run Tests
       run: make run-tests-containerd
 
