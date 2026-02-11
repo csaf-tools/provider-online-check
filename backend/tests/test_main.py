@@ -59,9 +59,9 @@ class TestScanStartEndpointDomains:
         )
         assert response.status_code == 201
         data = response.json()
-        assert data["status"] == "started"
+        assert data["status"] == "INITIALIZED"
         assert data["domain"] == "example.com"
-        assert "message" in data
+        assert "results_checker" in data
 
     def test_start_scan_with_whitespace(self):
         """Whitespace is trimmed from domain"""
@@ -173,9 +173,9 @@ class TestScanStartEndpointSessionId:
         )
         assert response.status_code == 201
         data = response.json()
-        assert data["status"] == "started"
+        assert data["status"] == "INITIALIZED"
         assert data["domain"] == "example.com"
-        assert "message" in data
+        assert "results_checker" in data
 
     def test_start_scan_empty_session(self):
         """Fails with empty session id"""
@@ -208,9 +208,9 @@ class TestScanStartEndpointSessionId:
         )
         assert response.status_code == 201
         data = response.json()
-        assert data["status"] == "started"
+        assert data["status"] == "INITIALIZED"
         assert data["domain"] == "example.com"
-        assert "message" in data
+        assert "results_checker" in data
 
 
 class TestDomainValidation:
