@@ -134,10 +134,14 @@ In production, place a reverse proxy in front of the services to terminate TLS a
 The application allows users to scan external targets.
 To prevent data exfiltration, restrict the access to internal and forbidden networks.
 
-### Note on Current Docker Images
+### Production Docker Images
 
-The provided Dockerfiles run development servers (`npm run dev`, `uvicorn --reload`).
-For production, consider building optimized images with a production web server and disabling hot-reloading.
+Production Dockerfiles are provided for both services.
+Use `docker-compose.prod.yml` to build and run them:
+
+```shell
+docker compose -f docker-compose.prod.yml up -d --build
+```
 
 ## License
 

@@ -2,12 +2,10 @@ services:
   backend:
     build:
       context: ./backend
-      target: dev
+      target: prod
     container_name: backend
     ports:
       - "${PORT_BACKEND:-48090}:8000"
-    volumes:
-      - ./backend:/app
     environment:
       - SCAN_SLOTS=${SCAN_SLOTS:-10}
     restart: unless-stopped
@@ -18,21 +16,18 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 10s
 
   frontend:
     build:
       context: ./frontend
-      target: dev
+      target: prod
+      args:
+        - VITE_FOOTER_TEXT=${FOOTER_TEXT:-}
+        - VITE_BACKEND_PORT=${PORT_BACKEND:-48090}
     container_name: frontend
     ports:
       - "${PORT_FRONTEND:-48091}:8080"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - VITE_FOOTER_TEXT=${FOOTER_TEXT:-}
-      - VITE_BACKEND_PORT=${PORT_BACKEND:-48090}
     restart: unless-stopped
     depends_on:
       - backend
@@ -41,7 +36,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 10s
 
   redis:
     image: redis:alpine
+    restart: unless-stopped
