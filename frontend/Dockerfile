@@ -24,11 +24,11 @@ ARG VITE_FOOTER_TEXT
 RUN npm run build
 
 # Production image
-FROM nginx:latest AS prod
+FROM httpd:2-alpine AS prod
 
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/local/apache2/htdocs/
+COPY httpd.conf /usr/local/apache2/conf/httpd.conf
 
 EXPOSE 8080
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["httpd-foreground"]

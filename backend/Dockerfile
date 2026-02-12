@@ -3,7 +3,10 @@ FROM ubuntu:22.04 AS base
 
 # Install Python and curl
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3 python3-pip curl && \
+    apt-get install -y --no-install-recommends \
+    python3=3.10.6-1~22.04.1 \
+    python3-pip=22.0.2+dfsg-1ubuntu0.7 \
+    curl=7.81.0-1ubuntu1.21 && \
     rm -rf /var/lib/apt/lists/*
 
 ENV PYTHONUNBUFFERED=1 \
@@ -35,11 +38,12 @@ FROM base AS prod
 
 # Download csaf_checker binary
 ARG CSAF_VERSION=3.4.0
-RUN mkdir -p bin && cd bin && \
-    curl -LO "https://github.com/gocsaf/csaf/releases/download/v${CSAF_VERSION}/csaf-${CSAF_VERSION}-gnulinux-amd64.tar.gz" && \
+WORKDIR /app/bin
+RUN curl -LO "https://github.com/gocsaf/csaf/releases/download/v${CSAF_VERSION}/csaf-${CSAF_VERSION}-gnulinux-amd64.tar.gz" && \
     tar -xzf "csaf-${CSAF_VERSION}-gnulinux-amd64.tar.gz" && \
     rm "csaf-${CSAF_VERSION}-gnulinux-amd64.tar.gz" && \
     mv "csaf-${CSAF_VERSION}-gnulinux-amd64" csaf-binary
+WORKDIR /app
 
 COPY . .
 
