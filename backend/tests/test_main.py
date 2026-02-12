@@ -48,6 +48,7 @@ class TestHealthEndpoint:
         assert "free_slots" in data
         assert "total_slots" in data
         assert "csaf_checker_available" in data
+        assert "redis_available" in data
         assert data["status"] in ("healthy", "unhealthy")
 
     def test_health_check_without_binary(self):
