@@ -28,8 +28,8 @@ async def root():
     return {
         "name": "CSAF Provider Scan API",
         "version": "1.0.0",
-        "docs": "/docs",
-        "openapi": "/openapi.json",
+        "docs": "/api/docs",
+        "openapi": "/api/openapi.json",
     }
 
 

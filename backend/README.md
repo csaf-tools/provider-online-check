@@ -27,13 +27,13 @@ python main.py
 ## API Documentation
 
 Once the server is running, access:
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-- **OpenAPI JSON**: http://localhost:8000/openapi.json
+- **Swagger UI**: http://localhost:8000/api/docs
+- **ReDoc**: http://localhost:8000/api/redoc
+- **OpenAPI JSON**: http://localhost:8000/api/openapi.json
 
 ## API Endpoints
 
-### POST /scan/start
+### POST /api/scan/start
 Start a scan for a domain.
 
 **Request Body:**
@@ -52,8 +52,8 @@ Start a scan for a domain.
 }
 ```
 
-### GET /health
+### GET /api/health
 Health check endpoint.
 
-### GET /
+### GET /api/
 Root endpoint with API information.

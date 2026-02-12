@@ -67,7 +67,7 @@ See the README files in [backend/](backend/) and [frontend/](frontend/) for comp
 The application consists of three main components:
 
 - **Frontend**: A Vue.js 3 single-page application using Bootstrap for styling. It provides the user interface for initiating scans and viewing results.
-- **Backend**: A FastAPI-based REST API that handles scan requests. It exposes endpoints for starting scans and checking status. The interactive API documentation is available at `/docs`.
+- **Backend**: A FastAPI-based REST API that handles scan requests. It exposes endpoints for starting scans and checking status. The interactive API documentation is available at `/api/docs`.
 - **Redis**: Used as a message broker for the job queue, for asynchronous scan job processing
 
 ## Security Considerations
@@ -128,6 +128,38 @@ FOOTER_TEXT=Hosted by <a href="https://example.com">Example Corp</a>
 ### Reverse Proxy
 
 In production, place a reverse proxy in front of the services to terminate TLS and route traffic.
+Below is a minimal example using Apache httpd serving frontend and backend.
+
+```apache
+<VirtualHost *:443>
+    ServerName scan.example.com
+
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/scan.example.com.crt
+    SSLCertificateKeyFile /etc/ssl/private/scan.example.com.key
+
+    # Security headers
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'"
+
+    # Backend API
+    ProxyPass /api http://localhost:48090/api
+    ProxyPassReverse /api http://localhost:48090/api
+
+    # Frontend (catch-all)
+    ProxyPass / http://localhost:48091/
+    ProxyPassReverse / http://localhost:48091/
+</VirtualHost>
+```
+
+Enable the required modules:
+
+```shell
+a2enmod proxy proxy_http ssl headers
+systemctl reload apache2
+```
 
 ### Restrict Network Access
 

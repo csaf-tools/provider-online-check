@@ -126,7 +126,7 @@ export default {
       return `${protocol}//${hostname}:${backendPort}`
     },
     apiDocsUrl() {
-      return `${this.backendUrl}/docs`
+      return `${this.backendUrl}/api/docs`
     },
     footerText() {
       return import.meta.env.VITE_FOOTER_TEXT || ''
@@ -139,7 +139,7 @@ export default {
       this.error = null
 
       try {
-        const response = await axios.post(`${this.backendUrl}/scan/start`, {
+        const response = await axios.post(`${this.backendUrl}/api/scan/start`, {
           domain: this.domain,
           session_id: this.session_id
         })
