@@ -38,8 +38,10 @@ FROM base AS prod
 
 # Download csaf_checker binary
 ARG CSAF_VERSION=3.4.0
+ARG CSAF_SHA256=d604d17805bb1dfd4fa3c1887c7d109356eb5e36079a3877e37ef9fb412b66b7
 WORKDIR /app/bin
 RUN curl -LO "https://github.com/gocsaf/csaf/releases/download/v${CSAF_VERSION}/csaf-${CSAF_VERSION}-gnulinux-amd64.tar.gz" && \
+    echo "${CSAF_SHA256}  csaf-${CSAF_VERSION}-gnulinux-amd64.tar.gz" | sha256sum -c - && \
     tar -xzf "csaf-${CSAF_VERSION}-gnulinux-amd64.tar.gz" && \
     rm "csaf-${CSAF_VERSION}-gnulinux-amd64.tar.gz" && \
     mv "csaf-${CSAF_VERSION}-gnulinux-amd64" csaf-binary
