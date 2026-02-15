@@ -41,11 +41,25 @@ class TestHealthEndpoint:
     """Tests for the health check endpoint"""
 
     def test_health_check(self):
-        """health endpoint returns healthy status"""
+        """health endpoint returns expected fields"""
         response = client.get("/health")
-        assert response.status_code == 200
         data = response.json()
-        assert data["status"] == "healthy"
+        assert "status" in data
+        assert "free_slots" in data
+        assert "total_slots" in data
+        assert "csaf_checker_available" in data
+        assert data["status"] in ("healthy", "unhealthy")
+
+    def test_health_check_without_binary(self):
+        """health endpoint returns 503 when csaf_checker binary is unavailable"""
+        from unittest.mock import patch, AsyncMock
+        with patch("src.router.router.CSAF_BINARY_PATH", "/nonexistent/path"):
+            response = client.get("/health")
+            assert response.status_code == 503
+            data = response.json()
+            assert data["status"] == "unhealthy"
+            assert data["csaf_checker_available"] is False
+            assert "csaf_checker binary is not available" in data["errors"]
 
 
 class TestScanStartEndpointDomains:
@@ -59,9 +73,9 @@ class TestScanStartEndpointDomains:
         )
         assert response.status_code == 201
         data = response.json()
-        assert data["status"] == "started"
+        assert data["status"] == "INITIALIZED"
         assert data["domain"] == "example.com"
-        assert "message" in data
+        assert "results_checker" in data
 
     def test_start_scan_with_whitespace(self):
         """Whitespace is trimmed from domain"""
@@ -173,9 +187,9 @@ class TestScanStartEndpointSessionId:
         )
         assert response.status_code == 201
         data = response.json()
-        assert data["status"] == "started"
+        assert data["status"] == "INITIALIZED"
         assert data["domain"] == "example.com"
-        assert "message" in data
+        assert "results_checker" in data
 
     def test_start_scan_empty_session(self):
         """Fails with empty session id"""
@@ -208,9 +222,9 @@ class TestScanStartEndpointSessionId:
         )
         assert response.status_code == 201
         data = response.json()
-        assert data["status"] == "started"
+        assert data["status"] == "INITIALIZED"
         assert data["domain"] == "example.com"
-        assert "message" in data
+        assert "results_checker" in data
 
 
 class TestDomainValidation:

@@ -7,13 +7,17 @@
 
 # Involved in: 3, basically everything else too
 
+import asyncio
+import os
 from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, status
+from fastapi.responses import JSONResponse
 
+from ..csaf.csaf_checker import CSAF_BINARY_PATH, CSAF_CHECKER_BINARY
 from ..slots.slot_manager import Slot_Manager
 from .scan_request import ScanRequest
-from .scan_response import ScanResponse
+from .scan_response import ScanResponse, ScanResponseStatus
 
 router = APIRouter()
 
@@ -51,13 +55,24 @@ async def start_scan(request: ScanRequest) -> Dict[str, Any]:
         HTTPException: If the scan cannot be initiated
     """
     try:
-        result = await Slot_Manager().start_domain_task(request)
-        slot_status = result.running_task.status
+        slot = await Slot_Manager().start_domain_task(request)
+
+        if slot is None:
+            # No slot is available
+            return {
+                "status": ScanResponseStatus.ERROR,
+                "domain": request.domain,
+                "error": "Server is over capacity, try again later",
+            }
+
+        json_result = slot.running_task.data.results_to_json()
 
         return {
-            "status": "started",
+            "status": ScanResponseStatus.INITIALIZED,
             "domain": request.domain,
-            "message": f"Scan initiated for domain: {request.domain} with result {slot_status}",
+            "runtime_output": slot.running_task.data.csaf_checker_output_runtime_log,
+            "results_checker": json_result,
+            "slot_id": slot.id,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")
@@ -74,9 +89,9 @@ async def get_scan(slot_id: str, request: ScanRequest) -> Dict[str, Any]:
     try:
         # FIXME: Add real scan logic here
         return {
-            "status": f"get {slot_id}",
+            "status": ScanResponseStatus.ERROR,
             "domain": request.domain,
-            "message": f"Scan initiated for domain: {request.domain}",
+            "error": "Path not implemented yet",
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")
@@ -84,5 +99,42 @@ async def get_scan(slot_id: str, request: ScanRequest) -> Dict[str, Any]:
 
 @router.get("/health", summary="Health Check", tags=["devops"])
 async def health_check():
-    """Health check endpoint"""
-    return {"status": "healthy"}
+    """Check fir free slots and csaf_checker binary"""
+    errors = []
+
+    # Check free slots
+    slot_manager = Slot_Manager()
+    free_slots = sum(1 for slot in slot_manager.slots if slot.is_available())
+
+    # Check csaf_checker binary
+    checker_path = os.path.join(CSAF_BINARY_PATH, CSAF_CHECKER_BINARY)
+    binary_available = False
+    try:
+        # Should probably improved (cached?)
+        proc = await asyncio.create_subprocess_exec(
+            os.path.abspath(checker_path),
+            "--help",
+            stdout=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.DEVNULL,
+        )
+        returncode = await proc.wait()
+        binary_available = returncode == 0
+    except Exception:
+        binary_available = False
+
+    if not binary_available:
+        errors.append("csaf_checker binary is not available")
+
+    healthy = len(errors) == 0
+    response = {
+        "status": "healthy" if healthy else "unhealthy",
+        "free_slots": free_slots,
+        "total_slots": len(slot_manager.slots),
+        "csaf_checker_available": binary_available,
+    }
+
+    if errors:
+        response["errors"] = errors
+        return JSONResponse(content=response, status_code=503)
+
+    return response
