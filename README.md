@@ -45,6 +45,14 @@ docker compose up -d
 
 In the README files of `backend` and `frontend`, you can find instructions on the components and how to run them without Docker.
 
+### Dev Makefile Targets
+
+Common docker compose operations for the development environment are wrapped in make targets prefixed with `dev`.
+
+For example, `make dev` runs `docker compose up --build`.
+
+Run `make dev-help` to list all available dev targets.
+
 ## How to use
 
 Visit http://localhost:48091/ in your browser.
