@@ -91,6 +91,7 @@
                 Software-Engineering: <a href="https://intevation.de">Intevation GmbH</a><br />
                 Software License: Apache-2.0
               </p>
+              <p v-if="footerText" v-html="footerText"></p>
             </div>
           </div>
         </div>
@@ -121,11 +122,14 @@ export default {
       // Use the same protocol and host as the client, but with backend port
       const protocol = window.location.protocol
       const hostname = window.location.hostname
-      const backendPort = 48090
+      const backendPort = import.meta.env.VITE_BACKEND_PORT || 48090
       return `${protocol}//${hostname}:${backendPort}`
     },
     apiDocsUrl() {
-      return `${this.backendUrl}/docs`
+      return `${this.backendUrl}/api/docs`
+    },
+    footerText() {
+      return import.meta.env.VITE_FOOTER_TEXT || ''
     }
   },
   methods: {
@@ -135,7 +139,7 @@ export default {
       this.error = null
 
       try {
-        const response = await axios.post(`${this.backendUrl}/scan/start`, {
+        const response = await axios.post(`${this.backendUrl}/api/scan/start`, {
           domain: this.domain,
           session_id: this.session_id
         })

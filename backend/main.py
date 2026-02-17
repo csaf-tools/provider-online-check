@@ -9,9 +9,9 @@ app = FastAPI(
     title="CSAF Provider Scan API",
     description="API for scanning CSAF providers",
     version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
-    openapi_url="/openapi.json"
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json",
 )
 
 # Configure CORS
@@ -23,7 +23,7 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-app.include_router(router)
+app.include_router(router, prefix="/api")
 
 
 level = os.getenv("LOG_LEVEL", "INFO").upper()

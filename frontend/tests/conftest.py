@@ -1,4 +1,6 @@
 """Pytest configuration for Selenium tests."""
+import os
+
 import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -44,13 +46,15 @@ def firefox_driver():
 @pytest.fixture(scope="session")
 def base_url():
     """Base URL for the frontend application."""
-    return "http://localhost:48091"
+    port = os.environ.get("PORT_FRONTEND", "48091")
+    return f"http://localhost:{port}"
 
 
 @pytest.fixture(scope="session")
 def backend_url():
     """Base URL for the backend API."""
-    return "http://localhost:48090"
+    port = os.environ.get("PORT_BACKEND", "48090")
+    return f"http://localhost:{port}"
 
 
 @pytest.fixture(scope="session")

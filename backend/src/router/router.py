@@ -16,6 +16,7 @@ from fastapi.responses import JSONResponse
 
 from ..csaf.csaf_checker import CSAF_BINARY_PATH, CSAF_CHECKER_BINARY
 from ..slots.slot_manager import Slot_Manager
+from .redis import Redis
 from .scan_request import ScanRequest
 from .scan_response import ScanResponse, ScanResponseStatus
 
@@ -28,8 +29,8 @@ async def root():
     return {
         "name": "CSAF Provider Scan API",
         "version": "1.0.0",
-        "docs": "/docs",
-        "openapi": "/openapi.json",
+        "docs": "/api/docs",
+        "openapi": "/api/openapi.json",
     }
 
 
@@ -125,12 +126,22 @@ async def health_check():
     if not binary_available:
         errors.append("csaf_checker binary is not available")
 
+    # Check Redis connectivity
+    redis_available = False
+    try:
+        redis_available = Redis()._redis.ping()
+    except Exception:
+        redis_available = False
+    if not redis_available:
+        errors.append("Redis is not available")
+
     healthy = len(errors) == 0
     response = {
         "status": "healthy" if healthy else "unhealthy",
         "free_slots": free_slots,
         "total_slots": len(slot_manager.slots),
         "csaf_checker_available": binary_available,
+        "redis_available": redis_available,
     }
 
     if errors:

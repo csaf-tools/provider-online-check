@@ -1,17 +1,17 @@
-fastapi
-uvicorn[standard]
-pydantic
-pydantic-settings
-redis
-rq
-python-dotenv
-requests
+fastapi>=0,<1
+uvicorn[standard]>=0,<1
+pydantic>=2,<3
+pydantic-settings>=2,<3
+redis>=7,<8
+rq>=2,<3
+python-dotenv>=1,<2
+requests>=2,<3
 
 # Testing
-pytest
-pytest-asyncio
-httpx
-black
-isort
-flake8
-mypy
+pytest>=9,<10
+pytest-asyncio>=1,<2
+httpx>=0,<1
+black>=26,<27
+isort>=7,<8
+flake8>=7,<8
+mypy>=1,<2
