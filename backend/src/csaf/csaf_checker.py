@@ -46,7 +46,7 @@ class CSAF_Checker():
         self.__terminate_asyncio_task()
 
         # create subprocess, merge stderr into stdout for unified streaming
-        args = ["--verbose", data.domain]
+        args = ["--verbose", "--validator=http://validator:8082", data.domain]
         self._running_task_checker = await asyncio.create_subprocess_exec(
             os.path.abspath(self.__csaf_checker_path()),
             *args,
