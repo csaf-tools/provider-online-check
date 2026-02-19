@@ -14,11 +14,10 @@ class Domain_Task_Status(Enum):
     UNDEFINED = 0  # No status set yet
     INITIALIZED = 1  # On initialization
     RUNNING_CHECKER = 2  # Currently running csaf checker
-    RUNNING_VALIDATOR = 3  # Currently running csaf validator
-    DONE = 4  # Task is done
-    PAUSED = 5  # Task has been paused
-    INTERRUPTED = 6  # Task has been interrupted via controlled means
-    ERROR = 7  # Task has failed due to an unintentional error
+    DONE = 3  # Task is done
+    PAUSED = 4  # Task has been paused
+    INTERRUPTED = 5  # Task has been interrupted via controlled means
+    ERROR = 6  # Task has failed due to an unintentional error
 
 
 class Domain_Task(BaseModel):
@@ -63,8 +62,6 @@ class Domain_Task(BaseModel):
         if result is False:
             return result
 
-        result = await self.run_validator()
-
         return result
 
     async def run_checker(self) -> bool:
@@ -90,17 +87,7 @@ class Domain_Task(BaseModel):
             self.on_error(f"Domain Task Error while running CSAF Checker: {e}")
             return False
 
-    async def run_validator(self):
-        self.status = Domain_Task_Status.RUNNING_VALIDATOR
-
-        self.on_validator_done()
-
     def on_checker_done(self):
-        # FIXME
-        # Continue to validator either automatically or after user input
-        self.status = Domain_Task_Status.DONE
-
-    def on_validator_done(self):
         self.status = Domain_Task_Status.DONE
 
     def interrupt(self):

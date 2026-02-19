@@ -9,10 +9,7 @@ class ScanResponseStatus(Enum):
     ERROR = "ERROR"                          # Domain task couldn't be started or ended early because of some error (see error field)
     RUNNING_CHECKER = "RUNNING_CHECKER"      # Domain task is running CSAF Checker
     DONE_CHECKER = "DONE_CHECKER"            # CSAF Checker is done
-    RUNNING_VALIDATOR = "RUNNING_VALIDATOR"  # Domain task is running CSAF Validator
-    DONE_VALIDATOR = "DONE_VALIDATOR"        # CSAF Checker is done
     CACHED_CHECKER = "CACHED_CHECKER"        # CSAF Checker output has been found for requested domain in database cache. No domain task has been started
-    CACHED_VALIDATOR = "CACHED_VALIDATOR"    # CSAF Validator output has been found for requested domain in database cache. Domain task has been paused
     PAUSED = "PAUSED"                        # Domain task is paused
 
 

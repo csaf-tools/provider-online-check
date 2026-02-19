@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 CSAF_BINARY_PATH = "./bin/csaf-binary/bin-linux-amd64/"
 CSAF_CHECKER_BINARY = "csaf_checker"
-CSAF_VALIDATOR_BINARY = "csaf_validator"
 
 
 class CSAF_Checker():
@@ -45,8 +44,13 @@ class CSAF_Checker():
         # Handle non-null running task
         self.__terminate_asyncio_task()
 
-        # create subprocess, merge stderr into stdout for unified streaming
-        args = ["--verbose", "--validator=http://validator:8082", data.domain]
+        # Write args
+        args = ["--verbose", data.domain]
+
+        if data.enable_validator:
+            args.append("--validator=http://validator:8082")
+
+        # Run task asynchroniously
         self._running_task_checker = await asyncio.create_subprocess_exec(
             os.path.abspath(self.__csaf_checker_path()),
             *args,

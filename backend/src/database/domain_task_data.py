@@ -12,14 +12,12 @@ class Domain_Task_Data(BaseModel):
         int, Field(description="Timestamp of this tasks initiziation")
     ]
 
+    enable_validator: Annotated[bool, Field(description="Activates csaf validator for every downloaded document", default=True)]
+
     csaf_checker_output_runtime_log: list[
         Annotated[str, Field(description="Verbose output by csaf checker while it was running")]
     ] = []
     csaf_checker_output_result: Annotated[str, Field(description="Result of csaf checker")] = ""
-
-    csaf_validator_output: list[
-        Annotated[str, Field(description="Log line printed by csaf validator")]
-    ] = []
 
     @classmethod
     def create(cls, domain: str) -> "Domain_Task_Data":
