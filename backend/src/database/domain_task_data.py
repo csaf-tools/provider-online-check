@@ -11,6 +11,7 @@ import hashlib
 class Domain_Task_Data(BaseModel):
     domain: Annotated[str, Field(description="HTML domain that is queried")]
     start_time: Annotated[int, Field(description="Timestamp of this tasks initiziation")]
+    end_time: Annotated[int, Field(description="Timestamp of this tasks finish")]
     enable_validator: Annotated[bool, Field(description="Activates csaf validator for every downloaded document")] = True
 
 

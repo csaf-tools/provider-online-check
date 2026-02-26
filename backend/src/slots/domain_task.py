@@ -37,6 +37,11 @@ class Domain_Task(BaseModel):
         ),
     ] = Field(default_factory=list)
 
+    skip_cache: Annotated[
+        bool,
+        Field(description="Skips cache if enabled/ guarantees to run csaf checker, even if the domain has recently been checked already")
+    ] = False
+
     data: Annotated[
         Domain_Task_Data,
         Field(description="Data concerning this domain task. Will be saved persistently on task completion")
@@ -78,6 +83,8 @@ class Domain_Task(BaseModel):
             logger.error(f"Error writing domain task to file: {e}")
 
     async def __load_from_chache(self) -> Domain_Task_Data:
+        if self.skip_cache:
+            return None
 
         try:
             if not os.path.exists(f"{CACHE_PATH_TASKS}{self.data.cache_name}") :
@@ -87,7 +94,7 @@ class Domain_Task(BaseModel):
                 task = pickle.load(file)
 
                 # Cached task too old?
-                if int(time.time()) - task.data.start_time > CACHE_TIMEOUT:
+                if int(time.time()) - task.data.end_time > CACHE_TIMEOUT:
                     return None
                 return task.data
         except Exception as e:
@@ -99,6 +106,9 @@ class Domain_Task(BaseModel):
         Runs csaf checker asynchronously and stream its output
         into self.csaf_checker_output. This method updates status and returns
         True on successful run, False otherwise.
+
+        Is serialized into cache on successful runs.
+        If a domain task has been recently cached, it will be returned; skipping CSAF Checker
         """
 
         # Fetch and return cache
@@ -114,8 +124,6 @@ class Domain_Task(BaseModel):
         try:
             result = await csaf_checker.run(self.data)
 
-            await self.__write_to_cache()
-
             if result is True:
                 self.on_checker_done()
                 return True
@@ -129,6 +137,11 @@ class Domain_Task(BaseModel):
             return False
 
     def on_checker_done(self):
+        self.data.end_time = int(time.time())
+
+        # Write results to file cache
+        await self.__write_to_cache()
+
         self.status = Domain_Task_Status.DONE
 
     def interrupt(self):
