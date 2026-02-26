@@ -9,6 +9,7 @@ import asyncio
 import os
 import logging
 import signal
+import hashlib
 
 logger = logging.getLogger(__name__)
 
@@ -42,13 +43,16 @@ class CSAF_Checker():
     async def __start_asyncio_task(self, data: Domain_Task_Data):
         # FIXME
         # Handle non-null running task
-        self.__terminate_asyncio_task()
+        await self.__terminate_asyncio_task()
 
         # Write args
         args = ["--verbose", data.domain]
 
+        data_name = hashlib.sha256(data.domain.encode("utf-8")).hexdigest()
+
         if data.enable_validator:
             args.append("--validator=http://validator:8082")
+            args.append(f"--validator_cache=/app/store/validator/cache/{data_name}")
 
         # Run task asynchroniously
         self._running_task_checker = await asyncio.create_subprocess_exec(
@@ -59,7 +63,6 @@ class CSAF_Checker():
             cwd=CSAF_BINARY_PATH,
             env=None,
         )
-        assert self._running_task_checker.stdout is not None
 
     async def __terminate_asyncio_task(self):
         if self._running_task_checker is None:
@@ -74,6 +77,17 @@ class CSAF_Checker():
             await self._running_task_checker.wait()
         except Exception:
             pass
+
+    async def __write_output_to_cache(self, data: Domain_Task_Data):
+        data_name = hashlib.sha256(data.domain.encode("utf-8")).hexdigest()
+
+        with open(f"/app/store/checker/results/{data_name}", "w") as file:
+            file.write(data.csaf_checker_output_result)
+
+        with open(f"/app/store/checker/verbose_stream/{data_name}", "w") as file:
+            for line in data.csaf_checker_output_runtime_log:
+                file.write(line)
+
 
     async def run(self, data: Domain_Task_Data):
 
@@ -162,6 +176,9 @@ class CSAF_Checker():
 
             returncode = await self._running_task_checker.wait()
             logger.info(f"Task done with returncode {returncode}")
+
+            logger.info(data.csaf_checker_output_runtime_log)
+            await self.__write_output_to_cache(data)
 
             if returncode == 0:
                 return True
