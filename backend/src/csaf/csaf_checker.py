@@ -13,8 +13,9 @@ import hashlib
 
 logger = logging.getLogger(__name__)
 
-CSAF_BINARY_PATH = "./bin/csaf-binary/bin-linux-amd64/"
+CSAF_BINARY_PATH = "/app/bin/csaf-binary/bin-linux-amd64/"
 CSAF_CHECKER_BINARY = "csaf_checker"
+CACHE_PATH_VALIDATOR = "/app/store/validator/cache/"
 
 
 class CSAF_Checker():
@@ -48,11 +49,11 @@ class CSAF_Checker():
         # Write args
         args = ["--verbose", data.domain]
 
-        data_name = hashlib.sha256(data.domain.encode("utf-8")).hexdigest()
+        data_name = data.cache_name
 
         if data.enable_validator:
             args.append("--validator=http://validator:8082")
-            args.append(f"--validator_cache=/app/store/validator/cache/{data_name}")
+            args.append(f"--validator_cache={CACHE_PATH_VALIDATOR}{data_name}")
 
         # Run task asynchroniously
         self._running_task_checker = await asyncio.create_subprocess_exec(
@@ -78,18 +79,7 @@ class CSAF_Checker():
         except Exception:
             pass
 
-    async def __write_output_to_cache(self, data: Domain_Task_Data):
-        data_name = hashlib.sha256(data.domain.encode("utf-8")).hexdigest()
-
-        with open(f"/app/store/checker/results/{data_name}", "w") as file:
-            file.write(data.csaf_checker_output_result)
-
-        with open(f"/app/store/checker/verbose_stream/{data_name}", "w") as file:
-            for line in data.csaf_checker_output_runtime_log:
-                file.write(line)
-
-
-    async def run(self, data: Domain_Task_Data):
+    async def run(self, data: Domain_Task_Data) -> bool:
 
         try:
             # create subprocess, merge stderr into stdout for unified streaming
@@ -176,9 +166,6 @@ class CSAF_Checker():
 
             returncode = await self._running_task_checker.wait()
             logger.info(f"Task done with returncode {returncode}")
-
-            logger.info(data.csaf_checker_output_runtime_log)
-            await self.__write_output_to_cache(data)
 
             if returncode == 0:
                 return True

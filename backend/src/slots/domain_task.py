@@ -5,10 +5,15 @@ from enum import Enum
 from ..csaf.csaf_checker import CSAF_Checker
 from ..database.domain_task_data import Domain_Task_Data
 
+import os
 import logging
+import pickle
+import time
 
 logger = logging.getLogger(__name__)
 
+CACHE_PATH_TASKS = "/app/store/tasks/"
+CACHE_TIMEOUT_SECONDS=300
 
 class Domain_Task_Status(Enum):
     UNDEFINED = 0  # No status set yet
@@ -64,16 +69,52 @@ class Domain_Task(BaseModel):
 
         return result
 
+    async def __write_to_cache(self):
+        try:
+            with open(f"/app/store/tasks/{self.data.cache_name}", "wb") as file:
+                pickle.dump(self, file)
+
+        except Exception as e:
+            logger.error(f"Error writing domain task to file: {e}")
+
+    async def __load_from_chache(self) -> Domain_Task_Data:
+
+        try:
+            if not os.path.exists(f"{CACHE_PATH_TASKS}{self.data.cache_name}") :
+                return None
+
+            with open(f"{CACHE_PATH_TASKS}{self.data.cache_name}", 'rb') as file:
+                task = pickle.load(file)
+
+                # Cached task too old?
+                if int(time.time()) - task.data.start_time > CACHE_TIMEOUT:
+                    return None
+                return task.data
+        except Exception as e:
+            logger.error(f"Error reading domain task from file: {e}")
+
+
     async def run_checker(self) -> bool:
         """
         Runs csaf checker asynchronously and stream its output
         into self.csaf_checker_output. This method updates status and returns
         True on successful run, False otherwise.
         """
+
+        # Fetch and return cache
+        cached_task_data = await self.__load_from_chache()
+        if cached_task_data is not None:
+            logger.info(f"Found {self.data.domain} in cache")
+            self.data = cached_task_data
+            return True
+
+        # Start CSAF Checker
         self.status = Domain_Task_Status.RUNNING_CHECKER
         csaf_checker = CSAF_Checker()
         try:
             result = await csaf_checker.run(self.data)
+
+            await self.__write_to_cache()
 
             if result is True:
                 self.on_checker_done()

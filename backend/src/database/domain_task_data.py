@@ -2,8 +2,10 @@
 
 from typing import Annotated, Dict, Any
 from pydantic import BaseModel, Field
+
 import time
 import json
+import hashlib
 
 
 class Domain_Task_Data(BaseModel):
@@ -17,11 +19,18 @@ class Domain_Task_Data(BaseModel):
     ] = []
     csaf_checker_output_result: Annotated[str, Field(description="Result of csaf checker")] = ""
 
+    cache_name: Annotated[str,
+        Field(
+            description="Identifying name for this domain task to be used in caching"
+        ),
+    ] = ""
+
     @classmethod
     def create(cls, domain: str) -> "Domain_Task_Data":
         data = {
             "domain": domain,
             "start_time": int(time.time()),
+            "cache_name": hashlib.sha256(domain.encode("utf-8")).hexdigest()
         }
         return cls(**data)
 
