@@ -171,8 +171,33 @@ systemctl reload apache2
 
 ### Restrict Network Access
 
-The application allows users to scan external targets.
-To prevent data exfiltration, restrict the access to internal and forbidden networks.
+The application fetches external URLs on behalf of users, which makes restricting egress to internal networks important.
+Without this, the scanner can be used to probe internal infrastructure (SSRF).
+
+The docker-compose file pins the subnet for the scanner network so that firewall rules remain stable across restarts.
+`iptables` and `ip6tables` rules targeting that subnet are applied to the `DOCKER-USER` chain.
+This chain is not changed by Docker and evaluated before Docker's own forwarding rules.
+
+Run as root once after initial deployment:
+
+```shell
+sudo make restrict-network
+```
+
+The script is idempotent, re-running it is safe.
+To persist the rules across reboots (requires package `iptables-persistent`):
+
+```shell
+sudo apt install iptables-persistent
+sudo make persist-restrict-network
+```
+
+To remove all rules from `DOCKER-USER` (both IPv4 and IPv6):
+
+```shell
+sudo iptables -F DOCKER-USER
+sudo ip6tables -F DOCKER-USER
+```
 
 ### Production Docker Images
 
