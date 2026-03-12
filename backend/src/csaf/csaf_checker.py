@@ -16,6 +16,8 @@ CSAF_BINARY_PATH = "./bin/csaf-binary/bin-linux-amd64/"
 CSAF_CHECKER_BINARY = "csaf_checker"
 CSAF_VALIDATOR_BINARY = "csaf_validator"
 
+CSAF_CHECKER_TIMEOUT: Optional[int] = int(os.environ.get("CSAF_CHECKER_TIMEOUT", "0")) or None
+
 
 class CSAF_Checker():
 
@@ -71,110 +73,107 @@ class CSAF_Checker():
         except Exception:
             pass
 
-    async def run(self, data: Domain_Task_Data):
+    async def __run(self, data: Domain_Task_Data):
+        # create subprocess, merge stderr into stdout for unified streaming
+        await self.__start_asyncio_task(data)
+        logger.info(f"Async CSAF checker task for domain {data.domain}")
 
-        try:
-            # create subprocess, merge stderr into stdout for unified streaming
-            await self.__start_asyncio_task(data)
-            logger.info(f"Async CSAF checker task for domain {data.domain}")
+        # Stream output lines as they come
+        inJSONStructure = False
+        while True:
+            # Check signals
 
-            # Stream output lines as they come
+            # - Termination Signal
+            if self._signal_stop:
+                logger.info(f"Stop csaf checker task for domain {data.domain}")
+                self.__terminate_asyncio_task()
+                # FIXME
+                # Add termination error
+                self._signal_stop = False
+                return False
 
-            inJSONStructure = False
-            while True:
-                # Check signals
+            # - Restart Signal
+            if self._signal_restart:
+                logger.info(f"Restart csaf checker task for domain {data.domain}")
+                await self.__start_asyncio_task(data)
+                self._signal_restart = False
+                continue
 
-                # - Termination Signal
-                if self._signal_stop:
-                    logger.info(f"Stop csaf checker task for domain {data.domain}")
-                    self.__terminate_asyncio_task()
-                    # FIXME
-                    # Add termination error
+            # - Pause Signal
+            if self._signal_paused:
+                max_wait_time = 100
+                wait_time_interval = 0.2
 
-                    self._signal_stop = False
-                    return False
+                logger.info(f"Pause csaf checker task for domain {data.domain}")
+                if self._running_task_checker.pid is not None:
+                    try:
+                        os.kill(self._running_task_checker.pid, signal.SIGSTOP)
+                    except Exception as e:
+                        logger.debug(f"SIGSTOP failed: {e}")
 
-                # - Restart Signal
-                if self._signal_restart:
-                    logger.info(f"Restart csaf checker task for domain {data.domain}")
+                while self._pause_event.is_set():
+                    await asyncio.sleep(wait_time_interval)
+                    max_wait_time -= wait_time_interval
 
-                    await self.__start_asyncio_task(data)
+                    if max_wait_time < 0:
+                        self.__terminate_asyncio_task()
+                        # FIXME
+                        # Add timeout error
+                        return False
 
-                    self._signal_restart = False
+                # stop early in case restart or stop has been signaled while task was paused
+                if self._signal_restart or self._signal_stop:
                     continue
 
-                # - Pause Signal
-                if self._signal_paused:
-                    max_wait_time = 100
-                    wait_time_interval = 0.2
+                logger.info(f"Continue csaf checker task for domain {data.domain}")
+                if self._running_task_checker.pid is not None:
+                    try:
+                        os.kill(self._running_task_checker.pid, signal.SIGCONT)
+                    except Exception as e:
+                        logger.debug(f"SIGCONT failed: {e}")
 
-                    logger.info(f"Pause csaf checker task for domain {data.domain}")
-                    if self._running_task_checker.pid is not None:
-                        try:
-                            os.kill(self._running_task_checker.pid, signal.SIGSTOP)
-                        except Exception as e:
-                            logger.debug(f"SIGSTOP failed: {e}")
+                self._signal_paused = False
 
-                    while self._pause_event.is_set():
-                        await asyncio.sleep(wait_time_interval)
-                        max_wait_time -= wait_time_interval
+            # Interpret output
+            line = await self._running_task_checker.stdout.readline()
+            if not line:
+                break
+            decoded_line = line.decode(errors="replace").rstrip("\n")
 
-                        if max_wait_time < 0:
-                            self.__terminate_asyncio_task()
-                            # FIXME
-                            # Add timeout error
-                            return False
-
-                    # stop early in case restart or stop has been signaled while task was paused
-                    if self._signal_restart or self._signal_stop:
-                        continue
-
-                    logger.info(f"Continue csaf checker task for domain {data.domain}")
-                    if self._running_task_checker.pid is not None:
-                        try:
-                            os.kill(self._running_task_checker.pid, signal.SIGCONT)
-                        except Exception as e:
-                            logger.debug(f"SIGCONT failed: {e}")
-
-                    self._signal_paused = False
-
-                # Interprete output
-                line = await self._running_task_checker.stdout.readline()
-                if not line:
-                    break
-                decoded_line = line.decode(errors="replace").rstrip("\n")
-
-                # Once a single '{' is read, it is assumed that the csaf results are printed out
-                inJSONStructure = (inJSONStructure or (decoded_line == "{"))
-                if inJSONStructure:
-                    # Result Line
-                    data.csaf_checker_output_result += (decoded_line + "\n")
-                else:
-                    # Runtime Line
-                    data.csaf_checker_output_runtime_log.append(decoded_line)
-
-                # FIXME
-                # Notify client socket
-
-            returncode = await self._running_task_checker.wait()
-            logger.info(f"Task done with returncode {returncode}")
-
-            if returncode == 0:
-                return True
+            # Once a single '{' is read, it is assumed that the csaf results are printed out
+            inJSONStructure = (inJSONStructure or (decoded_line == "{"))
+            if inJSONStructure:
+                # Result Line
+                data.csaf_checker_output_result += (decoded_line + "\n")
             else:
-                return False
+                # Runtime Line
+                data.csaf_checker_output_runtime_log.append(decoded_line)
+
+            # FIXME
+            # Notify client socket
+
+        returncode = await self._running_task_checker.wait()
+        logger.info(f"Task done with returncode {returncode}")
+        return returncode == 0
+
+    async def run(self, data: Domain_Task_Data):
+        try:
+            return await asyncio.wait_for(self.__run(data), timeout=CSAF_CHECKER_TIMEOUT)
+
+        except asyncio.TimeoutError:
+            logger.warning(f"csaf_checker timed out for domain {data.domain} after {CSAF_CHECKER_TIMEOUT}s")
+            await self.__terminate_asyncio_task()
+            return False
 
         except asyncio.CancelledError as e:
             # If the coroutine is cancelled, try to terminate the process
             try:
-                self.__terminate_asyncio_task()
+                await self.__terminate_asyncio_task()
             except Exception:
                 pass
-
             # FIXME
             # Throw Interrupt
             logger.warn(f"Interrupted {e}")
-
             return False
 
         except FileNotFoundError as e:
