@@ -11,6 +11,8 @@ services:
     environment:
       - SCAN_SLOTS=${SCAN_SLOTS:-10}
     restart: unless-stopped
+    networks:
+      - scanner
     depends_on:
       - redis
     healthcheck:
@@ -34,6 +36,8 @@ services:
       - VITE_FOOTER_TEXT=${FOOTER_TEXT:-}
       - VITE_BACKEND_PORT=${PORT_BACKEND:-48090}
     restart: unless-stopped
+    networks:
+      - scanner
     depends_on:
       - backend
     healthcheck:
@@ -45,3 +49,14 @@ services:
 
   redis:
     image: redis:alpine
+    networks:
+      - scanner
+
+networks:
+  scanner:
+    enable_ipv6: true
+    ipam:
+      config:
+        # these must match the source ranges in dev/restrict-network.sh
+        - subnet: 172.30.0.0/24
+        - subnet: fd00:30::/64
