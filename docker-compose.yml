@@ -11,6 +11,10 @@ services:
     environment:
       - SCAN_SLOTS=${SCAN_SLOTS:-10}
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: ${CSAF_CHECKER_MEMORY_LIMIT:-500m}
     networks:
       - scanner
     depends_on:
