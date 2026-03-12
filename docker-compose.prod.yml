@@ -8,6 +8,7 @@ services:
       - "${PORT_BACKEND:-48090}:8000"
     environment:
       - SCAN_SLOTS=${SCAN_SLOTS:-10}
+      - CSAF_CHECKER_TIMEOUT=${CSAF_CHECKER_TIMEOUT:-3600}
     restart: unless-stopped
     deploy:
       resources:
