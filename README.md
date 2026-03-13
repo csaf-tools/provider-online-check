@@ -166,7 +166,7 @@ Enable the required modules:
 
 ```shell
 a2enmod proxy proxy_http ssl headers
-systemctl reload apache2
+systemctl restart apache2
 ```
 
 ### Restrict Network Access

@@ -29,7 +29,7 @@ services:
       target: prod
       args:
         - VITE_FOOTER_TEXT=${FOOTER_TEXT:-}
-        - VITE_BACKEND_PORT=${PORT_BACKEND:-48090}
+        - VITE_BACKEND_PORT=443
     container_name: frontend
     ports:
       - "${PORT_FRONTEND:-48091}:8080"
