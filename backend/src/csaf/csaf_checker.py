@@ -17,6 +17,8 @@ CSAF_BINARY_PATH = "/app/bin/csaf-binary/bin-linux-amd64/"
 CSAF_CHECKER_BINARY = "csaf_checker"
 CACHE_PATH_VALIDATOR = "/app/store/validator/cache/"
 
+PAUSE_TIME_MAX_BEFORE_RESET=100
+PAUSE_TIME_INTERVAL=0.2
 
 class CSAF_Checker():
 
@@ -49,11 +51,9 @@ class CSAF_Checker():
         # Write args
         args = ["--verbose", data.domain]
 
-        data_name = data.cache_name
-
         if data.enable_validator:
             args.append("--validator=http://validator:8082")
-            args.append(f"--validator_cache={CACHE_PATH_VALIDATOR}{data_name}")
+            args.append(f"--validator_cache={CACHE_PATH_VALIDATOR}{data.validator_cache_file}")
 
         # Run task asynchroniously
         self._running_task_checker = await asyncio.create_subprocess_exec(
@@ -79,11 +79,11 @@ class CSAF_Checker():
         except Exception:
             pass
 
-    async def run(self, data: Domain_Task_Data) -> bool:
+    async def run(self, data: Domain_Task_Data, task: Domain_Task):
 
         try:
             # create subprocess, merge stderr into stdout for unified streaming
-            await self.__start_asyncio_task(data)
+            self.__start_asyncio_task(data)
             logger.info(f"Async CSAF checker task for domain {data.domain}")
 
             # Stream output lines as they come
@@ -106,15 +106,15 @@ class CSAF_Checker():
                 if self._signal_restart:
                     logger.info(f"Restart csaf checker task for domain {data.domain}")
 
-                    await self.__start_asyncio_task(data)
+                    self.__start_asyncio_task(data)
 
                     self._signal_restart = False
                     continue
 
                 # - Pause Signal
                 if self._signal_paused:
-                    max_wait_time = 100
-                    wait_time_interval = 0.2
+                    max_wait_time = PAUSE_TIME_MAX_BEFORE_RESET
+                    wait_time_interval = PAUSE_TIME_INTERVAL
 
                     logger.info(f"Pause csaf checker task for domain {data.domain}")
                     if self._running_task_checker.pid is not None:
@@ -161,36 +161,40 @@ class CSAF_Checker():
                     # Runtime Line
                     data.csaf_checker_output_runtime_log.append(decoded_line)
 
-                # FIXME
-                # Notify client socket
-
+            # Done
             returncode = await self._running_task_checker.wait()
             logger.info(f"Task done with returncode {returncode}")
 
             if returncode == 0:
-                return True
+                # Write Task
+                task.on_checker_done()
             else:
-                return False
+                task.on_error(f"CSAF Process ended with status code: {returncode}")
 
         except asyncio.CancelledError as e:
+
+            task.on_error(f"CSAF Process cancelled with error: {e}")
+
             # If the coroutine is cancelled, try to terminate the process
             try:
                 self.__terminate_asyncio_task()
             except Exception:
                 pass
-
-            # FIXME
-            # Throw Interrupt
-            logger.warn(f"Interrupted {e}")
-
-            return False
+            pass
 
         except FileNotFoundError as e:
-            # binary not found
-            logger.error(f"CSAF Checker Binary not found: {self.__csaf_checker_path()}, error: {e}")
-            return False
+            # Binary not found
+            task.on_error(f"CSAF Checker Binary not found: {self.__csaf_checker_path()}, error: {e}")
+
+            pass
 
         except Exception as e:
             # Unexpected error running the process
-            logger.error(f"CSAF Checker errror: {e}")
-            return False
+            task.on_error(f"CSAF Checker errror: {e}")
+
+            # Try to terminate the process
+            try:
+                self.__terminate_asyncio_task()
+            except Exception:
+                pass
+            pass

@@ -10,10 +10,11 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Annotated, Optional
 
+from typing import Annotated, Optional
 from pydantic import Field
 
+from ..database.database import Database_Manager
 from ..router.scan_request import ScanRequest
 from .slot import Slot
 
@@ -48,18 +49,44 @@ class Slot_Manager:
         for i in range(self.slot_amount):
             self.slots.append(Slot.create(i))
 
-    async def start_domain_task(self, request: ScanRequest) -> Slot:
+    def start_domain_task(self, request: ScanRequest) -> str:
+        """
+        Starts a domain task for the requested domain.
+        If a domain task for the requested domain has already been started or recently cached, no new domain task will be started
+
+        Started domain tasks are associated with a slot. The associated slot is blocked until the domain task is done or has been orphaned
+        Only a fixed amount of slots are available for processing at once
+
+        Returns uuid of relevant domain task.
+        """
+        # Check database cache first
+        if not request.skip_cache:
+            cached_task_data = Database_Manager().load_task_by_domain(request.domain)
+            if cached_task_data is not None:
+                logger.info(f"Found {request.domain} in cache. UUID : {cached_task_data.uuid}")
+                # Fixme: This needs to return something different than a slot to enable immediate cache return
+                return cached_task_data.uuid
+
         # Find available slot
         available_slot = self.find_first_available_slot()
         if available_slot is None:
             # Throw some kind of error
+            logger.info("No available slot found")
             return None
 
         logger.info(f"For scan request of domain {request.domain}, slot {available_slot.id} is available")
-        # Start Checker
-        await available_slot.start_domain_task(request)
 
-        return available_slot
+        # Start Checker
+        domain_task = available_slot.start_domain_task(request)
+
+        return domain_task.uuid
+
+    def get_slot_by_task_id(self, task_id: str) -> Slot:
+        for slot in self.slots:
+            if slot.running_task is not None:
+                if slot.running_task.uuid == task_id:
+                    return slot
+        return None
 
     def find_first_available_slot(self) -> Slot:
         # First check if any slot is available outright

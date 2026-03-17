@@ -3,12 +3,15 @@ from __future__ import annotations
 from typing import Annotated, Optional
 
 import redis
+
+from domain_task_data import Domain_Task_Data
 from pydantic import Field
 
 # Fields
 BLOCKLIST_CLIENT_DB_FIELD = "blocklist-client:"
 BLOCKLIST_DOMAIN_DB_FIELD = "blocklist-domain:"
-
+RECORDED_DOMAIN_TASKS = "domain-task:"
+RECORDED_DOMAIN_TASK_ID_TO_DOMAIN = "domain-task-id-to-domain:"
 
 class Redis:
     _instance: Annotated[
@@ -28,6 +31,29 @@ class Redis:
 
         # Setup Redis
         self._redis = redis.Redis(host="redis", port=6379, db=0)
+
+    # Cached Domain Tasks
+    # This links a domain tasks uuid to the persistent cache file of its data
+    def record_domain_task(self, task: Domain_Task_Data):
+        # Save task as json blob
+        json = task.model_to_dump()
+        self._redis.hset(RECORDED_DOMAIN_TASKS, task.domain_hash(), json)
+
+        # Link uuid with domain
+        self._redis.hset(RECORDED_DOMAIN_TASK_ID_TO_DOMAIN, task.uuid, task.domain_hash())
+
+    def get_domain_task_by_uuid(self, uuid: str) -> Domain_Task_Data:
+        if not self._redis.hexists(RECORDED_DOMAIN_TASK_ID_TO_DOMAIN, domain_task_id):
+            return None
+
+        return self._redis.hget(RECORDED_DOMAIN_TASK_ID_TO_DOMAIN, uuid)
+
+    def get_domain_task_by_domain_hash(self, domain_hash: str) -> Domain_Task_Data:
+        if not self._redis.hexists(RECORDED_DOMAIN_TASKS, domain_hash):
+            return None
+
+        json = self._redis.hget(RECORDED_DOMAIN_TASKS, domain_hash)
+        return Domain_Task_Data.model_validate_json(json)
 
     # Client Blocklist
 

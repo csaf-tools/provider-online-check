@@ -7,7 +7,7 @@
 
 import re
 
-from ..router.redis import Redis
+from ..database.redis import Redis
 
 # Basic domain validation pattern (same as before)
 DOMAIN_PATTERN = (

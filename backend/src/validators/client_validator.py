@@ -3,7 +3,7 @@
 
 # Involved in: 4, 19, 20, 21
 
-from ..router.redis import Redis
+from ..database.redis import Redis
 
 
 def validate_client_blocklist_check(session_id: str, domain: str) -> str:

@@ -18,6 +18,11 @@ class ScanRequest(BaseModel):
         Field(json_schema_extra={"example": "example.com"}),
     ]
 
+    skip_cache: Annotated[
+        bool,
+        Field(description="Skips cache if enabled/ guarantees to run csaf checker, even if the domain has recently been checked already")
+    ] = False
+
     @field_validator("domain")
     def _validate_domain(cls, value):
         """

@@ -5,6 +5,7 @@
 
 # Involved in: 7, 8, 9, 12
 
+import logging
 from typing import Annotated
 from pydantic import BaseModel, Field
 
@@ -12,6 +13,7 @@ from pydantic import BaseModel, Field
 from ..router.scan_request import ScanRequest
 from .domain_task import Domain_Task, Domain_Task_Status
 
+logger = logging.getLogger(__name__)
 
 class Slot(BaseModel):
     id: Annotated[
@@ -30,7 +32,7 @@ class Slot(BaseModel):
         }
         return cls(**data)
 
-    async def start_domain_task(self, request: ScanRequest) -> bool:
+    def start_domain_task(self, request: ScanRequest) -> str:
         # FIXME
         # Handle old domain task if it exists
         if self.running_task is not None:
@@ -39,10 +41,10 @@ class Slot(BaseModel):
         # Create new domain task
         self.running_task = Domain_Task.create(request.domain, request.session_id)
 
-        # Run Task
-        result = await self.running_task.begin()
+        # Run Task (in background)
+        self.running_task.run_checker()
 
-        return result
+        return self.running_task.uuid
 
     def is_available(self) -> bool:
         if self.running_task is None:

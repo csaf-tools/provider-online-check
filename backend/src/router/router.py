@@ -5,10 +5,6 @@
 # Creates client for continuous frontend communication
 # Gives slot_manager command to start threaded csaf check/validator
 
-# Involved in: 3, basically everything else too
-
-import asyncio
-import os
 from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, status
@@ -16,11 +12,20 @@ from fastapi.responses import JSONResponse
 
 from ..csaf.csaf_checker import CSAF_BINARY_PATH, CSAF_CHECKER_BINARY
 from ..slots.slot_manager import Slot_Manager
-from .redis import Redis
+from ..database.database import Database_Manager
+from ..database.redis import Redis
 from .scan_request import ScanRequest
 from .scan_response import ScanResponse, ScanResponseStatus
 
+import logging
+import asyncio
+import os
+
 router = APIRouter()
+
+
+logger = logging.getLogger(__name__)
+
 
 
 @router.get("/", summary="API root", tags=["main"])
@@ -56,9 +61,18 @@ async def start_scan(request: ScanRequest) -> Dict[str, Any]:
         HTTPException: If the scan cannot be initiated
     """
     try:
-        slot = await Slot_Manager().start_domain_task(request)
+        # ----------------- Important thoughts -----------------
+        # Starting a scan can have multiple response types:
+        #   - Domain already processed by a slotted domain task (Return UUID + Running domain task data)
+        #   - Domain not processed, but recently cached (Return UUID + Cached domain task data)
+        #   - Domain not processed, but no slots available (Return Error)
+        #   - Domain not processed and slot avaialable. (Return UUID + Running domain task data)
+        #
+        # Either start_scan should display data or redirect to get_data (in case no error has been returned)
+        # ------------------------------------------------------
+        uuid = await Slot_Manager().start_domain_task(request)
 
-        if slot is None:
+        if uuid == "":
             # No slot is available
             return {
                 "status": ScanResponseStatus.ERROR,
@@ -66,36 +80,49 @@ async def start_scan(request: ScanRequest) -> Dict[str, Any]:
                 "error": "Server is over capacity, try again later",
             }
 
-        json_result = slot.running_task.data.results_to_json()
-
         return {
             "status": ScanResponseStatus.INITIALIZED,
             "domain": request.domain,
-            "runtime_output": slot.running_task.data.csaf_checker_output_runtime_log,
-            "results_checker": json_result,
-            "slot_id": slot.id,
+            "task_id": uuid,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")
 
 
 @router.get(
-    "/scan/get/{slot_id}",
+    "/scan/get/{task_id}",
     summary="Get output of scan",
-    description="Get latest feedback of scan, either from cache or from stream",
+    description="Get latest feedback of scan, either from cache or from running task",
     tags=["scan"],
     status_code=status.HTTP_200_OK,
 )
-async def get_scan(slot_id: str, request: ScanRequest) -> Dict[str, Any]:
-    try:
-        # FIXME: Add real scan logic here
+async def get_scan(task_id: str) -> Dict[str, Any]:
+    """
+    Returns
+    """
+
+    # 1. Find slot which runs domain task
+    slot = Slot_Manager().get_slot_by_task_id(task_id)
+    if slot is not None:
+        data = slot.running_task.data
+
+    # 1. Find domain task in database cache
+    if data is None:
+        data = Database_Manager().load_task_by_id(task_id)
+
+    if data is None:
         return {
-            "status": ScanResponseStatus.ERROR,
-            "domain": request.domain,
-            "error": "Path not implemented yet",
+            "status": ScanResponseStatus.ERROR
+        }
+
+    try:
+        return {
+            "status": ScanResponseStatus.RUNNING_CHECKER,
+            "runtime_output": data.csaf_checker_output_runtime_log,
+            "results_checker": data.results_to_json(),
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get scan: {str(e)}")
 
 
 @router.get("/health", summary="Health Check", tags=["devops"])
