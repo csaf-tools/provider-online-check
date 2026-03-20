@@ -2,7 +2,7 @@
   <div id="app">
     <nav class="navbar navbar-dark bg-dark">
       <div class="container-fluid">
-        <span class="navbar-brand mb-0 h1">CSAF Provider Scan</span>
+        <span class="navbar-brand mb-0 h1">CSAF Provider Scan <span class="badge bg-warning text-dark ms-2">Beta</span></span>
       </div>
     </nav>
 
@@ -11,7 +11,7 @@
         <div class="col-md-8">
           <div class="card shadow">
             <div class="card-body">
-              <h2 class="card-title mb-4">Scan a Domain</h2>
+              <h2 class="card-title mb-4">Scan a Domain <span class="badge bg-warning ms-2" style="font-size: 0.4em; vertical-align: middle;">Experimental</span></h2>
 
               <form @submit.prevent="startScan">
                 <div class="mb-3">
@@ -75,8 +75,8 @@
             <div class="card-body">
               <h5 class="card-title">About</h5>
               <p class="card-text">
-                This tool scans domains for <a href="https://www.csaf.io" target="_blank">CSAF</a> (Common Security Advisory Framework)
-                provider metadata and check it's validity.
+                This is an experimental tool that scans domains for <a href="https://www.csaf.io" target="_blank">CSAF</a> (Common Security Advisory Framework)
+                provider metadata and checks its validity. Results may vary.
               </p>
               <p>
                 <a href="https://github.com/Intevation/csaf-provider-scan/" target="_blank">
@@ -85,11 +85,6 @@
                 <a :href="apiDocsUrl" target="_blank">
                   API Documentation
                 </a>
-              </p>
-              <p>
-                This is a project of the <a href="https://www.bsi.bund.de">German Federal Office for Information Security (BSI)</a><br />
-                Software-Engineering: <a href="https://intevation.de">Intevation GmbH</a><br />
-                Software License: Apache-2.0
               </p>
               <p v-if="footerText" v-html="footerText"></p>
             </div>
