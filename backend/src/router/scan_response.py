@@ -37,6 +37,5 @@ class ScanResponse(BaseModel):
         str, Field(description="Runtime output provided by CSAF Checker in verbose mode"),
     ] = []
     results_checker: Annotated[
-        Dict[str, Any],
         str, Field(description="Results of CSAF Checker"),
     ] = []

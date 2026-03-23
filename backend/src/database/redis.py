@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from typing import Annotated, Optional
-
-import redis
+from pydantic import Field
 
 from .domain_task_data import Domain_Task_Data
-from pydantic import Field
+
+import logging
+import redis
+
+logger = logging.getLogger(__name__)
 
 # Fields
 BLOCKLIST_CLIENT_DB_FIELD = "blocklist-client:"
@@ -38,10 +41,10 @@ class Redis_Controller:
         # Save task as json blob
         json = task.model_dump_json()
 
-        self._redis.set(RECORDED_DOMAIN_TASKS + task.domain_hash(), json)
+        self._redis.set(RECORDED_DOMAIN_TASKS + task.get_domain_hash(), json)
 
         # Link uuid with domain
-        self._redis.set(RECORDED_DOMAIN_TASK_ID_TO_DOMAIN + str(task.uuid), task.domain_hash())
+        self._redis.set(RECORDED_DOMAIN_TASK_ID_TO_DOMAIN + str(task.uuid), task.get_domain_hash())
 
     def get_domain_task_by_uuid(self, uuid: str) -> Domain_Task_Data:
         if not self._redis.exists(RECORDED_DOMAIN_TASK_ID_TO_DOMAIN + str(uuid)):

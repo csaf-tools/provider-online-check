@@ -119,7 +119,7 @@ async def get_scan(task_id: str) -> Dict[str, Any]:
         return {
             "status": ScanResponseStatus.RUNNING_CHECKER,
             "runtime_output": data.csaf_checker_output_runtime_log,
-            "results_checker": data.results_to_json(),
+            "results_checker": data.csaf_checker_output_result,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get scan: {str(e)}")

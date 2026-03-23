@@ -56,7 +56,7 @@ class Domain_Task(BaseModel):
         """
 
         # Generate validator path
-        self.data.validator_cache_file = self.data.domain_hash()
+        self.data.validator_cache_file = self.data.get_domain_hash()
 
         # Start CSAF Checker
         self.status = Domain_Task_Status.RUNNING_CHECKER

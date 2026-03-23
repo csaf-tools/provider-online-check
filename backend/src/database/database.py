@@ -7,6 +7,7 @@ from typing import Annotated, Optional
 from pydantic import Field
 
 from .redis import Redis_Controller
+from .domain_name_hash_wrapper import Domain_Name_Hash_Wrapper
 
 import logging
 import os
@@ -37,17 +38,20 @@ class Database_Manager():
         if data is not None:
             # Cached task too old?
             if int(time.time()) - data.end_time > CACHE_TIMEOUT_SECONDS:
+                logger.info(f"Cache was found for {data.domain} but outdated: {data.end_time}")
                 return None
 
-            return task.data
+            return data
         return None
 
     def load_task_by_domain(self, domain: str) -> Domain_Task_Data:
-        data = Redis_Controller().get_domain_task_by_domain_hash(domain)
+        data = Redis_Controller().get_domain_task_by_domain_hash(
+            Domain_Name_Hash_Wrapper().domain_hash(domain)
+            )
 
         return self.__evaluate_cache_time(data)
 
     def load_task_by_id(self, uuid: str) -> Domain_Task_Data:
-        data = Redis().get_domain_task_by_uuid(domain)
+        data = Redis().get_domain_task_by_uuid(uuid)
 
         return self.__evaluate_cache_time(data)

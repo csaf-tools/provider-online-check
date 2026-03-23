@@ -4,6 +4,8 @@ from typing import Annotated, Dict, Any
 from pydantic import BaseModel, Field
 from uuid import UUID, uuid4
 
+from .domain_name_hash_wrapper import Domain_Name_Hash_Wrapper
+
 import time
 import json
 import hashlib
@@ -30,10 +32,6 @@ class Domain_Task_Data(BaseModel):
         }
         return cls(**data)
 
-    def results_to_json(self) -> Dict[str, Any]:
-        return json.loads(self.csaf_checker_output_result)
-
-
-    def domain_hash(self) -> str:
-        return hashlib.sha256(self.domain.encode("utf-8")).hexdigest()
+    def get_domain_hash(self) -> str:
+        return Domain_Name_Hash_Wrapper().domain_hash(self.domain)
 
