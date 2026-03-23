@@ -64,27 +64,26 @@ class Slot_Manager:
             cached_task_data = Database_Manager().load_task_by_domain(request.domain)
             if cached_task_data is not None:
                 logger.info(f"Found {request.domain} in cache. UUID : {cached_task_data.uuid}")
-                # Fixme: This needs to return something different than a slot to enable immediate cache return
                 return cached_task_data.uuid
 
         # Find available slot
         available_slot = self.find_first_available_slot()
         if available_slot is None:
-            # Throw some kind of error
+            # FIXME: Throw some kind of error
             logger.info("No available slot found")
-            return None
+            return ""
 
         logger.info(f"For scan request of domain {request.domain}, slot {available_slot.id} is available")
 
         # Start Checker
-        domain_task = available_slot.start_domain_task(request)
+        domain_task_uuid = available_slot.start_domain_task(request)
 
-        return domain_task.uuid
+        return domain_task_uuid
 
     def get_slot_by_task_id(self, task_id: str) -> Slot:
         for slot in self.slots:
             if slot.running_task is not None:
-                if slot.running_task.uuid == task_id:
+                if slot.running_task.data.uuid == task_id:
                     return slot
         return None
 

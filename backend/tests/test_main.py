@@ -2,7 +2,7 @@ import pytest
 from main import app
 from src.router.scan_request import ScanRequest
 from fastapi.testclient import TestClient
-from ..database.redis import Redis
+from ..database.redis import Redis_Controller
 
 client = TestClient(app)
 
@@ -204,7 +204,7 @@ class TestScanStartEndpointSessionId:
 
     def test_start_scan_blocked_session(self):
         """Fails with blocked session id"""
-        Redis().block_session_id_for_domain("12", "example.com")
+        Redis_Controller().block_session_id_for_domain("12", "example.com")
         response = client.post(
             "/api/scan/start",
             json=mock_scan_request_variable_session_id("12")
@@ -215,8 +215,8 @@ class TestScanStartEndpointSessionId:
 
     def test_start_scan_unblocked_session(self):
         """Fails with unblocked session id"""
-        Redis().block_session_id_for_domain("12", "example.com")
-        Redis().unblock_session_id_for_domain("12", "example.com")
+        Redis_Controller().block_session_id_for_domain("12", "example.com")
+        Redis_Controller().unblock_session_id_for_domain("12", "example.com")
         response = client.post(
             "/api/scan/start",
             json=mock_scan_request_variable_session_id("12")

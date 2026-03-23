@@ -13,7 +13,7 @@ from fastapi.responses import JSONResponse
 from ..csaf.csaf_checker import CSAF_BINARY_PATH, CSAF_CHECKER_BINARY
 from ..slots.slot_manager import Slot_Manager
 from ..database.database import Database_Manager
-from ..database.redis import Redis
+from ..database.redis import Redis_Controller
 from .scan_request import ScanRequest
 from .scan_response import ScanResponse, ScanResponseStatus
 
@@ -64,13 +64,13 @@ async def start_scan(request: ScanRequest) -> Dict[str, Any]:
         # ----------------- Important thoughts -----------------
         # Starting a scan can have multiple response types:
         #   - Domain already processed by a slotted domain task (Return UUID + Running domain task data)
-        #   - Domain not processed, but recently cached (Return UUID + Cached domain task data)
+        #   - Domain not processed, but recently cached (Return Cached domain task data)
         #   - Domain not processed, but no slots available (Return Error)
         #   - Domain not processed and slot avaialable. (Return UUID + Running domain task data)
         #
         # Either start_scan should display data or redirect to get_data (in case no error has been returned)
         # ------------------------------------------------------
-        uuid = await Slot_Manager().start_domain_task(request)
+        uuid = Slot_Manager().start_domain_task(request)
 
         if uuid == "":
             # No slot is available
@@ -156,7 +156,7 @@ async def health_check():
     # Check Redis connectivity
     redis_available = False
     try:
-        redis_available = Redis()._redis.ping()
+        redis_available = Redis_Controller()._redis.ping()
     except Exception:
         redis_available = False
     if not redis_available:

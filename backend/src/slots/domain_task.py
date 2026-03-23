@@ -48,29 +48,35 @@ class Domain_Task(BaseModel):
         }
         return cls(**data)
 
-    def run_checker(self):
+    async def run_checker(self):
         """
-        Runs csaf checker asynchronously and stream its output
-        into self.csaf_checker_output. This method updates status and returns
-        True on successful run, False otherwise.
+        Runs csaf checker asynchronously and awaits return type
 
         Is serialized into cache on successful runs.
         """
 
         # Generate validator path
-        self.data.validator_cache_file = Database_Manager().generate_cache_name(self.data.domain)
+        self.data.validator_cache_file = self.data.domain_hash()
 
         # Start CSAF Checker
         self.status = Domain_Task_Status.RUNNING_CHECKER
 
         csaf_checker = CSAF_Checker()
-        csaf_checker.run(self.data)
+        code, err = await csaf_checker.run(self.data)
+
+
+        if code == 0:
+            self.on_checker_done()
+        elif code == 1:
+            self.on_error(err)
+        elif code == 2:
+            self.interrupt()
 
     def on_checker_done(self):
         self.data.end_time = int(time.time())
 
         # Write results to file cache
-        Database_Manager().write_task(self)
+        Database_Manager().write_task(self.data)
 
         self.status = Domain_Task_Status.DONE
 
@@ -82,8 +88,15 @@ class Domain_Task(BaseModel):
 
         logger.error(f"Domain Task Error: {string}")
 
-    # A task is considered orphaned, if each listener to this task has disconnected for a while
+    # Returns false if domain task has been interrupted or is in an erroneous state
+    def is_in_valid_state(self) -> bool:
+        if self.status == Domain_Task_Status.INTERRUPTED or self.status == Domain_Task_Status.ERROR:
+            return False
+        return True
+
+    # A domain task is considered orphaned, if each listener to this task has disconnected for a while
     def is_orphaned(self) -> bool:
+
         # Listener is considered disconnected if connection couldn't be established within this time period (in seconds)
         # disconnection_timeout_grace_period = 10
 

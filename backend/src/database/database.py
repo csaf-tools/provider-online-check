@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import Field
 
-from redis import Redis
+from .redis import Redis_Controller
 
 import logging
 import os
@@ -30,8 +30,8 @@ class Database_Manager():
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def write_task(self, task: Domain_Task):
-        Redis().record_domain_task(task)
+    def write_task(self, task: Domain_Task_Data):
+        Redis_Controller().record_domain_task(task)
 
     def __evaluate_cache_time(self, data: Domain_Task_Data) -> Domain_Task_Data:
         if data is not None:
@@ -43,11 +43,11 @@ class Database_Manager():
         return None
 
     def load_task_by_domain(self, domain: str) -> Domain_Task_Data:
-        data = Redis().get_domain_task_by_domain_hash(domain)
+        data = Redis_Controller().get_domain_task_by_domain_hash(domain)
 
-        return self.__evaluate_cache_time(domain)
+        return self.__evaluate_cache_time(data)
 
     def load_task_by_id(self, uuid: str) -> Domain_Task_Data:
         data = Redis().get_domain_task_by_uuid(domain)
 
-        return self.__evaluate_cache_time(domain)
+        return self.__evaluate_cache_time(data)

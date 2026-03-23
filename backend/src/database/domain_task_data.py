@@ -6,7 +6,7 @@ from uuid import UUID, uuid4
 
 import time
 import json
-
+import hashlib
 
 class Domain_Task_Data(BaseModel):
     uuid: Annotated[UUID, Field(description="This tasks unique identifier", default_factory=uuid4)]
@@ -34,6 +34,6 @@ class Domain_Task_Data(BaseModel):
         return json.loads(self.csaf_checker_output_result)
 
 
-    def domain_hash(self) -> string:
+    def domain_hash(self) -> str:
         return hashlib.sha256(self.domain.encode("utf-8")).hexdigest()
 

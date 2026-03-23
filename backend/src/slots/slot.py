@@ -5,13 +5,15 @@
 
 # Involved in: 7, 8, 9, 12
 
-import logging
 from typing import Annotated
 from pydantic import BaseModel, Field
 
 # from ..router.redis import get_redis
 from ..router.scan_request import ScanRequest
 from .domain_task import Domain_Task, Domain_Task_Status
+
+import asyncio
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -42,15 +44,19 @@ class Slot(BaseModel):
         self.running_task = Domain_Task.create(request.domain, request.session_id)
 
         # Run Task (in background)
-        self.running_task.run_checker()
+        asyncio.create_task(self.running_task.run_checker())
 
-        return self.running_task.uuid
+        return self.running_task.data.uuid
 
+    # Returns true if no running task exists or running task is either done, interrupted or in an erroneous state
     def is_available(self) -> bool:
         if self.running_task is None:
             return True
 
         if self.running_task.status == Domain_Task_Status.DONE:
+            return True
+
+        if not self.running_task.is_in_valid_state():
             return True
 
         return False
