@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 # Fields
 BLOCKLIST_CLIENT_DB_FIELD = "blocklist-client:"
 BLOCKLIST_DOMAIN_DB_FIELD = "blocklist-domain:"
-RECORDED_DOMAIN_TASKS = "domain-task:"
-RECORDED_DOMAIN_TASK_ID_TO_DOMAIN = "domain-task-id-to-domain:"
+RECORDED_DOMAIN_TASK_BY_DOMAIN = "domain-task:"
+RECORDED_DOMAIN_TASK_BY_UUID = "domain-task-id-to-domain:"
 
 class Redis_Controller:
     _instance: Annotated[
@@ -41,22 +41,22 @@ class Redis_Controller:
         # Save task as json blob
         json = task.model_dump_json()
 
-        self._redis.set(RECORDED_DOMAIN_TASKS + task.get_domain_hash(), json)
-
-        # Link uuid with domain
-        self._redis.set(RECORDED_DOMAIN_TASK_ID_TO_DOMAIN + str(task.uuid), task.get_domain_hash())
+        # Connect json with task uuid and hashed domain name
+        self._redis.set(RECORDED_DOMAIN_TASK_BY_DOMAIN + task.get_domain_hash(), json)
+        self._redis.set(RECORDED_DOMAIN_TASK_BY_UUID + str(task.uuid), json)
 
     def get_domain_task_by_uuid(self, uuid: str) -> Domain_Task_Data:
-        if not self._redis.exists(RECORDED_DOMAIN_TASK_ID_TO_DOMAIN + str(uuid)):
+        if not self._redis.exists(RECORDED_DOMAIN_TASK_BY_UUID + str(uuid)):
             return None
 
-        return self._redis.get(RECORDED_DOMAIN_TASK_ID_TO_DOMAIN + str(uuid))
+        json = self._redis.get(RECORDED_DOMAIN_TASK_BY_UUID + str(uuid))
+        return Domain_Task_Data.model_validate_json(json)
 
     def get_domain_task_by_domain_hash(self, domain_hash: str) -> Domain_Task_Data:
-        if not self._redis.exists(RECORDED_DOMAIN_TASKS + domain_hash):
+        if not self._redis.exists(RECORDED_DOMAIN_TASK_BY_DOMAIN + domain_hash):
             return None
 
-        json = self._redis.get(RECORDED_DOMAIN_TASKS + domain_hash)
+        json = self._redis.get(RECORDED_DOMAIN_TASK_BY_DOMAIN + domain_hash)
         return Domain_Task_Data.model_validate_json(json)
 
     # Client Blocklist

@@ -52,6 +52,6 @@ class Database_Manager():
         return self.__evaluate_cache_time(data)
 
     def load_task_by_id(self, uuid: str) -> Domain_Task_Data:
-        data = Redis().get_domain_task_by_uuid(uuid)
+        data = Redis_Controller().get_domain_task_by_uuid(uuid)
 
         return self.__evaluate_cache_time(data)
