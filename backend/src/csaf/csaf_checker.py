@@ -60,6 +60,7 @@ class CSAF_Checker():
             os.path.abspath(self.__csaf_checker_path()),
             *args,
             stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT,
             cwd=CSAF_BINARY_PATH,
             env=None,
         )

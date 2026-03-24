@@ -83,7 +83,7 @@ class Slot_Manager:
     def get_slot_by_task_id(self, task_id: str) -> Slot:
         for slot in self.slots:
             if slot.running_task is not None:
-                if slot.running_task.data.uuid == task_id:
+                if str(slot.running_task.data.uuid) == task_id:
                     return slot
         return None
 

@@ -80,22 +80,13 @@ async def start_scan(request: ScanRequest) -> Dict[str, Any]:
                 "error": "Server is over capacity, try again later",
             }
 
-        data = Database_Manager().load_task_by_id(uuid)
-
-        if data != None:
-            return {
-                "status": ScanResponseStatus.INITIALIZED,
-                "domain": request.domain,
-                "task_id": uuid,
-                "runtime_output": data.csaf_checker_output_runtime_log,
-                "results_checker": data.csaf_checker_output_result,
-            }
-        else:
-            return {
-                "status": ScanResponseStatus.INITIALIZED,
-                "domain": request.domain,
-                "task_id": uuid,
-            }
+        return {
+            "status": ScanResponseStatus.INITIALIZED,
+            "domain": request.domain,
+            "task_id": uuid,
+            "runtime_output": [f"Visit 48090/api/scan/get/{str(uuid)} to see results"],
+            "results_checker": str(uuid),
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")
 
@@ -113,8 +104,14 @@ async def get_scan(task_id: str) -> Dict[str, Any]:
     csaf checker on the associated domain
     """
 
-    # 1. Find domain task in database cache
-    data = Database_Manager().load_task_by_id(task_id)
+    # 1. Find domain task in running task
+    slot = Slot_Manager().get_slot_by_task_id(task_id)
+
+    if slot != None:
+        data = slot.running_task.data
+    else:
+        # 2. Find domain task in database cache
+        data = Database_Manager().load_task_by_id(task_id)
 
     if data is None:
         return {
