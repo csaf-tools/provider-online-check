@@ -5,27 +5,25 @@
 # Creates client for continuous frontend communication
 # Gives slot_manager command to start threaded csaf check/validator
 
+import asyncio
+import logging
+import os
 from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
 
 from ..csaf.csaf_checker import CSAF_BINARY_PATH, CSAF_CHECKER_BINARY
-from ..slots.slot_manager import Slot_Manager
 from ..database.database import Database_Manager
 from ..database.redis import Redis_Controller
+from ..slots.slot_manager import Slot_Manager
 from .scan_request import ScanRequest
 from .scan_response import ScanResponse, ScanResponseStatus
-
-import logging
-import asyncio
-import os
 
 router = APIRouter()
 
 
 logger = logging.getLogger(__name__)
-
 
 
 @router.get("/", summary="API root", tags=["main"])
@@ -107,16 +105,14 @@ async def get_scan(task_id: str) -> Dict[str, Any]:
     # 1. Find domain task in running task
     slot = Slot_Manager().get_slot_by_task_id(task_id)
 
-    if slot != None:
+    if slot is not None:
         data = slot.running_task.data
     else:
         # 2. Find domain task in database cache
         data = Database_Manager().load_task_by_id(task_id)
 
     if data is None:
-        return {
-            "status": ScanResponseStatus.ERROR
-        }
+        return {"status": ScanResponseStatus.ERROR}
 
     try:
         return {

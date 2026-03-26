@@ -1,16 +1,16 @@
-from typing import Annotated
-from pydantic import BaseModel, Field
-from enum import Enum
-
-from ..csaf.csaf_checker import CSAF_Checker
-from ..database.domain_task_data import Domain_Task_Data
-from ..database.database import Database_Manager
-
-import os
 import logging
 import time
+from enum import Enum
+from typing import Annotated
+
+from pydantic import BaseModel, Field
+
+from ..csaf.csaf_checker import CSAF_Checker
+from ..database.database import Database_Manager
+from ..database.domain_task_data import Domain_Task_Data
 
 logger = logging.getLogger(__name__)
+
 
 class Domain_Task_Status(Enum):
     UNDEFINED = 0  # No status set yet
@@ -36,7 +36,9 @@ class Domain_Task(BaseModel):
 
     data: Annotated[
         Domain_Task_Data,
-        Field(description="Data concerning this domain task. Will be saved persistently on task completion")
+        Field(
+            description="Data concerning this domain task. Will be saved persistently on task completion"
+        ),
     ] = None
 
     @classmethod
@@ -64,7 +66,6 @@ class Domain_Task(BaseModel):
         csaf_checker = CSAF_Checker()
         code, err = await csaf_checker.run(self.data)
 
-
         if code == 0:
             self.on_checker_done()
         elif code == 1:
@@ -90,13 +91,15 @@ class Domain_Task(BaseModel):
 
     # Returns false if domain task has been interrupted or is in an erroneous state
     def is_in_valid_state(self) -> bool:
-        if self.status == Domain_Task_Status.INTERRUPTED or self.status == Domain_Task_Status.ERROR:
+        # Split up to appease linters
+        if self.status == Domain_Task_Status.INTERRUPTED:
+            return False
+        if self.status == Domain_Task_Status.ERROR:
             return False
         return True
 
     # A domain task is considered orphaned, if each listener to this task has disconnected for a while
     def is_orphaned(self) -> bool:
-
         # Listener is considered disconnected if connection couldn't be established within this time period (in seconds)
         # disconnection_timeout_grace_period = 10
 

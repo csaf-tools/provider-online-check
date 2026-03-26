@@ -3,25 +3,23 @@
 # Involved in: 9, 18
 
 from __future__ import annotations
-from typing import Annotated, Optional
-from pydantic import Field
-
-from .redis import Redis_Controller
-from .domain_name_hash_wrapper import Domain_Name_Hash_Wrapper
 
 import logging
-import os
-import pickle
 import time
-import hashlib
+from typing import Annotated, Optional
+
+from pydantic import Field
 
 from ..database.domain_task_data import Domain_Task_Data
+from .domain_name_hash_wrapper import Domain_Name_Hash_Wrapper
+from .redis import Redis_Controller
 
 logger = logging.getLogger(__name__)
 
-CACHE_TIMEOUT_SECONDS=300
+CACHE_TIMEOUT_SECONDS = 300
 
-class Database_Manager():
+
+class Database_Manager:
     _instance: Annotated[
         Optional[Database_Manager], Field(description="Singleton instance")
     ] = None
@@ -38,7 +36,9 @@ class Database_Manager():
         if data is not None:
             # Cached task too old?
             if int(time.time()) - data.end_time > CACHE_TIMEOUT_SECONDS:
-                logger.info(f"Cache was found for {data.domain} but outdated: {data.end_time}")
+                logger.info(
+                    f"Cache was found for {data.domain} but outdated: {data.end_time}"
+                )
                 return None
 
             return data
@@ -47,7 +47,7 @@ class Database_Manager():
     def load_task_by_domain(self, domain: str) -> Domain_Task_Data:
         data = Redis_Controller().get_domain_task_by_domain_hash(
             Domain_Name_Hash_Wrapper().domain_hash(domain)
-            )
+        )
 
         return self.__evaluate_cache_time(data)
 

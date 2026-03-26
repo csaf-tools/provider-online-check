@@ -1,5 +1,5 @@
-
 from typing import Annotated
+
 from pydantic import BaseModel, Field, field_validator, model_validator
 from typing_extensions import Self
 
@@ -20,7 +20,9 @@ class ScanRequest(BaseModel):
 
     skip_cache: Annotated[
         bool,
-        Field(description="Skips cache if enabled/ guarantees to run csaf checker, even if the domain has recently been checked already")
+        Field(
+            description="Skips cache if enabled/ guarantees to run csaf checker, even if the domain has recently been checked already"
+        ),
     ] = False
 
     @field_validator("domain")

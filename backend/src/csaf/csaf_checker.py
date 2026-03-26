@@ -1,15 +1,13 @@
 # Interface to call, communicate with and save results of csaf checker
 
 # Involved in: 7, 8, 9
-from ..database.domain_task_data import Domain_Task_Data
-
+import asyncio
+import logging
+import os
+import signal
 from typing import Optional
 
-import asyncio
-import os
-import logging
-import signal
-import hashlib
+from ..database.domain_task_data import Domain_Task_Data
 
 logger = logging.getLogger(__name__)
 
@@ -17,11 +15,11 @@ CSAF_BINARY_PATH = "/app/bin/csaf-binary/bin-linux-amd64/"
 CSAF_CHECKER_BINARY = "csaf_checker"
 CACHE_PATH_VALIDATOR = "/app/store/validator/cache/"
 
-PAUSE_TIME_MAX_BEFORE_RESET=100
-PAUSE_TIME_INTERVAL=0.2
+PAUSE_TIME_MAX_BEFORE_RESET = 100
+PAUSE_TIME_INTERVAL = 0.2
 
-class CSAF_Checker():
 
+class CSAF_Checker:
     _signal_paused: bool = False
     _signal_stop: bool = False
     _signal_restart: bool = False
@@ -53,7 +51,9 @@ class CSAF_Checker():
 
         if data.enable_validator:
             args.append("--validator=http://validator:8082")
-            args.append(f"--validator_cache={CACHE_PATH_VALIDATOR}{data.validator_cache_file}")
+            args.append(
+                f"--validator_cache={CACHE_PATH_VALIDATOR}{data.validator_cache_file}"
+            )
 
         # Run task asynchroniously
         self._running_task_checker = await asyncio.create_subprocess_exec(
@@ -141,7 +141,10 @@ class CSAF_Checker():
 
                         if max_wait_time < 0:
                             await self.__terminate_asyncio_task()
-                            return (1, f"Error: Time Out: Domain task was paused for too long")
+                            return (
+                                1,
+                                "Error: Time Out: Domain task was paused for too long",
+                            )
 
                     # stop early in case restart or stop has been signaled while task was paused
                     if self._signal_restart or self._signal_stop:
@@ -164,10 +167,10 @@ class CSAF_Checker():
                 decoded_line = line.decode(errors="replace").rstrip("\n")
 
                 # Once a single '{' is read, it is assumed that the csaf results are printed out
-                inJSONStructure = (inJSONStructure or (decoded_line == "{"))
+                inJSONStructure = inJSONStructure or (decoded_line == "{")
                 if inJSONStructure:
                     # Result Line
-                    data.csaf_checker_output_result += (decoded_line + "\n")
+                    data.csaf_checker_output_result += decoded_line + "\n"
                 else:
                     # Runtime Line
                     data.csaf_checker_output_runtime_log.append(decoded_line)
@@ -187,12 +190,18 @@ class CSAF_Checker():
             try:
                 await self.__terminate_asyncio_task()
             except Exception as ex:
-                return (1, f"CSAF Process cancelled with error: {e}. Terminating task also failed: {ex}")
+                return (
+                    1,
+                    f"CSAF Process cancelled with error: {e}. Terminating task also failed: {ex}",
+                )
             return (1, f"CSAF Process cancelled with error: {e}")
 
         except FileNotFoundError as e:
             # Binary not found
-            return (1, f"CSAF Checker Binary not found: {self.__csaf_checker_path()}, error: {e}")
+            return (
+                1,
+                f"CSAF Checker Binary not found: {self.__csaf_checker_path()}, error: {e}",
+            )
 
         except Exception as e:
             # Unexpected error running the process
@@ -200,5 +209,8 @@ class CSAF_Checker():
             try:
                 await self.__terminate_asyncio_task()
             except Exception as ex:
-                return (1, f"CSAF Checker error: {e}. Terminating task also failed: {ex}")
+                return (
+                    1,
+                    f"CSAF Checker error: {e}. Terminating task also failed: {ex}",
+                )
             return (1, f"CSAF Checker error: {e}")

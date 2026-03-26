@@ -5,22 +5,22 @@
 
 # Involved in: 7, 8, 9, 12
 
+import asyncio
+import logging
 from typing import Annotated
+
 from pydantic import BaseModel, Field
 
 # from ..router.redis import get_redis
 from ..router.scan_request import ScanRequest
 from .domain_task import Domain_Task, Domain_Task_Status
 
-import asyncio
-import logging
-
 logger = logging.getLogger(__name__)
+
 
 class Slot(BaseModel):
     id: Annotated[
-        int,
-        Field(description="Slot identifier, mostly for debugging purposes")
+        int, Field(description="Slot identifier, mostly for debugging purposes")
     ] = 0
 
     running_task: Annotated[

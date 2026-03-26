@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+import logging
 from typing import Annotated, Optional
+
+import redis
 from pydantic import Field
 
 from .domain_task_data import Domain_Task_Data
-
-import logging
-import redis
 
 logger = logging.getLogger(__name__)
 
@@ -16,9 +16,10 @@ BLOCKLIST_DOMAIN_DB_FIELD = "blocklist-domain:"
 RECORDED_DOMAIN_TASK_BY_DOMAIN = "domain-task:"
 RECORDED_DOMAIN_TASK_BY_UUID = "domain-task-id-to-domain:"
 
+
 class Redis_Controller:
     _instance: Annotated[
-        Optional[Redis], Field(description="Singleton instance")
+        Optional[Redis_Controller], Field(description="Singleton instance")
     ] = None
 
     def __new__(cls, *args, **kwargs):

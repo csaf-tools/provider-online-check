@@ -10,8 +10,8 @@ from __future__ import annotations
 
 import logging
 import os
-
 from typing import Annotated, Optional
+
 from pydantic import Field
 
 from ..database.database import Database_Manager
@@ -63,7 +63,9 @@ class Slot_Manager:
         if not request.skip_cache:
             cached_task_data = Database_Manager().load_task_by_domain(request.domain)
             if cached_task_data is not None:
-                logger.info(f"Found {request.domain} in cache. UUID : {cached_task_data.uuid}")
+                logger.info(
+                    f"Found {request.domain} in cache. UUID : {cached_task_data.uuid}"
+                )
                 return cached_task_data.uuid
 
         # Find available slot
@@ -73,7 +75,9 @@ class Slot_Manager:
             logger.info("No available slot found")
             return ""
 
-        logger.info(f"For scan request of domain {request.domain}, slot {available_slot.id} is available")
+        logger.info(
+            f"For scan request of domain {request.domain}, slot {available_slot.id} is available"
+        )
 
         # Start Checker
         domain_task_uuid = available_slot.start_domain_task(request)
