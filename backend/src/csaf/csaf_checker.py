@@ -6,7 +6,6 @@ import logging
 import os
 import signal
 from pathlib import Path
-
 from typing import Annotated, Optional
 
 from pydantic import BaseModel, Field
