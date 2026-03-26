@@ -2,7 +2,7 @@ import pytest
 from main import app
 from src.router.scan_request import ScanRequest
 from fastapi.testclient import TestClient
-from ..database.redis import Redis_Controller
+from src.database.redis import Redis_Controller
 
 client = TestClient(app)
 
