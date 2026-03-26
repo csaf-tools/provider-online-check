@@ -5,6 +5,8 @@ import asyncio
 import logging
 import os
 import signal
+from pathlib import Path
+
 from typing import Annotated, Optional
 
 from pydantic import BaseModel, Field
@@ -79,6 +81,10 @@ class CSAF_Checker(BaseModel):
         args = ["--verbose", data.domain]
 
         if data.enable_validator:
+            # Create cache folder if it doesnt exist yet
+            cache_path = Path(CACHE_PATH_VALIDATOR)
+            cache_path.mkdir(parents=True, exist_ok=True)
+
             args.append("--validator=http://validator:8082")
             args.append(
                 f"--validator_cache={CACHE_PATH_VALIDATOR}{data.validator_cache_file}"
