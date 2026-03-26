@@ -53,5 +53,8 @@ Thumbs.db
 backend/.csaf/*
 backend/bin/*
 
+# Backend Store
+backend/store/validator/cache/*
+
 # Frontend
 frontend/.vite/*
