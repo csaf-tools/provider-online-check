@@ -54,7 +54,7 @@ backend/.csaf/*
 backend/bin/*
 
 # Backend Store
-backend/store/*
+backend/store/validator/cache/*
 
 # Frontend
 frontend/.vite/*

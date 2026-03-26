@@ -35,25 +35,22 @@ class Slot(BaseModel):
         return cls(**data)
 
     def start_domain_task(self, request: ScanRequest) -> str:
-        # FIXME
-        # Handle old domain task if it exists
+        # Stop potentially running task
         if self.running_task is not None:
-            self.running_task = None
+            self.running_task.stop_task()
 
-        # Create new domain task
+        # Create and run task in background
         self.running_task = Domain_Task.create(request.domain, request.session_id)
-
-        # Run Task (in background)
         asyncio.create_task(self.running_task.run_checker())
 
-        return self.running_task.data.uuid
+        return self.running_task.get_data(False).uuid
 
     # Returns true if no running task exists or running task is either done, interrupted or in an erroneous state
     def is_available(self) -> bool:
         if self.running_task is None:
             return True
 
-        if self.running_task.status == Domain_Task_Status.DONE:
+        if self.running_task.get_status() == Domain_Task_Status.DONE:
             return True
 
         if not self.running_task.is_in_valid_state():

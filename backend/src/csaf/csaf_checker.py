@@ -5,7 +5,9 @@ import asyncio
 import logging
 import os
 import signal
-from typing import Optional
+from typing import Annotated, Optional
+
+from pydantic import BaseModel, Field
 
 from ..database.domain_task_data import Domain_Task_Data
 
@@ -15,16 +17,43 @@ CSAF_BINARY_PATH = "/app/bin/csaf-binary/bin-linux-amd64/"
 CSAF_CHECKER_BINARY = "csaf_checker"
 CACHE_PATH_VALIDATOR = "/app/store/validator/cache/"
 
-PAUSE_TIME_MAX_BEFORE_RESET = 100
-PAUSE_TIME_INTERVAL = 0.2
 
+class CSAF_Checker(BaseModel):
+    _signal_paused: Annotated[
+        bool,
+        Field(
+            description="Setting this to true, causes the running task to be paused in the next run-iteration. Likewise, setting it to false causes the task to unpause"
+        ),
+    ] = False
+    _signal_stop: Annotated[
+        bool,
+        Field(
+            description="Setting this to true, causes the running task to be stopped in the next run-iteration"
+        ),
+    ] = False
+    _signal_restart: Annotated[
+        bool,
+        Field(
+            description="Setting this to true, causes the running task to be restarted in the next run-iteration"
+        ),
+    ] = False
 
-class CSAF_Checker:
-    _signal_paused: bool = False
-    _signal_stop: bool = False
-    _signal_restart: bool = False
+    _running_task_checker: Annotated[
+        Optional[asyncio.subprocess.Process],
+        Field(description="Asynchronious task running csaf checker"),
+    ] = None
 
-    _running_task_checker: Optional[asyncio.subprocess.Process] = None
+    _max_wait_time: Annotated[
+        int,
+        Field(
+            description="Time in seconds a task is allowed to be in a paused state before being forcefully stopped"
+        ),
+    ] = int(os.environ.get("TASK_PAUSE_TIME_MAX_BEFORE_RESET", "100"))
+
+    _wait_time_interval: Annotated[
+        float,
+        Field(description="Interval used for task sleeping while the task is paused"),
+    ] = float(os.environ.get("TASK_PAUSE_TIME_INTERVAL", "0.2"))
 
     def pause(self):
         self._signal_paused = True
@@ -107,8 +136,6 @@ class CSAF_Checker:
                 if self._signal_stop:
                     logger.info(f"Stop csaf checker task for domain {data.domain}")
                     await self.__terminate_asyncio_task()
-                    # FIXME
-                    # Add termination error
 
                     self._signal_stop = False
                     return (2, "")
@@ -124,9 +151,7 @@ class CSAF_Checker:
 
                 # - Pause Signal
                 if self._signal_paused:
-                    max_wait_time = PAUSE_TIME_MAX_BEFORE_RESET
-                    wait_time_interval = PAUSE_TIME_INTERVAL
-
+                    pause_timer = self._max_wait_time
                     logger.info(f"Pause csaf checker task for domain {data.domain}")
                     if self._running_task_checker.pid is not None:
                         try:
@@ -136,10 +161,10 @@ class CSAF_Checker:
                             return (1, f"Error: Couldn't pause domain task: {e}")
 
                     while self._pause_event.is_set():
-                        await asyncio.sleep(wait_time_interval)
-                        max_wait_time -= wait_time_interval
+                        await asyncio.sleep(self._wait_time_interval)
+                        pause_timer -= self._wait_time_interval
 
-                        if max_wait_time < 0:
+                        if pause_timer <= 0:
                             await self.__terminate_asyncio_task()
                             return (
                                 1,

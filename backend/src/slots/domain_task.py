@@ -1,7 +1,8 @@
 import logging
+import os
 import time
 from enum import Enum
-from typing import Annotated
+from typing import Annotated, Optional
 
 from pydantic import BaseModel, Field
 
@@ -27,28 +28,44 @@ class Domain_Task(BaseModel):
         Domain_Task_Status,
         Field(description="Status of the scan request"),
     ] = Domain_Task_Status.UNDEFINED
-    watching_clients: Annotated[
-        list[str],
-        Field(
-            description="List of session IDs for each client who is currently following this tasks progress"
-        ),
-    ] = Field(default_factory=list)
 
     data: Annotated[
-        Domain_Task_Data,
+        Optional[Domain_Task_Data],
         Field(
             description="Data concerning this domain task. Will be saved persistently on task completion"
         ),
     ] = None
 
+    csaf_checker: Annotated[
+        Optional[CSAF_Checker],
+        Field(description="Wrapper for asynchroniously running csaf checker task"),
+    ] = None
+
+    latest_visit: Annotated[
+        int,
+        Field(
+            description="Records the latest timestamp when a request for data has been sent to this domain task. This timestamp will be used to determine, if this domain task has been orphaned or not"
+        ),
+    ] = 0
+
+    time_before_orphaned: Annotated[
+        int,
+        Field(
+            description="Time in seconds a task can run with out active listeners before being considered orphaned"
+        ),
+    ] = int(os.environ.get("TASK_TIME_BEFORE_ORPHANED", "50"))
+
     @classmethod
     def create(cls, domain: str, session_id: str) -> "Domain_Task":
         data = {
             "data": Domain_Task_Data.create(domain),
-            "watching_clients": [session_id],
             "status": Domain_Task_Status.INITIALIZED,
+            "latest_visit": int(time.time()),
         }
         return cls(**data)
+
+    def update_visit_time(self):
+        self.latest_visit = int(time.time())
 
     async def run_checker(self):
         """
@@ -56,38 +73,89 @@ class Domain_Task(BaseModel):
 
         Is serialized into cache on successful runs.
         """
+        self.update_visit_time()
 
         # Generate validator path
-        self.data.validator_cache_file = self.data.get_domain_hash()
+        self.get_data(False).validator_cache_file = self.get_data(False).get_domain_hash()
 
         # Start CSAF Checker
         self.status = Domain_Task_Status.RUNNING_CHECKER
 
-        csaf_checker = CSAF_Checker()
-        code, err = await csaf_checker.run(self.data)
+        self.csaf_checker = CSAF_Checker()
+        code, err = await self.get_csaf_checker().run(self.get_data(False))
 
         if code == 0:
             self.on_checker_done()
         elif code == 1:
             self.on_error(err)
         elif code == 2:
-            self.interrupt()
+            self.on_interrupt()
+
+        self.csaf_checker = None
+
+    def get_csaf_checker(self) -> CSAF_Checker:
+        return self.csaf_checker
+
+    def get_data(self, internal: bool) -> Domain_Task_Data:
+        """
+        Returns data object. Also updates last visit time, if called from a non-internal process.
+        All processes are internal, except those that propapage the data back to a user via API
+        """
+        if not internal:
+            self.update_visit_time()
+
+        if self.data is None:
+            logger.info(f"no data {self.status}")
+        else:
+            logger.info(f"We got data {self.status}")
+        return self.data
+
+    def stop_task(self):
+        self.update_visit_time()
+        if self.get_csaf_checker() is None:
+            return
+
+        self.get_csaf_checker().stop()
+
+    def restart_task(self):
+        self.update_visit_time()
+        if self.get_csaf_checker() is None:
+            return
+
+        self.get_csaf_checker().restart()
+
+    def pause_task(self):
+        self.update_visit_time()
+        if self.get_csaf_checker() is None:
+            return
+
+        self.get_csaf_checker().pause()
+
+    def unpause_task(self):
+        self.update_visit_time()
+        if self.get_csaf_checker() is None:
+            return
+
+        self.get_csaf_checker().unpause()
 
     def on_checker_done(self):
-        self.data.end_time = int(time.time())
+        self.get_data(False).end_time = int(time.time())
 
         # Write results to file cache
         Database_Manager().write_task(self.data)
 
         self.status = Domain_Task_Status.DONE
 
-    def interrupt(self):
+    def on_interrupt(self):
         self.status = Domain_Task_Status.INTERRUPTED
 
     def on_error(self, string):
         self.status = Domain_Task_Status.ERROR
 
         logger.error(f"Domain Task Error: {string}")
+
+    def get_status(self) -> Domain_Task_Status:
+        return self.status
 
     # Returns false if domain task has been interrupted or is in an erroneous state
     def is_in_valid_state(self) -> bool:
@@ -98,12 +166,7 @@ class Domain_Task(BaseModel):
             return False
         return True
 
-    # A domain task is considered orphaned, if each listener to this task has disconnected for a while
+    # A domain task is considered orphaned, if the last time any request has been sent to this domain task (including getting data) has
+    # taken longer than a predefined time
     def is_orphaned(self) -> bool:
-        # Listener is considered disconnected if connection couldn't be established within this time period (in seconds)
-        # disconnection_timeout_grace_period = 10
-
-        # FIXME
-        # Check if all watching_clients are disconnected
-
-        return False
+        return int(time.time()) - self.latest_visit > self.time_before_orphaned
