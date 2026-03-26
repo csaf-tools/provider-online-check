@@ -103,11 +103,6 @@ class Domain_Task(BaseModel):
         """
         if not internal:
             self.update_visit_time()
-
-        if self.data is None:
-            logger.info(f"no data {self.status}")
-        else:
-            logger.info(f"We got data {self.status}")
         return self.data
 
     def stop_task(self):
