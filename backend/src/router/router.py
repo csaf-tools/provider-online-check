@@ -5,9 +5,8 @@
 # Creates client for continuous frontend communication
 # Gives slot_manager command to start threaded csaf check/validator
 
-# Involved in: 3, basically everything else too
-
 import asyncio
+import logging
 import os
 from typing import Any, Dict
 
@@ -15,12 +14,16 @@ from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
 
 from ..csaf.csaf_checker import CSAF_BINARY_PATH, CSAF_CHECKER_BINARY
+from ..database.database import Database_Manager
+from ..database.redis import Redis_Controller
 from ..slots.slot_manager import Slot_Manager
-from .redis import Redis
 from .scan_request import ScanRequest
 from .scan_response import ScanResponse, ScanResponseStatus
 
 router = APIRouter()
+
+
+logger = logging.getLogger(__name__)
 
 
 @router.get("/", summary="API root", tags=["main"])
@@ -56,9 +59,20 @@ async def start_scan(request: ScanRequest) -> Dict[str, Any]:
         HTTPException: If the scan cannot be initiated
     """
     try:
-        slot = await Slot_Manager().start_domain_task(request)
+        # ----------------- Important thoughts -----------------
+        # Starting a scan can have multiple response types:
+        #   - Domain already processed by a slotted domain task (Return UUID + Running domain task data)
+        #   - Domain not processed, but recently cached (Return Cached domain task data)
+        #   - Domain not processed, but no slots available (Return Error)
+        #   - Domain not processed and slot avaialable. (Return UUID + Running domain task data)
+        #
+        # Either start_scan should display data or redirect to get_data (in case no error has been returned)
+        # ------------------------------------------------------
+        uuid = Slot_Manager().start_domain_task(request)
+        status = ScanResponseStatus.ERROR
+        errorMsg = ""
 
-        if slot is None:
+        if uuid == "":
             # No slot is available
             return {
                 "status": ScanResponseStatus.ERROR,
@@ -66,41 +80,85 @@ async def start_scan(request: ScanRequest) -> Dict[str, Any]:
                 "error": "Server is over capacity, try again later",
             }
 
-        json_result = slot.running_task.data.results_to_json()
+        # 1. Find domain task in running task
+        slot = Slot_Manager().get_slot_by_task_id(str(uuid))
+
+        if slot is not None:
+            data = slot.running_task.get_data(False)
+
+            status, errorMsg = slot.getSlotStatusResponse()
+        else:
+            # 2. Find domain task in database cache
+            data = Database_Manager().load_task_by_id(uuid)
+
+            if data is not None:
+                status = ScanResponseStatus.CACHED_CHECKER
+
+        if data is None or errorMsg != "":
+            return {
+                "status": ScanResponseStatus.INITIALIZED,
+                "domain": request.domain,
+                "error": errorMsg,
+            }
 
         return {
-            "status": ScanResponseStatus.INITIALIZED,
+            "status": status,
             "domain": request.domain,
-            "runtime_output": slot.running_task.data.csaf_checker_output_runtime_log,
-            "results_checker": json_result,
-            "slot_id": slot.id,
+            "task_id": uuid,
+            "runtime_output": data.csaf_checker_output_runtime_log,
+            "results_checker": data.csaf_checker_output_result,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")
 
 
 @router.get(
-    "/scan/get/{slot_id}",
+    "/scan/get/{task_id}",
     summary="Get output of scan",
-    description="Get latest feedback of scan, either from cache or from stream",
+    description="Get latest feedback of scan, either from cache or from running task",
     tags=["scan"],
     status_code=status.HTTP_200_OK,
 )
-async def get_scan(slot_id: str, request: ScanRequest) -> Dict[str, Any]:
+async def get_scan(task_id: str) -> Dict[str, Any]:
+    """
+    Returns the current or cached output of the domain task which is running or has run
+    csaf checker on the associated domain
+    """
+
+    # 1. Find domain task in running task
+    slot = Slot_Manager().get_slot_by_task_id(task_id)
+    status = ScanResponseStatus.ERROR
+
+    if slot is not None:
+        data = slot.running_task.get_data(False)
+
+        if slot.running_task.is_paused():
+            status = ScanResponseStatus.PAUSED
+        else:
+            status = ScanResponseStatus.RUNNING_CHECKER
+    else:
+        # 2. Find domain task in database cache
+        data = Database_Manager().load_task_by_id(task_id)
+
+        if data is not None:
+            status = ScanResponseStatus.DONE_CHECKER
+
+    if data is None:
+        return {"status": status}
+
     try:
-        # FIXME: Add real scan logic here
         return {
-            "status": ScanResponseStatus.ERROR,
-            "domain": request.domain,
-            "error": "Path not implemented yet",
+            "status": status,
+            "runtime_output": data.csaf_checker_output_runtime_log,
+            "results_checker": data.csaf_checker_output_result,
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get scan: {str(e)}")
 
 
 @router.get("/health", summary="Health Check", tags=["devops"])
 async def health_check():
-    """Check fir free slots and csaf_checker binary"""
+    """Check for free slots and csaf_checker binary"""
     errors = []
 
     # Check free slots
@@ -129,7 +187,7 @@ async def health_check():
     # Check Redis connectivity
     redis_available = False
     try:
-        redis_available = Redis()._redis.ping()
+        redis_available = Redis_Controller()._redis.ping()
     except Exception:
         redis_available = False
     if not redis_available:

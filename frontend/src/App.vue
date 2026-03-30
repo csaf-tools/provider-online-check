@@ -33,17 +33,33 @@
                   :disabled="loading"
                 >
                   <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                  {{ loading ? 'Scanning...' : 'Start Scan' }}
+                  {{ result ? 'Update' : 'Start Scan' }}
                 </button>
               </form>
 
               <div v-if="result" class="mt-4">
                 <div :class="['alert', resultClass]" role="alert">
-                  <div v-if="result.status === 'ERROR'">
+                  <div v-if="result.status === 'ERROR' || result.status === 'UNDEFINED'">
                     <h5 class="alert-heading">Error</h5>
                     <p class="mb-0">{{ result.error }}</p>
                   </div>
-                  <div v-if="result.status != 'ERROR'">
+                  <div v-if="result.status === 'INITIALIZED'">
+                    <h5 class="alert-heading">Scan started. Please click Update</h5>
+                    <pre>{{ result.results_checker }}</pre>
+                  </div>
+                  <div v-if="result.status === 'RUNNING_CHECKER'">
+                    <h5 class="alert-heading">Scan Running...</h5>
+                    <pre>{{ result.results_checker }}</pre>
+                  </div>
+                  <div v-if="result.status === 'CACHED_CHECKER'">
+                    <h5 class="alert-heading">Scan found in Cache</h5>
+                    <pre>{{ result.results_checker }}</pre>
+                  </div>
+                  <div v-if="result.status === 'PAUSED'">
+                    <h5 class="alert-heading">Scan paused</h5>
+                    <pre>{{ result.results_checker }}</pre>
+                  </div>
+                  <div v-if="result.status === 'DONE_CHECKER'">
                     <h5 class="alert-heading">Scan Done</h5>
                     <pre>{{ result.results_checker }}</pre>
                   </div>

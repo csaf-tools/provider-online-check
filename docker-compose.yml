@@ -43,5 +43,16 @@ services:
       retries: 3
       start_period: 40s
 
+  validator:
+    build:
+      context: ./validator
+      target: dev
+    container_name: validator
+    ports:
+      - "${PORT_VALIDATOR:-48092}:8082"
+    restart: unless-stopped
+    depends_on:
+      - redis
+
   redis:
     image: redis:alpine

@@ -3,7 +3,7 @@
 
 # Involved in: 4, 19, 20, 21
 
-from ..router.redis import Redis
+from ..database.redis import Redis_Controller
 
 
 def validate_client_blocklist_check(session_id: str, domain: str) -> str:
@@ -21,7 +21,7 @@ def validate_client_blocklist_check(session_id: str, domain: str) -> str:
         raise ValueError("Session ID cannot be empty")
 
     # Redis blocklist check
-    if Redis().is_session_id_in_client_blocklist(session_id, domain):
+    if Redis_Controller().is_session_id_in_client_blocklist(session_id, domain):
         raise ValueError("Session ID is blocked")
 
     return session_id
