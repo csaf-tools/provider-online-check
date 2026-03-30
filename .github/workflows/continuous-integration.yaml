@@ -24,7 +24,7 @@ jobs:
       run: |
         echo "Waiting for backend health check..."
         for i in $(seq 1 60); do
-          if curl -sf http://localhost:48090/api/health > /dev/null 2>&1; then
+          if curl -f http://0.0.0.0:48090/api/health 2>&1; then
             echo "Backend is ready!"
             exit 0
           fi
@@ -33,6 +33,7 @@ jobs:
         done
         echo "Backend failed to become ready"
         docker compose logs --timestamps backend
+        docker compose ps
         exit 1
 
     - name: Run Tests
