@@ -63,10 +63,15 @@ class Slot_Manager:
         if not request.skip_cache:
             cached_task_data = Database_Manager().load_task_by_domain(request.domain)
             if cached_task_data is not None:
-                logger.info(
-                    f"Found {request.domain} in cache. UUID : {cached_task_data.uuid}"
-                )
-                return cached_task_data.uuid
+                if cached_task_data.cache_is_outdated():
+                    logger.info(
+                        f"Found {request.domain} in cache but cache is outdated. UUID : {cached_task_data.uuid}"
+                    )
+                else:
+                    logger.info(
+                        f"Found {request.domain} in cache. UUID : {cached_task_data.uuid}"
+                    )
+                    return cached_task_data.uuid
 
         # Find available slot
         available_slot = self.find_first_available_slot()

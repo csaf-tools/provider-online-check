@@ -106,7 +106,7 @@ async def get_scan(task_id: str) -> Dict[str, Any]:
     slot = Slot_Manager().get_slot_by_task_id(task_id)
 
     if slot is not None:
-        data = slot.running_task.get_data()
+        data = slot.running_task.get_data(False)
     else:
         # 2. Find domain task in database cache
         data = Database_Manager().load_task_by_id(task_id)

@@ -1,6 +1,7 @@
 # This represents a data object for a specific domain task. It contains information about the domain as well as output from csaf checker and validator
 
 import time
+import os
 from typing import Annotated
 from uuid import UUID, uuid4
 
@@ -37,6 +38,13 @@ class Domain_Task_Data(BaseModel):
         str, Field(description="Result of csaf checker")
     ] = ""
 
+    cache_lifetime: Annotated[
+        int,
+        Field(
+            description="Time in seconds in which a recorded task is considered to fresh to be rerun automatically"
+        ),
+    ] = int(os.environ.get("CACHE_TIMEOUT_SECONDS", "300"))
+
     @classmethod
     def create(cls, domain: str) -> "Domain_Task_Data":
         data = {
@@ -47,3 +55,9 @@ class Domain_Task_Data(BaseModel):
 
     def get_domain_hash(self) -> str:
         return Domain_Name_Hash_Wrapper().domain_hash(self.domain)
+
+    def cache_is_outdated(self) -> bool:
+        """
+        Used to check if this task is too old to be considered cached
+        """
+        return int(time.time()) - self.end_time > self.cache_lifetime
