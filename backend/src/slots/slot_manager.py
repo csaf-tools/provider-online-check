@@ -73,6 +73,12 @@ class Slot_Manager:
                     )
                     return cached_task_data.uuid
 
+        # Search for a running task that operates on the same domain
+        # Return that task id, if it exists (avoid working on the same domain twice)
+        slot_with_identical_running_task = self.get_slot_by_domain(request.domain)
+        if slot_with_identical_running_task is not None:
+            return slot_with_identical_running_task.running_task.get_data(False).uuid
+
         # Find available slot
         available_slot = self.find_first_available_slot()
         if available_slot is None:
@@ -93,6 +99,13 @@ class Slot_Manager:
         for slot in self.slots:
             if slot.running_task is not None:
                 if str(slot.running_task.get_data(False).uuid) == task_id:
+                    return slot
+        return None
+
+    def get_slot_by_domain(self, domain: str) -> Slot:
+        for slot in self.slots:
+            if slot.running_task is not None:
+                if str(slot.running_task.get_data(False).domain) == domain:
                     return slot
         return None
 

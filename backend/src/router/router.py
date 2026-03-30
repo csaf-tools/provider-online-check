@@ -104,19 +104,29 @@ async def get_scan(task_id: str) -> Dict[str, Any]:
 
     # 1. Find domain task in running task
     slot = Slot_Manager().get_slot_by_task_id(task_id)
+    status = ScanResponseStatus.ERROR
 
     if slot is not None:
         data = slot.running_task.get_data(False)
+
+        if slot.running_task.is_paused():
+            status = ScanResponseStatus.PAUSED
+        else:
+            status = ScanResponseStatus.RUNNING_CHECKER
     else:
         # 2. Find domain task in database cache
         data = Database_Manager().load_task_by_id(task_id)
 
+        if data is not None:
+            status = ScanResponseStatus.DONE_CHECKER
+
+
     if data is None:
-        return {"status": ScanResponseStatus.ERROR}
+        return {"status": status}
 
     try:
         return {
-            "status": ScanResponseStatus.RUNNING_CHECKER,
+            "status": status,
             "runtime_output": data.csaf_checker_output_runtime_log,
             "results_checker": data.csaf_checker_output_result,
         }

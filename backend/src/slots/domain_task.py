@@ -135,6 +135,10 @@ class Domain_Task(BaseModel):
 
         self.get_csaf_checker().unpause()
 
+    def is_paused(self) -> bool:
+        self.update_visit_time()
+        return self.get_csaf_checker()._signal_paused
+
     def on_checker_done(self):
         self.get_data(False).end_time = int(time.time())
 
