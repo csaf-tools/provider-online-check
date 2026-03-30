@@ -1,7 +1,7 @@
 # This represents a data object for a specific domain task. It contains information about the domain as well as output from csaf checker and validator
 
-import time
 import os
+import time
 from typing import Annotated
 from uuid import UUID, uuid4
 

@@ -83,7 +83,9 @@ class Slot(BaseModel):
             return ScanResponseStatus.ERROR, "Task has been stopped manually"
         elif self.running_task.get_status() == Domain_Task_Status.DONE:
             return ScanResponseStatus.DONE_CHECKER, ""
-        elif len(self.running_task.get_data(False).csaf_checker_output_runtime_log) == 0:
+        elif (
+            len(self.running_task.get_data(False).csaf_checker_output_runtime_log) == 0
+        ):
             return ScanResponseStatus.INITIALIZED, ""
 
         return ScanResponseStatus.RUNNING_CHECKER, ""

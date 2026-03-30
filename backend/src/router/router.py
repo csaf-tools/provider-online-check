@@ -94,12 +94,11 @@ async def start_scan(request: ScanRequest) -> Dict[str, Any]:
             if data is not None:
                 status = ScanResponseStatus.CACHED_CHECKER
 
-
         if data is None or errorMsg != "":
             return {
-                "status": ScanResponseStatus.UNDEFINED,
+                "status": ScanResponseStatus.INITIALIZED,
                 "domain": request.domain,
-                "error": errorMsg
+                "error": errorMsg,
             }
 
         return {
@@ -143,7 +142,6 @@ async def get_scan(task_id: str) -> Dict[str, Any]:
 
         if data is not None:
             status = ScanResponseStatus.DONE_CHECKER
-
 
     if data is None:
         return {"status": status}
