@@ -137,6 +137,9 @@ class Domain_Task(BaseModel):
 
     def is_paused(self) -> bool:
         self.update_visit_time()
+        if self.get_csaf_checker() is None:
+            return False
+
         return self.get_csaf_checker()._signal_paused
 
     def on_checker_done(self):

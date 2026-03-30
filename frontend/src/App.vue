@@ -33,7 +33,7 @@
                   :disabled="loading"
                 >
                   <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                  {{ loading ? 'Scanning...' : 'Start Scan' }}
+                  {{ result ? 'Update' : 'Start Scan' }}
                 </button>
               </form>
 
@@ -43,7 +43,11 @@
                     <h5 class="alert-heading">Error</h5>
                     <p class="mb-0">{{ result.error }}</p>
                   </div>
-                  <div v-if="result.status === 'RUNNING_CHECKER' || result.status === 'INITIALIZED'">
+                  <div v-if="result.status === 'INITIALIZED'">
+                    <h5 class="alert-heading">Scan started. Please click Update</h5>
+                    <pre>{{ result.results_checker }}</pre>
+                  </div>
+                  <div v-if="result.status === 'RUNNING_CHECKER'">
                     <h5 class="alert-heading">Scan Running...</h5>
                     <pre>{{ result.results_checker }}</pre>
                   </div>

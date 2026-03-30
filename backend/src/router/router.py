@@ -69,6 +69,8 @@ async def start_scan(request: ScanRequest) -> Dict[str, Any]:
         # Either start_scan should display data or redirect to get_data (in case no error has been returned)
         # ------------------------------------------------------
         uuid = Slot_Manager().start_domain_task(request)
+        status = ScanResponseStatus.ERROR
+        errorMsg = ""
 
         if uuid == "":
             # No slot is available
@@ -78,12 +80,34 @@ async def start_scan(request: ScanRequest) -> Dict[str, Any]:
                 "error": "Server is over capacity, try again later",
             }
 
+        # 1. Find domain task in running task
+        slot = Slot_Manager().get_slot_by_task_id(str(uuid))
+
+        if slot is not None:
+            data = slot.running_task.get_data(False)
+
+            status, errorMsg = slot.getSlotStatusResponse()
+        else:
+            # 2. Find domain task in database cache
+            data = Database_Manager().load_task_by_id(uuid)
+
+            if data is not None:
+                status = ScanResponseStatus.CACHED_CHECKER
+
+
+        if data is None or errorMsg != "":
+            return {
+                "status": ScanResponseStatus.UNDEFINED,
+                "domain": request.domain,
+                "error": errorMsg
+            }
+
         return {
-            "status": ScanResponseStatus.INITIALIZED,
+            "status": status,
             "domain": request.domain,
             "task_id": uuid,
-            "runtime_output": [f"Visit 48090/api/scan/get/{str(uuid)} to see results"],
-            "results_checker": str(uuid),
+            "runtime_output": data.csaf_checker_output_runtime_log,
+            "results_checker": data.csaf_checker_output_result,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")

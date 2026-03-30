@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 
 # from ..router.redis import get_redis
 from ..router.scan_request import ScanRequest
+from ..router.scan_response import ScanResponseStatus
 from .domain_task import Domain_Task, Domain_Task_Status
 
 logger = logging.getLogger(__name__)
@@ -68,3 +69,21 @@ class Slot(BaseModel):
             return True
 
         return False
+
+    # Translates task status to scan response status
+    # Adds appropriate error message if necessary
+    def getSlotStatusResponse(self) -> (ScanResponseStatus, str):
+        if self.running_task is None:
+            return ScanResponseStatus.UNDEFINED, "No running task found"
+        elif self.running_task.is_paused():
+            return ScanResponseStatus.PAUSED, ""
+        elif self.running_task.get_status() == Domain_Task_Status.ERROR:
+            return ScanResponseStatus.ERROR, "A backend error occured"
+        elif self.running_task.get_status() == Domain_Task_Status.INTERRUPTED:
+            return ScanResponseStatus.ERROR, "Task has been stopped manually"
+        elif self.running_task.get_status() == Domain_Task_Status.DONE:
+            return ScanResponseStatus.DONE_CHECKER, ""
+        elif len(self.running_task.get_data(False).csaf_checker_output_runtime_log) == 0:
+            return ScanResponseStatus.INITIALIZED, ""
+
+        return ScanResponseStatus.RUNNING_CHECKER, ""
