@@ -55,7 +55,7 @@ class Domain_Task(BaseModel):
         ),
     ] = int(os.environ.get("TASK_TIME_BEFORE_ORPHANED", "50"))
 
-    debug_dont_save: Annotated[
+    database_skip_cache: Annotated[
         bool,
         Field(
             description="Test debug variable. Task data will not be saved in database if this is true"
@@ -157,7 +157,7 @@ class Domain_Task(BaseModel):
         self.get_data(False).end_time = int(time.time())
 
         # Write results to file cache
-        if not self.debug_dont_save:
+        if not self.database_skip_cache:
             Database_Manager().write_task(self.data)
 
         self.status = Domain_Task_Status.DONE

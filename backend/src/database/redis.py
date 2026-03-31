@@ -63,12 +63,13 @@ class Redis_Controller:
     # Client Blocklist
 
     def is_session_id_in_client_blocklist(self, session_id: str, domain: str) -> bool:
-        return self._redis.sismember(BLOCKLIST_CLIENT_DB_FIELD + domain, session_id)
+        return self._redis.sismember(BLOCKLIST_CLIENT_DB_FIELD + domain, session_id) == 1
 
-    def block_session_id_for_domain(self, session_id: str, domain: str):
+    def block_session_id_for_domain(self, session_id: str, domain: str) -> bool:
         if self.is_session_id_in_client_blocklist(session_id, domain):
-            return
+            return False
         self._redis.sadd(BLOCKLIST_CLIENT_DB_FIELD + domain, session_id)
+        return True
 
     def unblock_session_id_for_domain(self, session_id: str, domain: str):
         self._redis.srem(BLOCKLIST_CLIENT_DB_FIELD + domain, session_id)
@@ -76,12 +77,13 @@ class Redis_Controller:
     # Domain Blocklist
 
     def is_domain_in_domain_blocklist(self, domain: str) -> bool:
-        return self._redis.sismember(BLOCKLIST_DOMAIN_DB_FIELD + domain)
+        return self._redis.sismember(BLOCKLIST_DOMAIN_DB_FIELD + domain, 1) == 1
 
-    def block_domain(self, domain: str):
+    def block_domain(self, domain: str) -> bool:
         if self.is_domain_in_domain_blocklist(domain):
-            return
-        self._redis.sadd(BLOCKLIST_DOMAIN_DB_FIELD + domain)
+            return False
+        self._redis.sadd(BLOCKLIST_DOMAIN_DB_FIELD + domain, 1)
+        return True
 
     def unblock_domain(self, domain: str):
-        self._redis.srem(BLOCKLIST_DOMAIN_DB_FIELD + domain)
+        self._redis.srem(BLOCKLIST_DOMAIN_DB_FIELD + domain, 1)
