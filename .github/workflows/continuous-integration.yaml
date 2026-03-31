@@ -24,7 +24,7 @@ jobs:
       run: |
         echo "Waiting for backend health check..."
         for i in $(seq 1 60); do
-          if curl -sf http://localhost:8000/api/health > /dev/null 2>&1; then
+          if curl -f http://localhost:48090/api/health > /dev/null 2>&1; then
             echo "Backend is ready!"
             exit 0
           fi
