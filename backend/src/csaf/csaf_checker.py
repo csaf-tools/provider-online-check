@@ -192,7 +192,7 @@ class CSAF_Checker(BaseModel):
                     if exitCode != 0:
                         break
 
-                    # stop early in case restart or stop has been signaled while task was paused
+                    # reiterate early in case restart or stop has been signaled while task was paused
                     if self._signal_restart or self._signal_stop:
                         continue
 
@@ -242,13 +242,7 @@ class CSAF_Checker(BaseModel):
 
         except asyncio.CancelledError as e:
             # If the coroutine is cancelled, try to terminate the process
-            try:
-                await self.__terminate_asyncio_task()
-            except Exception as ex:
-                return (
-                    1,
-                    f"CSAF Process cancelled with error: {e}. Terminating task also failed: {ex}",
-                )
+            await self.__terminate_asyncio_task()
             return (1, f"CSAF Process cancelled with error: {e}")
 
         except FileNotFoundError as e:
@@ -261,11 +255,5 @@ class CSAF_Checker(BaseModel):
         except Exception as e:
             # Unexpected error running the process
             # Try to terminate the process
-            try:
-                await self.__terminate_asyncio_task()
-            except Exception as ex:
-                return (
-                    1,
-                    f"CSAF Checker error: {e}. Terminating task also failed: {ex}",
-                )
+            await self.__terminate_asyncio_task()
             return (1, f"CSAF Checker error: {e}")
