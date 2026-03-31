@@ -20,10 +20,16 @@ class Domain_Task_Data(BaseModel):
         int, Field(description="Timestamp of this tasks initiziation")
     ]
     end_time: Annotated[int, Field(description="Timestamp of this tasks finish")] = 0
+
     enable_validator: Annotated[
         bool,
         Field(description="Activates csaf validator for every downloaded document"),
     ] = True
+
+    enable_validator_cache: Annotated[
+        bool,
+        Field(description="Caches validator results in file system"),
+    ] = bool(os.environ.get("VALIDATOR_CACHE_RESULTS", "1"))
 
     validator_cache_file: Annotated[
         str, Field("Path to cache file created by csaf validator")
