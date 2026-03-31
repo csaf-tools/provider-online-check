@@ -55,6 +55,13 @@ class Domain_Task(BaseModel):
         ),
     ] = int(os.environ.get("TASK_TIME_BEFORE_ORPHANED", "50"))
 
+    debug_dont_save: Annotated[
+        bool,
+        Field(
+            description="Test debug variable. Task data will not be saved in database if this is true"
+        ),
+    ] = False
+
     @classmethod
     def create(cls, domain: str, session_id: str) -> "Domain_Task":
         data = {
@@ -126,12 +133,16 @@ class Domain_Task(BaseModel):
         if self.get_csaf_checker() is None:
             return
 
+        self.status = Domain_Task_Status.PAUSED
+
         self.get_csaf_checker().pause()
 
     def unpause_task(self):
         self.update_visit_time()
         if self.get_csaf_checker() is None:
             return
+
+        self.status = Domain_Task_Status.RUNNING_CHECKER
 
         self.get_csaf_checker().unpause()
 
@@ -146,7 +157,8 @@ class Domain_Task(BaseModel):
         self.get_data(False).end_time = int(time.time())
 
         # Write results to file cache
-        Database_Manager().write_task(self.data)
+        if not self.debug_dont_save:
+            Database_Manager().write_task(self.data)
 
         self.status = Domain_Task_Status.DONE
 

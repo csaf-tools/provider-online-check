@@ -269,7 +269,7 @@ done
 
 # Variables
 CONTAINER_NAME="csfa-checker-dev"
-USED_SHELL="sh"
+USED_SHELL="bash"
 COMPOSE_FILE="./docker-compose.yml"
 
 # Remove ARGS flag from maketarget that's calling this script
