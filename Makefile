@@ -46,3 +46,11 @@ lint-shell-scripts:
 
 run-act:
 	bash dev/act/run-act.sh
+
+# Restrict network
+
+restrict-network:
+	@bash dev/restrict-network.sh
+
+persist-restrict-network:
+	netfilter-persistent save

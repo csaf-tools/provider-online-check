@@ -8,7 +8,14 @@ services:
       - "${PORT_BACKEND:-48090}:8000"
     environment:
       - SCAN_SLOTS=${SCAN_SLOTS:-10}
+      - CSAF_CHECKER_TIMEOUT=${CSAF_CHECKER_TIMEOUT:-3600}
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: ${CSAF_CHECKER_MEMORY_LIMIT:-500m}
+    networks:
+      - scanner
     depends_on:
       - redis
     healthcheck:
@@ -24,11 +31,13 @@ services:
       target: prod
       args:
         - VITE_FOOTER_TEXT=${FOOTER_TEXT:-}
-        - VITE_BACKEND_PORT=${PORT_BACKEND:-48090}
+        - VITE_BACKEND_PORT=443
     container_name: frontend
     ports:
       - "${PORT_FRONTEND:-48091}:8080"
     restart: unless-stopped
+    networks:
+      - scanner
     depends_on:
       - backend
     healthcheck:
@@ -41,8 +50,19 @@ services:
   redis:
     image: redis:alpine
     restart: unless-stopped
+    networks:
+      - scanner
     volumes:
       - redis-data:/data
 
 volumes:
   redis-data:
+
+networks:
+  scanner:
+    enable_ipv6: true
+    ipam:
+      config:
+        # these must match the source ranges in dev/restrict-network.sh
+        - subnet: 172.30.0.0/24
+        - subnet: fd00:30::/64
