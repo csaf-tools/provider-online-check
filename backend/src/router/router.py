@@ -8,6 +8,7 @@
 import asyncio
 import logging
 import os
+import requests
 from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, status
@@ -163,6 +164,16 @@ async def health_check():
         redis_available = False
     if not redis_available:
         errors.append("Redis is not available")
+    
+    # Check Validator connectivity
+    try:
+        response = requests.get("http://validator:8082")
+        
+        # 404 is the expected result
+        if response.status_code != 404:
+            errors.append(f"Validator is not available. Status Code: {response.status_code}")
+    except Exception as e:
+        errors.append(f"Validator is not available: {e}")
 
     healthy = len(errors) == 0
     response = {
