@@ -5,15 +5,24 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "npx eslint src",
+    "lint-write": "npx eslint src --fix"
   },
   "dependencies": {
-    "vue": "^3.4.0",
+    "axios": "^1.6.0",
     "bootstrap": "^5.3.0",
-    "axios": "^1.6.0"
+    "jiti": "^2.7.0",
+    "vue": "^3.4.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@vitejs/plugin-vue": "^5.0.0",
+    "eslint": "^10.3.0",
+    "eslint-plugin-vue": "^10.9.1",
+    "globals": "^17.6.0",
+    "typescript-eslint": "^8.59.2",
     "vite": "^5.0.0"
-  }
+  },
+  "type": "module"
 }
