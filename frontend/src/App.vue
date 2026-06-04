@@ -138,10 +138,10 @@
                     <pre>{{ result.results_checker }}</pre>
                   </div>
                 </div>
-                <div v-if="result.runtime_output" class="mt-4">
+                <div v-if="runtime_output" class="mt-4">
                   <div :class="['alert', resultClass]" role="alert">
                     <h5 class="alert-heading">Details</h5>
-                    <li v-for="(item, index) in result.runtime_output" :key="index">
+                    <li v-for="(item, index) in runtime_output" :key="index">
                     <p class="mb-0">{{ item }}</p>
                     </li>
                   </div>
@@ -208,6 +208,7 @@ interface AppData {
   initializedListeners: boolean;
   result: any;
   error: any;
+  runtime_output: any;
   messagesList: null | MessageData[];
   scanTime: null | string;
   passed: boolean;
@@ -239,6 +240,7 @@ export default defineComponent({
       initializedListeners: false,
       result: null,
       error: null,
+      runtime_output: null,
       messagesList: null,
       scanTime: null,
       passed: false,
@@ -344,7 +346,6 @@ export default defineComponent({
   methods: {
     async startScan() {
       this.loading = true
-      this.result = null
       this.error = null
       this.clearFields()
 
@@ -354,6 +355,7 @@ export default defineComponent({
           session_id: this.session_id
         })
         this.result = response.data
+        this.runtime_output = this.getRuntimeOutput()
         if (['DONE_CHECKER', 'CACHED_CHECKER'].includes(this.result?.status)) {
           const parsedResultsChecker = this.parseResultsChecker(this.result.results_checker)
           this.extractMessagesFromResultsChecker(parsedResultsChecker)
@@ -386,6 +388,13 @@ export default defineComponent({
       this.messagesList = null
       this.scanTime = null
       this.passed = false
+    },
+    getRuntimeOutput(): any {
+      if (this.runtime_output?.length ?? 0 > 0) {
+        const new_runtime_output = this.runtime_output.concat(this.result.runtime_output.slice(this.runtime_output.length))
+        return new_runtime_output
+      }
+      return this.result?.runtime_output
     },
     parseResultsChecker(results_checker: string): ResultCheckerData {
       return JSON.parse(results_checker)
