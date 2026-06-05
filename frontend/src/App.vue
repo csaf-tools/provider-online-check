@@ -112,7 +112,7 @@
                       <button class="btn btn-sm btn-outline-secondary" @click="downloadLog">Download</button>
                     </div>
                     <div class="card-text log-card-size overflow-scroll">
-                      <pre>{{ result?.runtime_output?.join('\n') }}</pre>
+                      <pre>{{ runtime_output?.join('\n') }}</pre>
                     </div>
                   </div>
                 </div>
@@ -351,6 +351,7 @@ export default defineComponent({
   methods: {
     async startScan() {
       this.domainRescan = null
+      this.runtime_output = null
       this.scanWork()
     },
     async scanWork() {
@@ -485,7 +486,7 @@ export default defineComponent({
     },
     copyLogToClipboard() {
       // runtime_output is a list, join it by newlines
-      this.copyToClipboard(this.result?.runtime_output?.join('\n') ?? '')
+      this.copyToClipboard(this.runtime_output?.join('\n') ?? '')
     },
     downloadJson() {
       const blob = new Blob([this.result?.results_checker ?? ''], { type: 'application/json' })
@@ -496,7 +497,7 @@ export default defineComponent({
       URL.revokeObjectURL(a.href)
     },
     downloadLog() {
-      const blob = new Blob([this.result?.runtime_output?.join('\n') ?? ''], { type: 'text/plain' })
+      const blob = new Blob([this.runtime_output?.join('\n') ?? ''], { type: 'text/plain' })
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
       a.download = `${this.domain}-log.txt`
