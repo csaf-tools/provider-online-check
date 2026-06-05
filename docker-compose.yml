@@ -4,7 +4,7 @@ services:
       context: ./backend
       target: dev
       args:
-        - CSAF_CHECKER_VERSION=${CSAF_CHECKER_VERSION:-3.5.1}
+        - CSAF_CHECKER_VERSION=${CSAF_CHECKER_VERSION:?CSAF_CHECKER_VERSION is not set}
     container_name: backend
     ports:
       - "${PORT_BACKEND:-443}:8000"
@@ -18,9 +18,8 @@ services:
       - TASK_PAUSE_TIME_MAX_BEFORE_RESET=${TASK_PAUSE_TIME_MAX_BEFORE_RESET:-100}
       - TASK_PAUSE_TIME_INTERVAL=${TASK_PAUSE_TIME_INTERVAL:-0.2}
       - TASK_TIME_BEFORE_ORPHANED=${TASK_TIME_BEFORE_ORPHANED:-50}
-      - CSAF_CHECKER_VERSION=${CSAF_CHECKER_VERSION:-3.5.1}
-      - CSAF_VALIDATOR_VERSION=${CSAF_VALIDATOR_VERSION:-2.0.25}
-      - APP_VERSION=${APP_VERSION:-1.0.0}
+      - CSAF_VALIDATOR_VERSION=${CSAF_VALIDATOR_VERSION:?CSAF_VALIDATOR_VERSION is not set}
+      - APP_VERSION=${APP_VERSION:?APP_VERSION is not set}
       - CACHE_TIMEOUT_SECONDS=${CACHE_TIMEOUT_SECONDS:-604800}
     restart: unless-stopped
     deploy:
@@ -68,10 +67,8 @@ services:
       context: ./validator
       target: dev
       args:
-      - CSAF_VALIDATOR_VERSION=${CSAF_VALIDATOR_VERSION:-2.0.25}
+      - CSAF_VALIDATOR_VERSION=${CSAF_VALIDATOR_VERSION:?CSAF_VALIDATOR_VERSION is not set}
     container_name: validator
-    environment:
-      - CSAF_VALIDATOR_VERSION=${CSAF_VALIDATOR_VERSION:-2.0.25}
     ports:
       - "${PORT_VALIDATOR:-48092}:8082"
     restart: unless-stopped

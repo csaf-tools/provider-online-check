@@ -41,7 +41,6 @@ class ScanResponse(BaseModel):
     files_checked: Annotated[
         int, Field(description="Amount of files that have been checked so far")
     ] = 0
-
     latest_file_checked: Annotated[
         str,
         Field(

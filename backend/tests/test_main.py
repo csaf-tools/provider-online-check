@@ -1,8 +1,10 @@
 import pytest
+import asyncio
 from main import app
 from src.router.scan_request import ScanRequest
 from fastapi.testclient import TestClient
 from src.database.valkey import Valkey_Controller
+from src.slots.domain_task import Domain_Task
 
 client = TestClient(app)
 
@@ -23,6 +25,24 @@ def mock_scan_request_variable_session_id(session_id: str):
         "clear_any_running": True,
     }
     return mock
+
+def mock_scan_request_variable_shortening_options(start_at, max_lines: int, prioritize_newest_lines: bool):
+    mock = {
+        "session_id": "0",
+        "domain": "example2.com",
+        "clear_any_running": True,
+        "start_at_line": start_at,
+        "max_lines": max_lines,
+        "prioritize_newest_lines": prioritize_newest_lines,
+    }
+    return mock
+
+async def scan_example_domain():
+    task = Domain_Task.create("example2.com", "0")
+    task.get_data(True).enable_validator_cache = False
+
+    await asyncio.create_task(task.run_checker())
+
 
 
 class TestInformationEndpoint:
@@ -193,7 +213,6 @@ class TestScanStartEndpointDomains:
         )
         assert response.status_code == 422
 
-
 class TestScanStartEndpointSessionId:
 
     def test_start_scan_success(self):
@@ -242,6 +261,77 @@ class TestScanStartEndpointSessionId:
         assert data["status"] == "INITIALIZED"
         assert data["domain"] == "example.com"
         assert "results_checker" in data
+
+class TestOutputOptions:
+    """Tests different output shortening options"""
+
+    @pytest.mark.asyncio
+    async def test_start_at(self):
+        await scan_example_domain()
+
+        """Different start points should result in the same output that is offset"""
+        normalResponse = client.post(
+            "/api/scan/start",
+            json=mock_scan_request_variable_shortening_options(0, 10, False)
+        )
+        normalResponseData = normalResponse.json()
+
+        offsetResponse = client.post(
+            "/api/scan/start",
+            json=mock_scan_request_variable_shortening_options(5, 10, False)
+        )
+        offsetResponseData = offsetResponse.json()
+
+        assert normalResponse.status_code == 201
+        assert offsetResponse.status_code == 201
+        assert normalResponseData["runtime_output"][5] == offsetResponseData["runtime_output"][0]
+
+    @pytest.mark.asyncio
+    async def test_prioritize_latest(self):
+        await scan_example_domain()
+
+        """Testing priotization parameter"""
+        fullResponse = client.post(
+            "/api/scan/start",
+            json=mock_scan_request_variable_shortening_options(0, 1000, True)
+        )
+        fullResponseData = fullResponse.json()
+
+        prioritizeNewestResponse = client.post(
+            "/api/scan/start",
+            json=mock_scan_request_variable_shortening_options(0, 1, True)
+        )
+        prioritizeNewestResponseData = prioritizeNewestResponse.json()
+
+        prioritizeOldestResponse = client.post(
+            "/api/scan/start",
+            json=mock_scan_request_variable_shortening_options(0, 1, False)
+        )
+        prioritizeOldestResponseData = prioritizeOldestResponse.json()
+
+        assert fullResponse.status_code == 201
+        assert prioritizeNewestResponse.status_code == 201
+        assert prioritizeOldestResponse.status_code == 201
+        assert len(fullResponseData["runtime_output"]) < 1000 ## If this fails, test another domain with shorter output
+        assert len(fullResponseData["runtime_output"]) > 0 ## If this fails, test another domain with output
+        assert fullResponseData["runtime_output"][0] == prioritizeOldestResponseData["runtime_output"][0]
+        assert fullResponseData["runtime_output"][0] != prioritizeNewestResponseData["runtime_output"][0]
+        assert prioritizeOldestResponseData["runtime_output"][0] != prioritizeNewestResponseData["runtime_output"][0]
+        assert fullResponseData["runtime_output"][len(fullResponseData["runtime_output"]) - 1] == prioritizeNewestResponseData["runtime_output"][0]
+
+    @pytest.mark.asyncio
+    async def test_max_lines(self):
+        await scan_example_domain()
+
+        """Max lines determines amount of output lines"""
+        shortResponse = client.post(
+            "/api/scan/start",
+            json=mock_scan_request_variable_shortening_options(0, 4, True)
+        )
+        shortResponseData = shortResponse.json()
+
+        assert shortResponse.status_code == 201
+        assert len(shortResponseData["runtime_output"]) == 4
 
 
 class TestDomainValidation:

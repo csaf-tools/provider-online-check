@@ -99,11 +99,27 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
                 ),
             }
 
+        # Shorten output
+        full_output = data.csaf_checker_output_runtime_log
+        displayed_output = full_output
+
+        if request.prioritize_newest_lines:
+            # Latest max_lines entries. Lower boundary clamped at start_at_line
+            lower_boundary = max(0, len(full_output) - request.max_lines)
+            if request.start_at_line > lower_boundary:
+                lower_boundary = request.start_at_line
+
+            displayed_output = full_output[lower_boundary:]  # Slicing is boundary safe
+        else:
+            # max_lines entries starting from start_at_line
+            # fmt: off
+            displayed_output = full_output[request.start_at_line:(request.start_at_line + request.max_lines)]  # Slicing is boundary safe
+
         return {
             "status": status,
             "domain": request.domain,
             "task_id": uuid,
-            "runtime_output": data.csaf_checker_output_runtime_log,
+            "runtime_output": displayed_output,
             "results_checker": data.csaf_checker_output_result,
             "files_checked": data.files_checked,
             "latest_file_checked": data.latest_file_checked,

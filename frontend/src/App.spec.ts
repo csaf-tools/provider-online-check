@@ -37,7 +37,7 @@ describe("Testing App...", () => {
             ['UNDEFINED', 'alert-danger'],
             ['DONE_CHECKER', 'alert-success'],
             ['CACHED_CHECKER', 'alert-success'],
-            ['DEFAULT', 'alert-info']                    
+            ['DEFAULT', 'alert-info']
         ]
         for (const pair of test_oracle) {
             app.vm.result = { 'status': pair[0]}
@@ -194,7 +194,7 @@ describe("Testing App...", () => {
     test("setScanTime", () => {
         const data = { passed: true, date:"2026-05-22T08:00:00", requirements: [] }
         app.vm.setScanTime(data)
-        expect(app.vm.scanTime).toBe("5/22/2026, 8:00:00 AM UTC")
+        expect(app.vm.scanTime).toBe("2026-05-22 08:00:00+00:00")
     })
     test("setPassed", () => {
         const data = { date:"2026-05-22", domains: [{ passed: true }] }

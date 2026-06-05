@@ -214,6 +214,7 @@ Docker Compose reads this file automatically.
 | `PORT_BACKEND` | `48090` | Host port for the backend API. |
 | `PORT_FRONTEND` | `48091` | Host port for the frontend. |
 | `SCAN_SLOTS` | `10` | Maximum number of concurrent scans. |
+| `VERBOSE_OUTPUT_MAX_LINES_DEFAULT` | 10 | Default value for the maximum amount of verbose runtime output displayed at once. |
 | `FOOTER_TEXT` | _empty_ | Custom HTML content appended to the footer of the frontend. |
 
 Example `.env`:

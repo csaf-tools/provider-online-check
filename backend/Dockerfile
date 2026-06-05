@@ -1,7 +1,8 @@
 # --- Shared base ---
 FROM ubuntu:22.04 AS base
 
-ARG CSAF_CHECKER_VERSION=3.5.1
+ARG CSAF_CHECKER_VERSION
+ENV CSAF_CHECKER_VERSION=${CSAF_CHECKER_VERSION}
 
 # Install Python and curl
 RUN apt-get update && \
