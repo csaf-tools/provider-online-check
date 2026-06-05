@@ -5,6 +5,7 @@ services:
       target: dev
       args:
         - CSAF_CHECKER_VERSION=${CSAF_CHECKER_VERSION:?CSAF_CHECKER_VERSION is not set}
+        - CSAF_REF=${CSAF_REF}
     container_name: backend
     ports:
       - "${PORT_BACKEND:-443}:8000"
@@ -21,6 +22,7 @@ services:
       - CSAF_VALIDATOR_VERSION=${CSAF_VALIDATOR_VERSION:?CSAF_VALIDATOR_VERSION is not set}
       - APP_VERSION=${APP_VERSION:?APP_VERSION is not set}
       - CACHE_TIMEOUT_SECONDS=${CACHE_TIMEOUT_SECONDS:-604800}
+      - CSAF_REF=${CSAF_REF}
     restart: unless-stopped
     deploy:
       resources:

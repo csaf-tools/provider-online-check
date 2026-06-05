@@ -3,14 +3,22 @@ FROM ubuntu:22.04 AS base
 
 ARG CSAF_CHECKER_VERSION
 ENV CSAF_CHECKER_VERSION=${CSAF_CHECKER_VERSION}
+ARG CSAF_REF
 
-# Install Python and curl
+# Install Python and curl; install git and upstream Go when building from source
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
     curl && \
+    if [ -n "$CSAF_REF" ]; then \
+        apt-get install -y --no-install-recommends git make && \
+        curl -fsSL https://go.dev/dl/go1.25.11.linux-amd64.tar.gz \
+            | tar -C /usr/local -xz; \
+    fi && \
     rm -rf /var/lib/apt/lists/*
+
+ENV PATH="/usr/local/go/bin:${PATH}"
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app
@@ -45,14 +53,27 @@ RUN SWAGGER_UI_VERSION=$(python3 -c "import re; from fastapi.openapi.docs import
     curl -Lf "https://cdn.jsdelivr.net/npm/swagger-ui-dist@${SWAGGER_UI_VERSION}/swagger-ui-bundle.js" -o /app/static/swagger-ui/swagger-ui-bundle.js && \
     curl -Lf "https://cdn.jsdelivr.net/npm/swagger-ui-dist@${SWAGGER_UI_VERSION}/swagger-ui.css" -o /app/static/swagger-ui/swagger-ui.css
 
-# Download csaf_checker binary
+# Download or compile csaf_checker binary
 ARG CSAF_SHA256
-WORKDIR /app/bin
-RUN curl -LO "https://github.com/gocsaf/csaf/releases/download/v${CSAF_CHECKER_VERSION}/csaf-${CSAF_CHECKER_VERSION}-gnulinux-amd64.tar.gz" && \
-    echo "${CSAF_SHA256}  csaf-${CSAF_CHECKER_VERSION}-gnulinux-amd64.tar.gz" | sha256sum -c - && \
-    tar -xzf "csaf-${CSAF_CHECKER_VERSION}-gnulinux-amd64.tar.gz" && \
-    rm "csaf-${CSAF_CHECKER_VERSION}-gnulinux-amd64.tar.gz" && \
-    mv "csaf-${CSAF_CHECKER_VERSION}-gnulinux-amd64" csaf-binary
+ARG CSAF_REF
+RUN if [ -n "$CSAF_REF" ]; then \
+        git clone https://github.com/gocsaf/csaf.git /tmp/gocsaf && \
+        git -C /tmp/gocsaf checkout "${CSAF_REF}" && \
+        cd /tmp/gocsaf && \
+        make build_linux && \
+        mkdir -p /app/bin/csaf-binary && \
+        cp -r bin-linux-amd64 /app/bin/csaf-binary/ && \
+        git rev-parse --short HEAD > /app/bin/csaf_revision && \
+        rm -rf /tmp/gocsaf; \
+    else \
+        mkdir -p /app/bin && \
+        cd /app/bin && \
+        curl -LO "https://github.com/gocsaf/csaf/releases/download/v${CSAF_CHECKER_VERSION}/csaf-${CSAF_CHECKER_VERSION}-gnulinux-amd64.tar.gz" && \
+        echo "${CSAF_SHA256}  csaf-${CSAF_CHECKER_VERSION}-gnulinux-amd64.tar.gz" | sha256sum -c - && \
+        tar -xzf "csaf-${CSAF_CHECKER_VERSION}-gnulinux-amd64.tar.gz" && \
+        rm "csaf-${CSAF_CHECKER_VERSION}-gnulinux-amd64.tar.gz" && \
+        mv "csaf-${CSAF_CHECKER_VERSION}-gnulinux-amd64" csaf-binary; \
+    fi
 WORKDIR /app
 
 COPY . .
