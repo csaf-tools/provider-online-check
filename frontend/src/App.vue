@@ -367,10 +367,11 @@ export default defineComponent({
       try {
         const response = await axios.post(`${this.backendUrl}/api/scan/start`, {
           domain: this.domainRescan,
-          session_id: this.session_id
+          session_id: this.session_id,
+          start_at_line: this.runtime_output?.length ? this.runtime_output.length : 0
         })
         this.result = response.data
-        this.runtime_output = this.getRuntimeOutput()
+        this.setRuntimeOutput()
         if (['DONE_CHECKER', 'CACHED_CHECKER'].includes(this.result?.status)) {
           const parsedResultsChecker = this.parseResultsChecker(this.result.results_checker)
           this.extractMessagesFromResultsChecker(parsedResultsChecker)
@@ -404,12 +405,12 @@ export default defineComponent({
       this.scanTime = null
       this.passed = false
     },
-    getRuntimeOutput(): any {
-      if (this.runtime_output?.length ?? 0 > 0) {
-        const new_runtime_output = this.runtime_output.concat(this.result.runtime_output.slice(this.runtime_output.length))
-        return new_runtime_output
+    setRuntimeOutput() {
+      if (this.runtime_output?.length) {
+        this.runtime_output = this.runtime_output.concat(this.result.runtime_output)
+      } else {
+        this.runtime_output = this.result?.runtime_output
       }
-      return this.result?.runtime_output
     },
     parseResultsChecker(results_checker: string): ResultCheckerData {
       return JSON.parse(results_checker)
