@@ -35,8 +35,12 @@ ENV_CSAF_PROVIDER_VERSION = "APP_VERSION"
 
 # read the revision once at startup
 CSAF_REF = os.getenv(ENV_CSAF_CHECKER_REF, "")
+CSAF_REVISION = "unknown"
 if CSAF_REF:
-    CSAF_REVISION = Path('/app/bin/csaf_revision').open().read().strip()
+    try:
+        CSAF_REVISION = Path('/app/bin/csaf_revision').read_text().strip()
+    except OSError:
+        CSAF_REVISION = CSAF_REF
 
 
 @router.post(
