@@ -61,15 +61,9 @@ RUN SWAGGER_UI_VERSION=$(python3 -c "import re; from fastapi.openapi.docs import
 # Download or compile csaf_checker binary
 ARG CSAF_SHA256
 ARG CSAF_REF
+COPY build_gocsaf.sh /usr/local/bin/
 RUN if [ -n "$CSAF_REF" ]; then \
-        git clone https://github.com/gocsaf/csaf.git /tmp/gocsaf && \
-        git -C /tmp/gocsaf checkout "${CSAF_REF}" && \
-        cd /tmp/gocsaf && \
-        make build_linux && \
-        mkdir -p /app/bin/csaf-binary && \
-        cp -r bin-linux-amd64 /app/bin/csaf-binary/ && \
-        git rev-parse --short HEAD > /app/bin/csaf_revision && \
-        rm -rf /tmp/gocsaf; \
+        /usr/local/bin/build_gocsaf.sh \
     else \
         mkdir -p /app/bin && \
         cd /app/bin && \

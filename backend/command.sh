@@ -14,17 +14,7 @@ pip install -r requirements.txt
 : "${CSAF_CHECKER_VERSION:?CSAF_CHECKER_VERSION is not set}"
 
 if [ -n "${CSAF_REF}" ]; then
-    echo "Building csaf_checker from gocsaf source at ref: ${CSAF_REF}"
-
-    rm -rf /tmp/gocsaf  # may exist from a previous container start
-    git clone https://github.com/gocsaf/csaf.git /tmp/gocsaf
-    git -C /tmp/gocsaf checkout "${CSAF_REF}"
-    (
-        cd /tmp/gocsaf || exit 1
-        make build_linux
-        git rev-parse --short HEAD > /app/bin/csaf_revision
-    ) || { echo "Error building csaf_checker from source" && exit 1; }
-    rm -rf /tmp/gocsaf
+    /app/build_gocsaf.sh
 else
     (
         mkdir -p bin

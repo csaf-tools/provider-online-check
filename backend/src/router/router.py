@@ -160,7 +160,7 @@ async def meta_info() -> InformationResponse:
 
     csaf_checker_version = os.getenv(ENV_CSAF_CHECKER_VERSION, "")
     if CSAF_REF:
-        csaf_checker_version = f"{csaf_checker_version} revision {CSAF_REVISION}"
+        csaf_checker_version = f"revision {CSAF_REVISION}"
     csaf_validator_version = os.getenv(ENV_CSAF_VALIDATOR_VERSION, "")
     csaf_provider_version = os.getenv(ENV_CSAF_PROVIDER_VERSION, "")
 
