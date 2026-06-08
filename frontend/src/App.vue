@@ -1,3 +1,10 @@
+<!--
+SPDX-FileCopyrightText: 2026 German Federal Office for Information Security (BSI) <https://www.bsi.bund.de>
+Software-Engineering: 2026 Intevation GmbH <https://intevation.de>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div id="app">
     <nav class="navbar navbar-dark bg-dark">
@@ -62,7 +69,13 @@
                   <span v-else>FAILED:</span>
                   {{ role }}
                 </h4>
-                <MessageLine v-for="item of trustedProviderMessages" :key="item.text" :text="item.text" :type="item.type"></MessageLine>
+                <MessageGroup
+                  v-for="group of groupedTrustedProviderMessages"
+                  :key="group.num"
+                  :num="group.num"
+                  :description="group.description"
+                  :messages="group.messages"
+                />
 
                 <p class="small-margin-top">
                     <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseAllMessages" role="button" aria-expanded="false" aria-controls="collapseAllMessages"
@@ -194,15 +207,22 @@
 import axios from 'axios'
 import { defineComponent } from 'vue'
 import MessageLine from './MessageLine.vue'
+import MessageGroup from './MessageGroup.vue'
 import VersionDisplay from './VersionDisplay.vue';
 
 interface ResultCheckerData {
   domains: {
-    requirements: {num: number, messages: {text: string, type: number}[]}[],
+    requirements: {num: number, description: string, messages: {text: string, type: number}[]}[],
     passed: boolean;
     role: string;
   }[];
   date: string;
+}
+
+interface RequirementGroup {
+  num: number;
+  description: string;
+  messages: { text: string; type: number }[];
 }
 
 interface AppData {
@@ -214,6 +234,7 @@ interface AppData {
   result: any;
   error: any;
   messagesList: null | MessageData[];
+  requirementGroups: RequirementGroup[];
   scanTime: null | string;
   passed: boolean;
   role: string | null;
@@ -235,7 +256,7 @@ interface MessageData {
 
 export default defineComponent({
   name: 'App',
-  components: { MessageLine, VersionDisplay },
+  components: { MessageLine, MessageGroup, VersionDisplay },
   data() {
     return {
       session_id: '1',
@@ -246,6 +267,7 @@ export default defineComponent({
       result: null,
       error: null,
       messagesList: null,
+      requirementGroups: [],
       scanTime: null,
       passed: false,
       role: null,
@@ -334,6 +356,21 @@ export default defineComponent({
       }
       return null
     },
+    groupedTrustedProviderMessages(): RequirementGroup[] {
+      const flatMessages = this.trustedProviderMessages
+      if (!flatMessages) return []
+      const groupMap = new Map<number, RequirementGroup>()
+      for (const g of this.requirementGroups) {
+        groupMap.set(g.num, { num: g.num, description: g.description, messages: [] })
+      }
+      for (const msg of flatMessages) {
+        const group = groupMap.get(msg.num)
+        if (group) {
+          group.messages.push({ text: msg.text, type: msg.type })
+        }
+      }
+      return [...groupMap.values()].filter(g => g.messages.length > 0)
+    },
     trustedProviderStatus() {
       return this.passed ? 'text-green': 'text-red'
     },
@@ -399,6 +436,7 @@ export default defineComponent({
     },
     clearFields() {
       this.messagesList = null
+      this.requirementGroups = []
       this.scanTime = null
       this.passed = false
     },
@@ -444,10 +482,13 @@ export default defineComponent({
         this.messagesList = null
       }
     },
-    extractMessages(requirements: {num: number, messages: {text: string, type: number}[]}[]) {
+    extractMessages(requirements: {num: number, description: string, messages: {text: string, type: number}[]}[]) {
       this.messagesList = []
+      this.requirementGroups = []
       for (const req of requirements) {
-        for (const msg2 of req.messages ?? []) {
+        const msgs = req.messages ?? []
+        this.requirementGroups.push({ num: req.num, description: req.description ?? '', messages: msgs })
+        for (const msg2 of msgs) {
           this.messagesList.push({type: msg2.type, text: msg2.text, num: req.num })
         }
       }
@@ -481,7 +522,7 @@ export default defineComponent({
       const blob = new Blob([this.result?.results_checker ?? ''], { type: 'application/json' })
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
-      a.download = `${this.domain}-result.json`
+      a.download = `${this.domainRescan}-result.json`
       a.click()
       URL.revokeObjectURL(a.href)
     },

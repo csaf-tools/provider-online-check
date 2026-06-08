@@ -1,3 +1,10 @@
+<!--
+SPDX-FileCopyrightText: 2026 German Federal Office for Information Security (BSI) <https://www.bsi.bund.de>
+Software-Engineering: 2026 Intevation GmbH <https://intevation.de>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
     <div class="small-bottom-margin">
         <span v-if="type === 2" :class="messageClass">ERROR</span>

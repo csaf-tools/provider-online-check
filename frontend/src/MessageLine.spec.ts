@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2026 German Federal Office for Information Security (BSI) <https://www.bsi.bund.de>
+// Software-Engineering: 2026 Intevation GmbH <https://intevation.de>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 import { beforeEach, describe, expect, test } from 'vitest'
 import { mount } from '@vue/test-utils'
 import MessageLine from './MessageLine.vue'

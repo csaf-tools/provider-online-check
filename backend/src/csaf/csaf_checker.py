@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2026 German Federal Office for Information Security (BSI) <https://www.bsi.bund.de>
+# Software-Engineering: 2026 Intevation GmbH <https://intevation.de>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Interface to call, communicate with and save results of csaf checker
 
 import asyncio
@@ -89,8 +94,8 @@ class CSAF_Checker(BaseModel):
         # Handle non-null running task
         await self.__terminate_asyncio_task()
 
-        # Write args
-        args = ["--verbose", data.domain]
+        # Write args. Everything after the `--` is not a flag but a positional argument (the scan target)
+        args = ["--verbose", "--", data.domain]
 
         if data.enable_validator:
             args.append("--validator=http://validator:8082")
