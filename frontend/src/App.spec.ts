@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2026 German Federal Office for Information Security (BSI) <https://www.bsi.bund.de>
+// Software-Engineering: 2026 Intevation GmbH <https://intevation.de>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import App from './App.vue'
@@ -185,6 +190,35 @@ describe("Testing App...", () => {
         app.vm.messagesList = null;
         expect(app.vm.trustedProviderMessages).toBe(null)
     })
+    test("groupedTrustedProviderMessages groups messages by requirement", () => {
+        app.vm.requirementGroups = [
+            { num: 1, description: 'Valid CSAF documents', messages: [] },
+            { num: 2, description: 'Filename', messages: [] },
+        ]
+        app.vm.messagesList = [
+            { text: 'msg A', type: 0, num: 1 },
+            { text: 'msg B', type: 0, num: 2 },
+            { text: 'msg C', type: 2, num: 2 },
+        ]
+        const groups = app.vm.groupedTrustedProviderMessages
+        expect(groups).toHaveLength(2)
+        expect(groups[0]).toMatchObject({ num: 1, description: 'Valid CSAF documents' })
+        expect(groups[0].messages).toHaveLength(1)
+        expect(groups[1]).toMatchObject({ num: 2, description: 'Filename' })
+        expect(groups[1].messages).toHaveLength(2)
+    })
+    test("groupedTrustedProviderMessages excludes groups with no filtered messages", () => {
+        app.vm.requirementGroups = [
+            { num: 1, description: 'Valid CSAF documents', messages: [] },
+            { num: 2, description: 'Filename', messages: [] },
+        ]
+        app.vm.messagesList = [
+            { text: 'msg A', type: 0, num: 1 },
+        ]
+        const groups = app.vm.groupedTrustedProviderMessages
+        expect(groups).toHaveLength(1)
+        expect(groups[0].num).toBe(1)
+    })
     test("trustedProviderStatus", () => {
         app.vm.passed = true
         expect(app.vm.trustedProviderStatus).toBe('text-green')
@@ -222,5 +256,22 @@ describe("Testing App...", () => {
         expect(app.vm.isShowResultOutput).toBe(false)
         expect(app.vm.isShowLogOutput).toBe(false)
         expect(app.vm.initializedListeners).toBe(true)
+    })
+    test("downloadJson triggers download with correct filename and content", async () => {
+        // mock to intercept the click event of the new a element
+        const anchor = document.createElement('a')
+        vi.spyOn(anchor, 'click').mockImplementation(() => {})
+        vi.spyOn(document, 'createElement').mockReturnValue(anchor)
+        // required to capture the output
+        vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock')
+
+        app.vm.domainRescan = 'example.com'
+        app.vm.result = { results_checker: '{"version": "3.5.1}' }
+        app.vm.downloadJson()
+
+        expect(anchor.download).toBe('example.com-result.json')
+        expect(anchor.click).toHaveBeenCalled()
+        const blob = vi.mocked(URL.createObjectURL).mock.calls[0][0] as Blob
+        expect(await blob.text()).toBe('{"version": "3.5.1}')
     })
 })
