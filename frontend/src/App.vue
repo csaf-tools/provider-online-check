@@ -110,6 +110,7 @@
                       <h5 class="me-auto log-header">Log output:</h5>
                       <button class="btn btn-sm btn-outline-secondary" @click="copyLogToClipboard">Copy to clipboard</button>
                       <button class="btn btn-sm btn-outline-secondary" @click="downloadLog">Download</button>
+                      <button class="btn btn-sm btn-outline-secondary" @click="downloadFullLog">Download full log</button>
                     </div>
                     <div class="card-text log-card-size overflow-scroll">
                       <pre>{{ result?.runtime_output?.join('\n') }}</pre>
@@ -485,10 +486,22 @@ export default defineComponent({
       URL.revokeObjectURL(a.href)
     },
     downloadLog() {
-      const blob = new Blob([this.result?.runtime_output?.join('\n') ?? ''], { type: 'text/plain' })
+      this.downloadLogHelper(this.result?.runtime_output)
+    },
+    async downloadFullLog() {
+      const response = await axios.post(`${this.backendUrl}/api/scan/start`, {
+        domain: this.domainRescan,
+        session_id: this.session_id,
+        max_lines: Number.MAX_SAFE_INTEGER
+      })
+      const fullRuntimeOutput = response.data?.runtime_output;
+      this.downloadLogHelper(fullRuntimeOutput)
+    },
+    downloadLogHelper(data: string[]) {
+      const blob = new Blob([data.join('\n') ?? ''], { type: 'text/plain' })
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
-      a.download = `${this.domain}-log.txt`
+      a.download = `${this.domainRescan}-log.txt`
       a.click()
       URL.revokeObjectURL(a.href)
     },
