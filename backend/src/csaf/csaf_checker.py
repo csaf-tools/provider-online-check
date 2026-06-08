@@ -229,7 +229,7 @@ class CSAF_Checker(BaseModel):
                 data.csaf_checker_output_result += decoded_line + "\n"
             else:
                 # Runtime Line
-                data.csaf_checker_output_runtime_log.append(decoded_line)
+                data.append_runtime_log(decoded_line)
                 # Check if log line references a file
                 if "[GET]" in decoded_line:
                     data.files_checked += 1
