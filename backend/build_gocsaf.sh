@@ -9,6 +9,7 @@ set -euo pipefail
 
 echo "Building csaf_checker from gocsaf source at ref: ${CSAF_REF}"
 
+rm -rf /tmp/gocsaf  # from a potential previous build
 git clone https://github.com/gocsaf/csaf.git /tmp/gocsaf
 git -C /tmp/gocsaf checkout "${CSAF_REF}"
 cd /tmp/gocsaf
