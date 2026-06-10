@@ -221,7 +221,7 @@ Docker Compose reads this file automatically.
 | `PORT_FRONTEND` | `48091` | Host port for the frontend. |
 | `RUNTIME_LOG_MAX_BYTES` | 500000 | Maximum total byte size of runtime log stored per scan, 0 for unlimited. |
 | `SCAN_SLOTS` | `10` | Maximum number of concurrent scans. |
-| `VERBOSE_OUTPUT_MAX_LINES_DEFAULT` | 10 | Default value for the maximum amount of verbose runtime output displayed at once. |
+| `VERBOSE_OUTPUT_MAX_LINES_DEFAULT` | 10 | Default value for the maximum amount of verbose runtime output displayed at once. Set to -1 for full logs |
 | `FOOTER_TEXT` | _empty_ | Custom HTML content appended to the footer of the frontend. |
 | `CSAF_CHECKER_VERSION` | See `.env` | Version of the [gocsaf](https://github.com/gocsaf/csaf) (`csaf_checker`) binary to use. Only used for version display when `CSAF_REF` is set. |
 | `CSAF_VALIDATOR_VERSION` | See `.env` | Version of the [csaf-validator-service](https://github.com/csaf-tools/csaf-validator-service) to use for document validation. |

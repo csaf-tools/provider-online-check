@@ -7,61 +7,61 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div id="app">
-    <nav class="navbar navbar-dark bg-dark">
-      <div class="container-fluid">
-        <span class="navbar-brand mb-0 h1">CSAF Provider Scan <span class="badge bg-warning text-dark ms-2">Beta</span></span>
-      </div>
-    </nav>
-
-    <div class="container mt-5">
+    <div class="container pt-4">
       <div class="row justify-content-center">
         <div class="col-md-12">
           <div class="card shadow">
             <div class="card-body">
-              <h2 class="card-title mb-4">Scan a Domain or PMD<span class="badge bg-warning ms-2" style="font-size: 0.4em; vertical-align: middle;">Experimental</span></h2>
+              <h2 class="card-title mb-4">CSAF Provider Check <span class="badge bg-warning text-dark ms-2">Beta</span></h2>
+
+              <p>Check a CSAF Provider's metadata and all its documents for validity.<br />
+                Learn more about CSAF (Common Security Advisory Framework) at <a href="https://csaf.io" target="_blank">csaf.io</a>.</p>
 
               <form @submit.prevent="startScan">
                 <div class="mb-3">
+                  <label for="domainInput" class="form-label">Enter a domain name or <a href="https://docs.oasis-open.org/csaf/csaf/v2.1/csaf-v2.1.html#717-requirement-7-provider-metadatajson-" title="Provider Metadata File" target="_blank">PMD</a> to start the check:</label>
                   <input
                     type="text"
                     class="form-control"
                     id="domainInput"
                     v-model="domain"
-                    placeholder="example.com"
                     required
+                    placeholder="example.com or https://example.com/.well-known/csaf/provider-metadata.json"
                   >
-                  <div class="form-text">Enter a domain to scan a CSAF provider</div>
-                  <VersionDisplay :checkerVersion="version?.csaf_checker_version"
-                                  :provider-version="version?.csaf_provider_version"
-                                  :validator-version="version?.csaf_validator_version"
-                  />
                 </div>
 
                 <button
                   type="submit"
                   class="btn btn-primary"
                 >
-                  Start Scan
+                  Start Check
                 </button>
               </form>
 
               <div class="alert alert-light mt-4" role="alert" v-show="domainRescan">
-                  {{ loading ? 'Scanning': 'Done'}} domain or PMD: {{ domainRescan }}
-                  <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                  <span v-else>✔</span>
+                  {{ loading ? 'Running check on target': 'Completed the check of'}} <code>{{ domainRescan }}</code>
+                  <span v-if="loading" class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
+                  <span v-else class="ms-2">✓</span>
               </div>
 
               <!-- display of requirements messages -->
               <div v-if="messagesList" class="alert alert-light mt-4">
-                <div v-if="result?.status === 'DONE_CHECKER'">
-                  <h3 class="alert-heading">Scan Done</h3>
-                </div>
-                <div v-else-if="result?.status === 'CACHED_CHECKER'">
-                  <h3 class="alert-heading">Scan found in cache</h3>
+                <h3 class="alert-heading d-inline">Check results</h3>
+                <button v-if="result?.status === 'CACHED_CHECKER'"
+                  class="cache-info-btn ms-2"
+                  type="button"
+                  @click="isShowCacheInfo = !isShowCacheInfo"
+                  :aria-expanded="isShowCacheInfo"
+                >Loaded cached result <span class="cache-info-circle">?</span></button>
+                <div v-if="result?.status === 'CACHED_CHECKER' && isShowCacheInfo" class="cache-info-box mt-1">
+                  This target was checked previously.
+                   To reduce load on this service and the targeted CSAF provider, recent results are cached and reused.
+                   The result below may not reflect the current state of the provider.
+                   For up-to-date results, you can <a href="https://github.com/csaf-tools/provider-online-check/" target="_blank">run your own instance</a> of this service or use the <a href="https://github.com/gocsaf/csaf/blob/main/docs/csaf_checker.md" target="_blank">csaf_checker</a> command-line tool directly.
                 </div>
 
                 <div v-show="scanTime">
-                  Scan Time: {{ scanTime }}
+                  Start time of the check: {{ scanTime }}
                 </div>
 
                 <h4 :class="trustedProviderStatus" class="small-margin-top medium-font-size">
@@ -140,17 +140,17 @@ SPDX-License-Identifier: Apache-2.0
                     <p class="mb-0">{{ result.error }}</p>
                   </div>
                   <div v-if="result.status === 'INITIALIZED'">
-                    <h5 class="alert-heading">Scan started...</h5>
+                    <h5 class="alert-heading">Check started...</h5>
                     <pre>{{ result.results_checker }}</pre>
                   </div>
                   <div v-if="result.status === 'RUNNING_CHECKER'">
-                    <h5 class="alert-heading">Scan Running...</h5>
-                    <h6 class="alert-heading">Files scanned - {{ result.files_checked }}</h6>
-                    <h6 class="alert-heading">Latest file scanned - {{ result.latest_file_checked }}</h6>
+                    <h5 class="alert-heading">Check running...</h5>
+                    <h6 class="alert-heading">Files checked: {{ result.files_checked }}</h6>
+                    <h6 class="alert-heading">Latest file checked: {{ result.latest_file_checked }}</h6>
                     <pre>{{ result.results_checker }}</pre>
                   </div>
                   <div v-if="result.status === 'PAUSED'">
-                    <h5 class="alert-heading">Scan paused</h5>
+                    <h5 class="alert-heading">Check paused</h5>
                     <pre>{{ result.results_checker }}</pre>
                   </div>
                 </div>
@@ -175,14 +175,14 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </div>
 
-      <div class="row justify-content-center mt-4">
+      <div class="row justify-content-center mt-4 pb-4">
         <div class="col-md-12">
           <div class="card">
             <div class="card-body">
               <h5 class="card-title">About</h5>
               <p class="card-text">
-                This is an experimental tool that scans domains for <a href="https://www.csaf.io" target="_blank">CSAF</a> (Common Security Advisory Framework)
-                provider metadata and checks its validity. Results may vary.
+                This is an experimental tool that checks a CSAF provider's metadata and documents for validity.
+                It uses <a href="https://github.com/gocsaf/csaf/blob/main/docs/csaf_checker.md"><code>csaf_checker</code></a> of the gocsaf toolsuite under the hood.
               </p>
               <p>
                 <a href="https://github.com/csaf-tools/provider-online-check/" target="_blank">
@@ -194,6 +194,10 @@ SPDX-License-Identifier: Apache-2.0
                 </a>
               </p>
               <p v-if="footerText" v-html="footerText"></p>
+              <VersionDisplay :checkerVersion="version?.csaf_checker_version"
+                                  :provider-version="version?.csaf_provider_version"
+                                  :validator-version="version?.csaf_validator_version"
+                />
             </div>
           </div>
         </div>
@@ -240,6 +244,7 @@ interface AppData {
   isShowAllMessages: boolean;
   isShowResultOutput: boolean;
   isShowLogOutput: boolean;
+  isShowCacheInfo: boolean;
   version: {
     csaf_checker_version: string;
     csaf_validator_version: string;
@@ -273,7 +278,8 @@ export default defineComponent({
       version: null,
       isShowAllMessages: false,
       isShowResultOutput: false,
-      isShowLogOutput: false
+      isShowLogOutput: false,
+      isShowCacheInfo: false,
     } as AppData
   },
   async mounted() {
@@ -405,6 +411,9 @@ export default defineComponent({
           session_id: this.session_id
         })
         this.result = response.data
+        if (this.result?.domain) {
+          this.domainRescan = this.result.domain
+        }
         if (['DONE_CHECKER', 'CACHED_CHECKER'].includes(this.result?.status)) {
           const parsedResultsChecker = this.parseResultsChecker(this.result.results_checker)
           this.extractMessagesFromResultsChecker(parsedResultsChecker)
@@ -438,6 +447,7 @@ export default defineComponent({
       this.requirementGroups = []
       this.scanTime = null
       this.passed = false
+      this.isShowCacheInfo = false
     },
     parseResultsChecker(results_checker: string): ResultCheckerData {
       return JSON.parse(results_checker)
@@ -541,10 +551,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
-#app {
-  min-height: 100vh;
-  background-color: #f8f9fa;
-}
+  #app {
+    background-color: #f1f1f1;
+    min-height: 100vh;
+  }
 .text-green {
   color: var(--bs-success);
 }
@@ -553,6 +563,35 @@ export default defineComponent({
 }
 .small-margin-top {
   margin-top: 15px;
+}
+.cache-info-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8rem;
+  color: var(--bs-secondary);
+  cursor: pointer;
+  vertical-align: middle;
+}
+.cache-info-btn:hover {
+  color: var(--bs-primary);
+}
+.cache-info-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2ex;
+  height: 2ex;
+  border-radius: 1ex;
+  border: thin solid;
+  font-size: 0.8rem;
+  vertical-align: middle;
+}
+.cache-info-box {
+  font-size: 0.875rem;
+  color: var(--bs-secondary);
+  border-left: 3px solid var(--bs-secondary);
+  padding-left: 0.75rem;
 }
 .log-header {
   margin-top: 7px;

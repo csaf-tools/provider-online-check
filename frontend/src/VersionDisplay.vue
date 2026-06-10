@@ -6,7 +6,11 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-    <div class="version">Provider {{ providerVersion }} Checker {{ checkerVersion }} Validator {{ validatorVersion }}</div>
+    <small class="text-muted version">
+        Version Information: CSAF Provider Online Check {{ providerVersion }} •
+        <a href="https://github.com/gocsaf/csaf/releases/" target="_blank">CSAF Checker</a> {{ checkerVersion }} •
+        <a href="https://github.com/secvisogram/csaf-validator-service" target="_blank">Secvisogram Validator</a> {{ validatorVersion }}
+    </small>
 </template>
 
 <script lang="ts">
@@ -22,8 +26,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.version {
-    color: var(--bs-secondary-color);
-    font-size: 0.75em;
+.version a {
+    color: inherit;
 }
 </style>

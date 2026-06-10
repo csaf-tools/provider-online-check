@@ -17,8 +17,10 @@ SPDX-License-Identifier: Apache-2.0
         v-if="messages.length > COLLAPSE_THRESHOLD"
         class="toggle-btn ms-2"
         @click="expanded ? collapse() : expand()"
-      >{{ expanded ? '▲ collapse' : '▼ show all' }}</button>
-      <span v-if="expanding" class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
+      >
+        <span v-if="expanding" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+        {{ expanding ? (expanded ? 'collapse' : 'show all ' + messages.length + ' messages') : (expanded ? '▼ collapse' : '▶ show all ' + messages.length + ' messages') }}
+      </button>
     </div>
     <div class="message-group-body">
       <MessageLine
@@ -27,9 +29,10 @@ SPDX-License-Identifier: Apache-2.0
         :text="msg.text"
         :type="msg.type"
       />
-      <div v-if="!expanded && messages.length > COLLAPSE_THRESHOLD" class="show-more-hint text-muted">
+      <div v-if="messages.length > COLLAPSE_THRESHOLD" class="show-more-hint text-muted">
         <span v-if="expanding" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-        <span v-else role="button" @click="expand" class="toggle-btn">{{ messages.length - COLLAPSE_THRESHOLD }} more message{{ messages.length - COLLAPSE_THRESHOLD !== 1 ? 's' : '' }}</span>
+        <span v-if="!expanded && !expanding" role="button" @click="expand" class="toggle-btn">...</span>
+        <span v-if="expanded && !expanding" role="button" @click="collapse" class="toggle-btn">collapse</span>
       </div>
     </div>
   </div>

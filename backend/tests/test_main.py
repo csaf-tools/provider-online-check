@@ -338,6 +338,27 @@ class TestOutputOptions:
         assert shortResponse.status_code == 201
         assert len(shortResponseData["runtime_output"]) == 4
 
+    @pytest.mark.asyncio
+    async def test_max_lines_maximum(self):
+        await scan_example_domain()
+
+        """Max lines set to -1 should output all lines. Tests whether -1 is functionally the same as using max possible lines"""
+        minusOneResponse = client.post(
+            "/api/scan/start",
+            json=mock_scan_request_variable_shortening_options(0, -1, True)
+        )
+        minusOneData = minusOneResponse.json()
+
+        maxLinesResponse = client.post(
+            "/api/scan/start",
+            json=mock_scan_request_variable_shortening_options(0, 2147483647, True)
+        )
+        maxLinesData = maxLinesResponse.json()
+
+        assert minusOneResponse.status_code == 201
+        assert maxLinesResponse.status_code == 201
+        assert len(maxLinesData["runtime_output"]) == len(minusOneData["runtime_output"])
+
 
 class TestDomainValidation:
     """Tests for domain validation logic"""
@@ -366,6 +387,16 @@ class TestDomainValidation:
         """validation rejects invalid domain format"""
         with pytest.raises(ValueError, match="Invalid domain/PMD format. Please enter a valid Domain or PMD URL. Domains require a non-zero length extension. PMDs must start with 'https://' and end with '/provider-metadata.json'"):
             ScanRequest(domain="not a valid domain")
+
+    def test_validate_pmd_url_normalizes_hostname_only(self):
+        """validation lowercases PMD hostname but preserves path case"""
+        request = ScanRequest(session_id="0", domain="HTTPS://Example.COM/CSAF/provider-metadata.json")
+        assert request.domain == "https://example.com/CSAF/provider-metadata.json"
+
+    def test_validate_pmd_url_normalizes_idn_hostname(self):
+        """validation converts IDN hostname in PMD to Punycode"""
+        request = ScanRequest(session_id="0", domain="https://püñi.example/strange/path/provider-metadata.json")
+        assert request.domain == "https://xn--pi-zja7b.example/strange/path/provider-metadata.json"
 
 
 class TestOpenAPIDocumentation:

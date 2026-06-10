@@ -32,7 +32,8 @@ describe('MessageGroup', () => {
             props: { num: 1, description: 'Test', messages: makeMessages(10) },
         })
         expect(wrapper.findAllComponents(MessageLine)).toHaveLength(5)
-        expect(wrapper.text()).toContain('5 more messages')
+        expect(wrapper.text()).toContain('show all 10 messages')
+        expect(wrapper.text()).toContain('...')
 
         await wrapper.find('.toggle-btn').trigger('click')
         // flush timers, then wait for Vue to re-render

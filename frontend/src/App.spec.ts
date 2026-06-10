@@ -82,23 +82,26 @@ describe("Testing App...", () => {
         expect(app.vm.result?.status).toBe('RUNNING')
     })
     test('startScan CACHED_CHECKER', async () => {
+        app.vm.domain = "EXAMPLE.com"
         vi.spyOn(axios, 'post').mockImplementation(
             () => new Promise(resolve =>
             {
                 return resolve({
                     data: {
                         status: "CACHED_CHECKER",
+                        domain: "example.com",
                         results_checker: '{ "domains": [{ "requirements": [{ "messages": [{ "text": "Test1", "type": 0 }], "num": 12 }] }] }'
                     }
                 }
             )}
         ))
-        app.vm.domain = "Test"
         app.vm.startScan()
+        expect(app.vm.domainRescan).toBe('EXAMPLE.com')
         await flushPromises()
         expect(app.vm.loading).toBe(false)
         expect(app.vm.result?.status).toBe('CACHED_CHECKER')
         expect(app.vm.messagesList).toStrictEqual([{text: 'Test1', type: 0, num: 12}])
+        expect(app.vm.domainRescan).toBe('example.com')
 
     })
     test('startScan ERROR', async () => {

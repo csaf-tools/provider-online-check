@@ -118,10 +118,13 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
         # Shorten output
         full_output = data.csaf_checker_output_runtime_log
         displayed_output = full_output
+        used_max_lines = request.max_lines
+        if used_max_lines == -1:
+            used_max_lines = len(full_output)  # Full logs
 
         if request.prioritize_newest_lines:
             # Latest max_lines entries. Lower boundary clamped at start_at_line
-            lower_boundary = max(0, len(full_output) - request.max_lines)
+            lower_boundary = max(0, len(full_output) - used_max_lines)
             if request.start_at_line > lower_boundary:
                 lower_boundary = request.start_at_line
 
@@ -129,7 +132,7 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
         else:
             # max_lines entries starting from start_at_line
             # fmt: off
-            displayed_output = full_output[request.start_at_line:(request.start_at_line + request.max_lines)]  # Slicing is boundary safe
+            displayed_output = full_output[request.start_at_line:(request.start_at_line + used_max_lines)]  # Slicing is boundary safe
 
         return {
             "status": status,
