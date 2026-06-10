@@ -154,9 +154,9 @@ SPDX-License-Identifier: Apache-2.0
                 <div v-if="result.runtime_output" class="mt-4">
                   <div :class="['alert', resultClass]" role="alert">
                     <h5 class="alert-heading">Details</h5>
-                    <li v-for="(item, index) in result.runtime_output" :key="index">
-                    <p class="mb-0">{{ item }}</p>
-                    </li>
+                    <ul>
+                      <li v-for="(item, index) in result.runtime_output" :key="index">{{ item }}</li>
+                    </ul>
                   </div>
                 </div>
               </div>
