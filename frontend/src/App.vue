@@ -125,7 +125,7 @@ SPDX-License-Identifier: Apache-2.0
                       <button class="btn btn-sm btn-outline-secondary" @click="downloadLog">Download</button>
                     </div>
                     <div class="card-text log-card-size overflow-scroll">
-                      <pre>{{ result?.runtime_output?.join('\n') }}</pre>
+                      <pre>{{ runtime_output?.join('\n') }}</pre>
                     </div>
                   </div>
                 </div>
@@ -231,6 +231,7 @@ interface AppData {
   domainRescan: string | null;
   loading: boolean;
   result: any;
+  runtime_output: string[] | null;
   error: any;
   messagesList: null | MessageData[];
   requirementGroups: RequirementGroup[];
@@ -264,6 +265,7 @@ export default defineComponent({
       domainRescan: null,
       loading: false,
       result: null,
+      runtime_output: null,
       error: null,
       messagesList: null,
       requirementGroups: [],
@@ -418,6 +420,7 @@ export default defineComponent({
           setTimeout(() => {
             this.initializeListeners()
           })
+          this.loadLog()
         } else {
           this.clearFields()
         }
@@ -514,13 +517,21 @@ export default defineComponent({
         document.body.removeChild(el)
       }
     },
+    async loadLog() {
+        const response = await axios.post(`${this.backendUrl}/api/scan/start`, {
+          domain: this.domainRescan,
+          session_id: this.session_id,
+          max_lines: -1
+        })
+        this.runtime_output = response.data.runtime_output
+    },
     copyResultToClipboard() {
       // results_checker is a string (not a JSON object), pass it directly
       this.copyToClipboard(this.result?.results_checker ?? '')
     },
     copyLogToClipboard() {
       // runtime_output is a list, join it by newlines
-      this.copyToClipboard(this.result?.runtime_output?.join('\n') ?? '')
+      this.copyToClipboard(this.runtime_output?.join('\n') ?? '')
     },
     downloadJson() {
       const blob = new Blob([this.result?.results_checker ?? ''], { type: 'application/json' })
@@ -531,7 +542,7 @@ export default defineComponent({
       URL.revokeObjectURL(a.href)
     },
     downloadLog() {
-      const blob = new Blob([this.result?.runtime_output?.join('\n') ?? ''], { type: 'text/plain' })
+      const blob = new Blob([this.runtime_output?.join('\n') ?? ''], { type: 'text/plain' })
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
       a.download = `${this.domainRescan}-log.txt`
