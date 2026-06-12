@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
               <p>Check a CSAF Provider's metadata and all its documents for validity.<br />
                 Learn more about CSAF (Common Security Advisory Framework) at <a href="https://csaf.io" target="_blank">csaf.io</a>.</p>
 
-              <form @submit.prevent="startScan">
+              <form @submit.prevent="startScan" v-if="allowInput">
                 <div class="mb-3">
                   <label for="domainInput" class="form-label">Enter a domain name or <a href="https://docs.oasis-open.org/csaf/csaf/v2.1/csaf-v2.1.html#717-requirement-7-provider-metadatajson-" title="Provider Metadata File" target="_blank">PMD</a> to start the check:</label>
                   <input
@@ -38,10 +38,12 @@ SPDX-License-Identifier: Apache-2.0
                 </button>
               </form>
 
-              <div class="alert alert-light mt-4" role="alert" v-show="domainRescan">
-                  {{ loading ? 'Running check on target': 'Completed the check of'}} <code>{{ domainRescan }}</code>
-                  <span v-if="loading" class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
-                  <span v-else class="ms-2">✓</span>
+              <div class="alert alert-light mt-4 d-flex gap-2" role="alert" v-else>
+                  <span>{{ loading ? 'Running check on target': 'Completed the check of'}}</span>
+                  <span><code>{{ domain }}</code></span>
+                  <span v-if="loading" class="spinner-border spinner-border-sm ms-2 me-auto" role="status" aria-hidden="true"></span>
+                  <span v-else class="ms-2 me-auto">✓</span>
+                  <button class="btn btn-danger btn-sm" @click="reset">{{ loading ? 'Cancel': 'Start a new check'}}</button>
               </div>
 
               <!-- display of requirements messages -->
@@ -232,8 +234,8 @@ interface RequirementGroup {
 interface AppData {
   session_id: string;
   domain: string;
-  domainRescan: string | null;
   loading: boolean;
+  allowInput: boolean;
   result: any;
   error: any;
   messagesList: null | MessageData[];
@@ -265,8 +267,8 @@ export default defineComponent({
     return {
       session_id: '1',
       domain: '',
-      domainRescan: null,
       loading: false,
+      allowInput: true,
       result: null,
       error: null,
       messagesList: null,
@@ -390,28 +392,23 @@ export default defineComponent({
   },
   methods: {
     async startScan() {
-      this.domainRescan = null
+      this.loading = true
+      this.allowInput = false
+      this.result = null
+      this.messagesList = null
+      this.error = null
+      this.clearFields()
       this.scanWork()
     },
     async scanWork() {
-      if (!this.domainRescan) {
-        this.domainRescan = this.domain
-        this.domain = ''
-        this.loading = true
-        this.result = null
-        this.messagesList = null
-        this.error = null
-        this.clearFields()
-      }
-
       try {
         const response = await axios.post(`${this.backendUrl}/api/scan/start`, {
-          domain: this.domainRescan,
+          domain: this.domain,
           session_id: this.session_id
         })
-        this.result = response.data
+        this.result = this.loading ? response.data: null
         if (this.result?.domain) {
-          this.domainRescan = this.result.domain
+          this.domain = this.result.domain
         }
         if (['DONE_CHECKER', 'CACHED_CHECKER'].includes(this.result?.status)) {
           const parsedResultsChecker = this.parseResultsChecker(this.result.results_checker)
@@ -433,11 +430,19 @@ export default defineComponent({
         }
       } finally {
         if (['INITIALIZED', 'RUNNING_CHECKER'].includes(this.result?.status) ) {
-          setTimeout(this.scanWork, 3000)
+          if (this.loading) {
+            setTimeout(this.scanWork, 3000)
+          }
         } else {
           this.loading = false
         }
       }
+    },
+    reset() {
+      this.loading = false
+      this.allowInput = true
+      this.result = null
+      this.clearFields()
     },
     clearFields() {
       this.messagesList = null
@@ -526,11 +531,14 @@ export default defineComponent({
       // runtime_output is a list, join it by newlines
       this.copyToClipboard(this.result?.runtime_output?.join('\n') ?? '')
     },
+    sanitizeFilename(name: string): string {
+      return name.replace(/^https?:\/\//, '').replace(/[^a-zA-Z0-9._-]/g, '_')
+    },
     downloadJson() {
       const blob = new Blob([this.result?.results_checker ?? ''], { type: 'application/json' })
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
-      a.download = `${this.domainRescan}-result.json`
+      a.download = `${this.sanitizeFilename(this.domain ?? '')}-result.json`
       a.click()
       URL.revokeObjectURL(a.href)
     },
@@ -538,7 +546,7 @@ export default defineComponent({
       const blob = new Blob([this.result?.runtime_output?.join('\n') ?? ''], { type: 'text/plain' })
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
-      a.download = `${this.domainRescan}-log.txt`
+      a.download = `${this.sanitizeFilename(this.domain ?? '')}-log.txt`
       a.click()
       URL.revokeObjectURL(a.href)
     },
