@@ -27,12 +27,13 @@ services:
       - APP_VERSION=${APP_VERSION:?APP_VERSION is not set}
       - CACHE_TIMEOUT_SECONDS=${CACHE_TIMEOUT_SECONDS:-604800}
       - RUNTIME_LOG_MAX_BYTES=${RUNTIME_LOG_MAX_BYTES:-500000}
+      - VERBOSE_OUTPUT_MAX_LINES_DEFAULT=${VERBOSE_OUTPUT_MAX_LINES_DEFAULT:-10}
       - CSAF_REF=${CSAF_REF}
     restart: unless-stopped
     deploy:
       resources:
         limits:
-          memory: ${CSAF_CHECKER_MEMORY_LIMIT:-500m}
+          memory: ${BACKEND_MEMORY_LIMIT:-500m}
     networks:
       - scanner
     depends_on:
@@ -55,6 +56,10 @@ services:
     ports:
       - "${PORT_FRONTEND:-48091}:8080"
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: ${FRONTEND_MEMORY_LIMIT:-400m}
     networks:
       - scanner
     depends_on:
@@ -76,6 +81,10 @@ services:
     ports:
       - "${PORT_VALIDATOR:-48092}:8082"
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: ${CSAF_VALIDATOR_MEMORY_LIMIT:-150m}
     networks:
       - scanner
     depends_on:
@@ -100,6 +109,10 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: ${VALKEY_MEMORY_LIMIT:-500m}
 
 volumes:
   valkey-data:

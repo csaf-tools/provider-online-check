@@ -15,7 +15,7 @@ import logging
 import os
 from pathlib import Path
 
-import httpx
+import httpx2
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
 
@@ -142,6 +142,8 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
             "results_checker": data.csaf_checker_output_result,
             "files_checked": data.files_checked,
             "latest_file_checked": data.latest_file_checked,
+            "start_time": data.start_time,
+            "end_time": data.end_time
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")
@@ -220,7 +222,7 @@ async def health_check() -> HealthResponse:
     # Check Validator connectivity
     validator_available = False
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx2.AsyncClient() as client:
             validator_response = await client.get(
                 "http://validator:8082/api/v1/tests", timeout=10
             )
@@ -232,9 +234,9 @@ async def health_check() -> HealthResponse:
             )
         else:
             validator_available = True
-    except httpx.TimeoutException as e:
+    except httpx2.TimeoutException as e:
         errors.append(f"Validator timed out: {e}")
-    except httpx.RequestError as e:
+    except httpx2.RequestError as e:
         errors.append(f"Validator is not available: {e}")
     if not validator_available:
         errors.append("Validator is not available")

@@ -212,20 +212,35 @@ This repository uses the [Conventional Commits](https://www.conventionalcommits.
 
 ### Environment Variables
 
-All variables are configured in the `.env` file in the project root.
+All variables are configured in the `.env` file in the project root. The `.env` file contains default values for each variable.
 Docker Compose reads this file automatically.
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT_BACKEND` | `48090` | Host port for the backend API. |
-| `PORT_FRONTEND` | `48091` | Host port for the frontend. |
-| `RUNTIME_LOG_MAX_BYTES` | 500000 | Maximum total byte size of runtime log stored per scan, 0 for unlimited. |
-| `SCAN_SLOTS` | `10` | Maximum number of concurrent scans. |
-| `VERBOSE_OUTPUT_MAX_LINES_DEFAULT` | 10 | Default value for the maximum amount of verbose runtime output displayed at once. Set to -1 for full logs |
-| `FOOTER_TEXT` | _empty_ | Custom HTML content appended to the footer of the frontend. |
-| `CSAF_CHECKER_VERSION` | See `.env` | Version of the [gocsaf](https://github.com/gocsaf/csaf) (`csaf_checker`) binary to use. Only used for version display when `CSAF_REF` is set. |
-| `CSAF_VALIDATOR_VERSION` | See `.env` | Version of the [csaf-validator-service](https://github.com/csaf-tools/csaf-validator-service) to use for document validation. |
+| Variable | Description |
+|----------|-------------|
+| `PORT_BACKEND` | Host port for the backend API. |
+| `PORT_FRONTEND` | Host port for the frontend. |
+| `PORT_VALIDATOR` | Host port for the validator. |
+| `CSAF_CHECKER_VERSION` | Version of the [gocsaf](https://github.com/gocsaf/csaf) (`csaf_checker`) binary to use. Only used for version display when `CSAF_REF` is set. |
+| `CSAF_VALIDATOR_VERSION` | Version of the [csaf-validator-service](https://github.com/csaf-tools/csaf-validator-service) to use for document validation. |
 | `CSAF_REF` | _empty_ | Build `csaf_checker` from source at this git ref (branch, tag, or commit SHA) instead of downloading a release. |
+| `APP_VERSION` | This App's Version. |
+| `CSAF_SHA256` | The expected checksum of the gocsaf tarball. |
+| `RUNTIME_LOG_MAX_BYTES` | 500000 | Maximum total byte size of runtime log stored per scan, 0 for unlimited. |
+| `SCAN_SLOTS` | Maximum number of concurrent scans. |
+| `BACKEND_MEMORY_LIMIT` | Memory limit for the backend container. |
+| `FRONTEND_MEMORY_LIMIT` | Memory limit for the frontend container. |
+| `CSAF_VALIDATOR_MEMORY_LIMIT` | Memory limit for the validator container. |
+| `VALKEY_MEMORY_LIMIT` | Memory limit for the valkey container. |
+| `CSAF_CHECKER_TIMEOUT` | Timeout for csaf_checker in seconds, 0 for unlimited. |
+| `CACHE_TIMEOUT_SECONDS` | Lifetime of a cached csaf_checker result. |
+| `VALIDATOR_CACHE_RESULTS` | Enables validator output to be saved as cache files. 1 is enabled, 0 disabled. |
+| `TASK_PAUSE_TIME_MAX_BEFORE_RESET` | Maximum time in seconds before a paused task is forced to stop. |
+| `TASK_PAUSE_TIME_INTERVAL` | Second interval where the status of a paused task is queried. |
+| `TASK_TIME_BEFORE_ORPHANED` | Time in seconds a task can run without it's status being requested by a user before being considered orphaned. |
+| `LINTER_SHELLCHECK_OPTS` | Shellcheck rules that should be ignored. |
+| `DOMAIN_BLOCKLIST` | List of domains that are not to be scanned. See section `Blocking Domains` for more info |
+| `VERBOSE_OUTPUT_MAX_LINES_DEFAULT` | Default value for the maximum amount of verbose runtime output displayed at once. Set to -1 for full logs |
+| `FOOTER_TEXT` | Custom HTML content appended to the footer of the frontend. |
 
 Example `.env`:
 

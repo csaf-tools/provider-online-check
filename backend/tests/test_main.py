@@ -19,6 +19,7 @@ def mock_scan_request_variable_domain(domain: str):
         "session_id": "0",
         "domain": domain,
         "clear_any_running": True,
+        "skip_cache": True,
     }
     return mock
 
@@ -28,6 +29,7 @@ def mock_scan_request_variable_session_id(session_id: str):
         "session_id": session_id,
         "domain": "example.com",
         "clear_any_running": True,
+        "skip_cache": True,
     }
     return mock
 
@@ -213,7 +215,7 @@ class TestScanStartEndpointDomains:
         """Fails with invalid JSON"""
         response = client.post(
             "/api/scan/start",
-            data="not json",
+            content="not json",
             headers={"Content-Type": "application/json"}
         )
         assert response.status_code == 422
@@ -277,19 +279,25 @@ class TestOutputOptions:
         """Different start points should result in the same output that is offset"""
         normalResponse = client.post(
             "/api/scan/start",
-            json=mock_scan_request_variable_shortening_options(0, 10, False)
+            json=mock_scan_request_variable_shortening_options(0, -1, False)
         )
         normalResponseData = normalResponse.json()
 
+        assert normalResponse.status_code == 201
+
+        total_lines = len(normalResponseData["runtime_output"])
+        offset = min(5, total_lines - 1)
+        if offset == 0:
+            pytest.skip("Log has too few lines to test start_at offset")
+
         offsetResponse = client.post(
             "/api/scan/start",
-            json=mock_scan_request_variable_shortening_options(5, 10, False)
+            json=mock_scan_request_variable_shortening_options(offset, 10, False)
         )
         offsetResponseData = offsetResponse.json()
 
-        assert normalResponse.status_code == 201
         assert offsetResponse.status_code == 201
-        assert normalResponseData["runtime_output"][5] == offsetResponseData["runtime_output"][0]
+        assert normalResponseData["runtime_output"][offset] == offsetResponseData["runtime_output"][0]
 
     @pytest.mark.asyncio
     async def test_prioritize_latest(self):

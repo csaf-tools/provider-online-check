@@ -7,6 +7,7 @@
 # is valid
 # Also checks if requested domain has a valid cache
 # in database -> handles cache lookup
+
 import re
 from urllib.parse import urlsplit, urlunsplit
 

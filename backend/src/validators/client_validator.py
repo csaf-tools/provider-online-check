@@ -6,8 +6,6 @@
 # Validates a requesting client against blacklist and various DoS
 # security checks
 
-# Involved in: 4, 19, 20, 21
-
 from ..database.valkey import Valkey_Controller
 
 

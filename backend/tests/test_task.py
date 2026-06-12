@@ -151,6 +151,9 @@ class TestWorkingDomainTask:
         await waitUntilLoopStepIncremented(task)
         assert task.get_csaf_checker()._running_task_checker.pid != previousProcessPID
 
+        task.stop_task()
+        await waitUntilLoopStepIncremented(task)
+
     @pytest.mark.asyncio
     async def test_signaling_missing_task(self):
         """ Tests if signals to a non existent task causes errors """

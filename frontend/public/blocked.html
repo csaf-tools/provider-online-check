@@ -10,33 +10,29 @@ SPDX-License-Identifier: Apache-2.0
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSAF Provider Scan</title>
+    <title>CSAF Provider Check</title>
     <style>
-        /*  */
+        /* generic */
         *, *::before, *::after { box-sizing: border-box; }
-        body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 1rem; color: #212529; background-color: #f8f9fa; }
+        body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 1rem; color: #212529; background-color: #f1f1f1; }
         a { color: #0d6efd; }
+        h2 { font-size: 2rem; margin-top: 0; }
         h5 { margin-top: 0; margin-bottom: .5rem; font-weight: 500; line-height: 1.2; font-size: 1.25rem; }
         p { margin-top: 0; margin-bottom: 1rem; }
 
-        /* navbar */
-        .navbar { display: flex; align-items: center; padding: .5rem 1rem; background-color: #212529; }
-        .navbar-brand { color: #fff; font-size: 1.25rem; font-weight: 500; text-decoration: none; margin-bottom: 0; padding-top: .3125rem; padding-bottom: .3125rem; }
-        .container-fluid { width: 100%; padding-right: .75rem; padding-left: .75rem; }
-
         /* badge */
-        .badge { display: inline-block; padding: .35em .65em; font-size: .75em; font-weight: 700; border-radius: .375rem; }
+        .badge { display: inline-block; padding: .15em .65em; font-size: .75em; font-weight: 700; border-radius: .375rem; }
         .bg-warning { background-color: #ffc107; }
         .text-dark { color: #212529; }
         .ms-2 { margin-left: .5rem; }
 
         /* layout */
-        .container { width: 100%; max-width: 960px; margin-right: auto; margin-left: auto; padding-right: .75rem; padding-left: .75rem; }
+        .container { width: 100%; max-width: 1320px; margin-right: auto; margin-left: auto; padding-right: .75rem; padding-left: .75rem; }
         .mt-4 { margin-top: 1.5rem; }
-        .mt-5 { margin-top: 3rem; }
+        .mb-4 { margin-bottom: 1.5rem !important; }
         .row { display: flex; flex-wrap: wrap; margin-right: -.75rem; margin-left: -.75rem; }
         .justify-content-center { justify-content: center; }
-        .col-md-8 { width: 100%; padding-right: .75rem; padding-left: .75rem; }
+        .col-md-12 { width: 100%; padding-right: .75rem; padding-left: .75rem; }
 
         /* card */
         .card { background-color: #fff; border: 1px solid rgba(0,0,0,.125); border-radius: .375rem; }
@@ -52,41 +48,42 @@ SPDX-License-Identifier: Apache-2.0
     </style>
 </head>
 <body>
-    <div id="app" data-v-app="">
-        <div data-v-8e2b346d="" id="app">
-            <nav data-v-8e2b346d="" class="navbar navbar-dark bg-dark">
-                <div data-v-8e2b346d="" class="container-fluid"><span data-v-8e2b346d=""
-                        class="navbar-brand mb-0 h1">CSAF Provider Scan <span data-v-8e2b346d=""
-                            class="badge bg-warning text-dark ms-2">Beta</span></span></div>
-            </nav>
-            <div data-v-8e2b346d="" class="container mt-5">
-                <div data-v-8e2b346d="" class="row justify-content-center">
-                    <div data-v-8e2b346d="" class="col-md-8">
-                        <div data-v-8e2b346d="" class="card shadow">
-                            <div data-v-8e2b346d="" class="card-body">
-                                <div class="alert alert-danger">
-                                    <h5 class="alert-heading">Access Denied</h5>
-                                    <p>Your request has been blocked.</p>
-                                </div>
+    <div id="app">
+        <div class="container mt-4">
+            <div class="row justify-content-center">
+                <div class="col-md-12">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <h2 class="card-title mb-4">CSAF Provider Check <span class="badge bg-warning text-dark ms-2">Beta</span></h2>
+                            <p>Check a CSAF Provider's metadata and all its documents for validity.<br />
+                                Learn more about CSAF (Common Security Advisory Framework) at <a href="https://csaf.io" target="_blank">csaf.io</a>.</p>
+                            <div class="alert alert-danger">
+                                <h5 class="alert-heading">Access Denied</h5>
+                                <p>Your request has been blocked.</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div data-v-8e2b346d="" class="row justify-content-center mt-4">
-                    <div data-v-8e2b346d="" class="col-md-8">
-                        <div data-v-8e2b346d="" class="card">
-                            <div data-v-8e2b346d="" class="card-body">
-                                <h5 data-v-8e2b346d="" class="card-title">About</h5>
-                                <p data-v-8e2b346d="" class="card-text"> This is an experimental tool that scans domains
-                                    for <a data-v-8e2b346d="" href="https://www.csaf.io" target="_blank">CSAF</a>
-                                    (Common Security Advisory Framework) provider metadata and checks its validity.
-                                    Results may vary. </p>
-                                <p data-v-8e2b346d=""><a data-v-8e2b346d=""
-                                        href="https://github.com/csaf-tools/provider-online-check/issues/133/" target="_blank">
-                                        Website and Source Code </a> &nbsp; <a data-v-8e2b346d=""
-                                        href="/api/docs" target="_blank"> API
-                                        Documentation </a></p>
-                            </div>
+            </div>
+            <div class="row justify-content-center mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">About</h5>
+                            <p class="card-text">
+                                This is an experimental tool that checks a CSAF provider's metadata and documents for validity.
+                                It uses <a href="https://github.com/gocsaf/csaf/blob/main/docs/csaf_checker.md"><code>csaf_checker</code></a> of the gocsaf toolsuite under the hood.
+                            </p>
+                            <p>
+                                <a href="https://github.com/csaf-tools/provider-online-check/" target="_blank">
+                                Website and Source Code
+                                </a>
+                                &nbsp;
+                                <a :href="apiDocsUrl" target="_blank">
+                                API Documentation
+                                </a>
+                            </p>
+                            <p>This tool is in an experimental beta phase. No systematic analysis of submitted data is planned. During this development phase, we monitor logs to improve the software.<p></p><p>This site is hosted by <a href="https://intevation.de/">Intevation GmbH</a> (<a href="https://intevation.de/impressum-datenschutz">Datenschutzerklärung und Impressum</a> | <a href="https://intevation.de/imprint-privacy-policy">Privacy Policy and Imprint</a>)</p>
                         </div>
                     </div>
                 </div>

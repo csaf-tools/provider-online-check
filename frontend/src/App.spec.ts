@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import App from './App.vue'
 import axios from 'axios'
@@ -16,6 +16,9 @@ describe("Testing App...", () => {
             () => new Promise(resolve => resolve({}))
         )
         app = mount(App)
+    })
+    afterEach(() => {
+        vi.restoreAllMocks()
     })
 
     test('extractMessages', () => {
@@ -96,12 +99,12 @@ describe("Testing App...", () => {
             )}
         ))
         app.vm.startScan()
-        expect(app.vm.domainRescan).toBe('EXAMPLE.com')
+        expect(app.vm.domain).toBe('EXAMPLE.com')
         await flushPromises()
         expect(app.vm.loading).toBe(false)
         expect(app.vm.result?.status).toBe('CACHED_CHECKER')
         expect(app.vm.messagesList).toStrictEqual([{text: 'Test1', type: 0, num: 12}])
-        expect(app.vm.domainRescan).toBe('example.com')
+        expect(app.vm.domain).toBe('example.com')
 
     })
     test('startScan ERROR', async () => {
@@ -258,7 +261,6 @@ describe("Testing App...", () => {
         expect(app.vm.isShowAllMessages).toBe(false)
         expect(app.vm.isShowResultOutput).toBe(false)
         expect(app.vm.isShowLogOutput).toBe(false)
-        expect(app.vm.initializedListeners).toBe(true)
     })
     test("downloadJson triggers download with correct filename and content", async () => {
         // mock to intercept the click event of the new a element
@@ -268,13 +270,21 @@ describe("Testing App...", () => {
         // required to capture the output
         vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock')
 
-        app.vm.domainRescan = 'example.com'
+        app.vm.domain = 'https://example.com/.well-known/csaf/provider-metadata.json'
         app.vm.result = { results_checker: '{"version": "3.5.1}' }
         app.vm.downloadJson()
 
-        expect(anchor.download).toBe('example.com-result.json')
+        expect(anchor.download).toBe('example.com_.well-known_csaf_provider-metadata.json-result.json')
         expect(anchor.click).toHaveBeenCalled()
         const blob = vi.mocked(URL.createObjectURL).mock.calls[0][0] as Blob
         expect(await blob.text()).toBe('{"version": "3.5.1}')
+    })
+
+    test("sanitizeFilename", () => {
+        expect(app.vm.sanitizeFilename('example.com')).toBe('example.com')
+        expect(app.vm.sanitizeFilename('https://example.com/.well-known/csaf/provider-metadata.json'))
+            .toBe('example.com_.well-known_csaf_provider-metadata.json')
+        expect(app.vm.sanitizeFilename('http://example.com/path?foo=bar'))
+            .toBe('example.com_path_foo_bar')
     })
 })

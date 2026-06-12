@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
               <p>Check a CSAF Provider's metadata and all its documents for validity.<br />
                 Learn more about CSAF (Common Security Advisory Framework) at <a href="https://csaf.io" target="_blank">csaf.io</a>.</p>
 
-              <form @submit.prevent="startScan">
+              <form @submit.prevent="startScan" v-if="allowInput">
                 <div class="mb-3">
                   <label for="domainInput" class="form-label">Enter a domain name or <a href="https://docs.oasis-open.org/csaf/csaf/v2.1/csaf-v2.1.html#717-requirement-7-provider-metadatajson-" title="Provider Metadata File" target="_blank">PMD</a> to start the check:</label>
                   <input
@@ -38,10 +38,15 @@ SPDX-License-Identifier: Apache-2.0
                 </button>
               </form>
 
-              <div class="alert alert-light mt-4" role="alert" v-show="domainRescan">
-                  {{ loading ? 'Running check on target': 'Completed the check of'}} <code>{{ domainRescan }}</code>
-                  <span v-if="loading" class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
-                  <span v-else class="ms-2">✓</span>
+              <div class="alert alert-light mt-4" role="alert" v-else>
+                <div class="d-flex gap-2">
+                  <span>{{ loading ? 'Running check on target': 'Completed the check of'}}</span>
+                  <span><code>{{ domain }}</code></span>
+                  <span v-if="loading" class="spinner-border spinner-border-sm ms-2 me-auto" role="status" aria-hidden="true"></span>
+                  <span v-else class="ms-2 me-auto">✓</span>
+                  <button class="btn btn-danger btn-sm" @click="reset">{{ loading ? 'Cancel': 'Start a new check'}}</button>
+                </div>
+                <div v-if="result?.start_time">Duration {{ formatDuration(result?.start_time, result?.end_time) }}</div>
               </div>
 
               <!-- display of requirements messages -->
@@ -61,7 +66,7 @@ SPDX-License-Identifier: Apache-2.0
                 </div>
 
                 <div v-show="scanTime">
-                  Start time of the check: {{ scanTime }}
+                  <div>Start time of the check: {{ scanTime }}</div>
                 </div>
 
                 <h4 :class="trustedProviderStatus" class="small-margin-top medium-font-size">
@@ -141,25 +146,22 @@ SPDX-License-Identifier: Apache-2.0
                   </div>
                   <div v-if="result.status === 'INITIALIZED'">
                     <h5 class="alert-heading">Check started...</h5>
-                    <pre>{{ result.results_checker }}</pre>
                   </div>
                   <div v-if="result.status === 'RUNNING_CHECKER'">
                     <h5 class="alert-heading">Check running...</h5>
                     <h6 class="alert-heading">Files checked: {{ result.files_checked }}</h6>
                     <h6 class="alert-heading">Latest file checked: {{ result.latest_file_checked }}</h6>
-                    <pre>{{ result.results_checker }}</pre>
                   </div>
                   <div v-if="result.status === 'PAUSED'">
                     <h5 class="alert-heading">Check paused</h5>
-                    <pre>{{ result.results_checker }}</pre>
                   </div>
                 </div>
                 <div v-if="result.runtime_output" class="mt-4">
                   <div :class="['alert', resultClass]" role="alert">
                     <h5 class="alert-heading">Details</h5>
-                    <li v-for="(item, index) in result.runtime_output" :key="index">
-                    <p class="mb-0">{{ item }}</p>
-                    </li>
+                    <ul>
+                      <li v-for="(item, index) in result.runtime_output" :key="index">{{ item }}</li>
+                    </ul>
                   </div>
                 </div>
               </div>
@@ -231,9 +233,8 @@ interface RequirementGroup {
 interface AppData {
   session_id: string;
   domain: string;
-  domainRescan: string | null;
   loading: boolean;
-  initializedListeners: boolean;
+  allowInput: boolean;
   result: any;
   error: any;
   messagesList: null | MessageData[];
@@ -265,9 +266,8 @@ export default defineComponent({
     return {
       session_id: '1',
       domain: '',
-      domainRescan: null,
       loading: false,
-      initializedListeners: false,
+      allowInput: true,
       result: null,
       error: null,
       messagesList: null,
@@ -391,28 +391,23 @@ export default defineComponent({
   },
   methods: {
     async startScan() {
-      this.domainRescan = null
+      this.loading = true
+      this.allowInput = false
+      this.result = null
+      this.messagesList = null
+      this.error = null
+      this.clearFields()
       this.scanWork()
     },
     async scanWork() {
-      if (!this.domainRescan) {
-        this.domainRescan = this.domain
-        this.domain = ''
-        this.loading = true
-        this.result = null
-        this.messagesList = null
-        this.error = null
-        this.clearFields()
-      }
-
       try {
         const response = await axios.post(`${this.backendUrl}/api/scan/start`, {
-          domain: this.domainRescan,
+          domain: this.domain,
           session_id: this.session_id
         })
-        this.result = response.data
+        this.result = this.loading ? response.data: null
         if (this.result?.domain) {
-          this.domainRescan = this.result.domain
+          this.domain = this.result.domain
         }
         if (['DONE_CHECKER', 'CACHED_CHECKER'].includes(this.result?.status)) {
           const parsedResultsChecker = this.parseResultsChecker(this.result.results_checker)
@@ -420,11 +415,9 @@ export default defineComponent({
           this.setScanTime(parsedResultsChecker)
           this.setPassed(parsedResultsChecker)
           this.setRole(parsedResultsChecker)
-          if (!this.initializedListeners) {
-            setTimeout(() => {
-              this.initializeListeners()
-            })
-          }
+          setTimeout(() => {
+            this.initializeListeners()
+          })
         } else {
           this.clearFields()
         }
@@ -436,17 +429,28 @@ export default defineComponent({
         }
       } finally {
         if (['INITIALIZED', 'RUNNING_CHECKER'].includes(this.result?.status) ) {
-          setTimeout(this.scanWork, 3000)
+          if (this.loading) {
+            setTimeout(this.scanWork, 3000)
+          }
         } else {
           this.loading = false
         }
       }
+    },
+    reset() {
+      this.loading = false
+      this.allowInput = true
+      this.result = null
+      this.clearFields()
     },
     clearFields() {
       this.messagesList = null
       this.requirementGroups = []
       this.scanTime = null
       this.passed = false
+      this.isShowAllMessages = false
+      this.isShowResultOutput = false
+      this.isShowLogOutput = false
       this.isShowCacheInfo = false
     },
     parseResultsChecker(results_checker: string): ResultCheckerData {
@@ -482,7 +486,6 @@ export default defineComponent({
       logOutputRef?.addEventListener('show.bs.collapse', () => { this.isShowLogOutput = true })
       logOutputRef?.addEventListener('hide.bs.collapse', () => { this.isShowLogOutput = false })
       logOutputRef?.addEventListener('shown.bs.collapse', () => { logOutputRef.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) })
-      this.initializedListeners = true
     },
     extractMessagesFromResultsChecker(results_checker: ResultCheckerData) {
       if (results_checker.domains?.[0]?.requirements) {
@@ -527,11 +530,14 @@ export default defineComponent({
       // runtime_output is a list, join it by newlines
       this.copyToClipboard(this.result?.runtime_output?.join('\n') ?? '')
     },
+    sanitizeFilename(name: string): string {
+      return name.replace(/^https?:\/\//, '').replace(/[^a-zA-Z0-9._-]/g, '_')
+    },
     downloadJson() {
       const blob = new Blob([this.result?.results_checker ?? ''], { type: 'application/json' })
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
-      a.download = `${this.domainRescan}-result.json`
+      a.download = `${this.sanitizeFilename(this.domain ?? '')}-result.json`
       a.click()
       URL.revokeObjectURL(a.href)
     },
@@ -539,12 +545,29 @@ export default defineComponent({
       const blob = new Blob([this.result?.runtime_output?.join('\n') ?? ''], { type: 'text/plain' })
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
-      a.download = `${this.domainRescan}-log.txt`
+      a.download = `${this.sanitizeFilename(this.domain ?? '')}-log.txt`
       a.click()
       URL.revokeObjectURL(a.href)
     },
     formatTime(ts: number) {
       return new Date(ts * 1000).toLocaleString()
+    },
+    formatDuration(startTime: number, endTime: number) {
+      if (endTime === 0) {
+        endTime = Date.now() / 1000
+      }
+      const duration = endTime - startTime;
+      const hours = Math.floor(duration / 3600);
+      const minutes = Math.floor((duration % 3600) / 60);
+      const seconds = Math.floor((duration % 60));
+
+      return [
+          hours && `${hours}h`,
+          minutes && `${minutes}m`,
+          `${seconds}s`,
+      ]
+          .filter(Boolean)
+          .join(' ');
     }
   }
 })

@@ -3,6 +3,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+# Wrapper around a CSAF Checker Process
+# Interface between Slot (and by extension the User) and the underlying
+# CSAF Checker Process
+# A Domain Task always has a running or completed CSAF Checker Process
+# Manages a data object which represents CSAF Checker output and other
+# information such as request start time
+
 import logging
 import os
 import time

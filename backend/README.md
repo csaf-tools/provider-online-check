@@ -7,60 +7,87 @@ SPDX-License-Identifier: Apache-2.0
 
 # CSAF Provider Scan Backend
 
-FastAPI-based backend
+FastAPI-based backend.
 
 ## Setup
 
-If not using Docker:
+The backend is intended to be used in conjunction with the frontend and validator containers.
+Refer to the main `README.md` for setup information.
 
-Optionally: Create a venv.
+## API Reference
 
-```bash
-pip install -r requirements.txt
-```
+### `POST /api/scan/start`
 
-## Running the Server
+Initiates a CSAF provider scan for the given domain.
 
-### Development
-```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
+**HTTP Status**: `201 Created` on success, `500 Internal Server Error` on failure.
 
-### Production
-```bash
-python main.py
-```
+#### Request Body
 
-## API Documentation
+See `docs/payload.md` for more info
 
-Once the server is running, access:
-- **Swagger UI**: http://localhost:8000/api/docs
-- **ReDoc**: http://localhost:8000/api/redoc
-- **OpenAPI JSON**: http://localhost:8000/api/openapi.json
-
-## API Endpoints
-
-### POST /api/scan/start
-Start a scan for a domain.
-
-**Request Body:**
 ```json
 {
-  "domain": "example.com"
-}
-```
-
-**Response:**
-```json
-{
-  "status": "started",
+  "session_id": "0",
   "domain": "example.com",
-  "message": "Scan initiated for domain: example.com"
+  "start_at_line": 0,
+  "max_lines": 10,
+  "prioritize_newest_lines": true,
+  "skip_cache": false,
+  "clear_any_running": false
 }
 ```
 
-### GET /api/health
-Health check endpoint.
+#### Response Body
 
-### GET /api/
-Root endpoint with API information.
+See `docs/domain_task_answer.md` for more info
+
+```json
+{
+  "domain": "example.com",
+  "status": "DONE_CHECKER",
+  "slot_id": 0,
+  "error": "",
+  "runtime_output": [""],
+  "results_checker": "",
+  "files_checked": 0,
+  "latest_file_checked": ""
+}
+```
+
+### `GET /api/information`
+
+Returns version and metadata about the running provider instance.
+
+#### Response Body
+
+See `docs/information_answer.md` for more info
+
+```json
+{
+  "csaf_checker_version": "1.0.0",
+  "csaf_validator_version": "1.0.0",
+  "csaf_provider_version": "1.0.0",
+  "docs": "/api/docs",
+  "openapi": "/api/openapi.json"
+}
+```
+
+### `GET /api/health`
+
+Returns the health status of the backend and its dependencies, such as valkey and the validator container.
+
+**HTTP Status**: `200 OK` if healthy, `503 Service Unavailable` if any component is unhealthy.
+
+#### Response Body
+
+```json
+{
+  "status": "healthy",
+  "free_slots": 10,
+  "total_slots": 10,
+  "csaf_checker_available": true,
+  "valkey_available": true,
+  "validator_available": true
+}
+```

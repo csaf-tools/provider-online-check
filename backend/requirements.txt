@@ -10,7 +10,7 @@ pydantic-settings>=2,<3
 valkey>=6,<7
 rq>=2,<3
 python-dotenv>=1,<2
-httpx>=0,<1
+httpx2>=2,<3
 
 # Testing
 pytest>=9,<10
