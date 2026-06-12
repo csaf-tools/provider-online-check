@@ -440,6 +440,7 @@ export default defineComponent({
       this.loading = false
       this.allowInput = true
       this.result = null
+      this.error = null
       this.clearFields()
     },
     clearFields() {
