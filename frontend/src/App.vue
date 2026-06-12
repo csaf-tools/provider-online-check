@@ -398,6 +398,7 @@ export default defineComponent({
     },
     async scanWork() {
       try {
+        this.error = null
         const response = await axios.post(`${this.backendUrl}/api/scan/start`, {
           domain: this.domain,
           session_id: this.session_id
@@ -420,6 +421,7 @@ export default defineComponent({
         }
       } catch (err: any) {
         this.clearFields()
+        this.result = null
         this.error = err.response?.data?.detail || err.message || 'An error occurred while starting the scan'
         if (err.response?.data?.detail[0]?.msg) {
           this.error = `${err.response?.data?.detail[0]?.input}: ${err.response?.data?.detail[0]?.msg}`
