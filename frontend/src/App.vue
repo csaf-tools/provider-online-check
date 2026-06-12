@@ -86,8 +86,9 @@ SPDX-License-Identifier: Apache-2.0
                 </p>
                 <div class="collapse" id="collapseAllMessages" ref="allMessagesRef">
                   <div class="card card-body">
-                    <h5 class="card-title">All messages:</h5>
+                    <h5 class="card-title">All messages</h5>
                     <div class="card-text log-card-size overflow-scroll">
+                      <p>These are all unfiltered messages of <code>csaf_checker</code> and may contain messages that are not relevant for the analysis.</p>
                       <MessageLine v-for="item of messagesList" :key="item.text" :text="item.text" :type="item.type"></MessageLine>
                     </div>
                   </div>
@@ -102,11 +103,12 @@ SPDX-License-Identifier: Apache-2.0
                 <div class="collapse" id="collapseResultOutput" ref="resultOutputRef">
                   <div class="card card-body">
                     <div class="card-title d-flex gap-2 mb-2">
-                      <h5 class="me-auto log-header">Result of the checker:</h5>
+                      <h5 class="me-auto log-header">Complete JSON Result</h5>
                       <button class="btn btn-sm btn-outline-secondary" @click="copyResultToClipboard">Copy to clipboard</button>
                       <button class="btn btn-sm btn-outline-secondary" @click="downloadJson">Download</button>
                     </div>
                     <div class="card-text log-card-size overflow-scroll">
+                      <p>This is the complete (stdout) unparsed JSON output of <code>csaf_checker</code>.</p>
                       <pre>{{ result?.results_checker }}</pre>
                     </div>
                   </div>
@@ -120,11 +122,12 @@ SPDX-License-Identifier: Apache-2.0
                 <div class="collapse" id="collapseLogOutput" ref="logOutputRef">
                   <div class="card card-body">
                     <div class="cart-title d-flex gap-2 mb-2">
-                      <h5 class="me-auto log-header">Log output:</h5>
+                      <h5 class="me-auto log-header">Log output</h5>
                       <button class="btn btn-sm btn-outline-secondary" @click="copyLogToClipboard">Copy to clipboard</button>
                       <button class="btn btn-sm btn-outline-secondary" @click="downloadLog">Download</button>
                     </div>
                     <div class="card-text log-card-size overflow-scroll">
+                      <p>This is the comple log (stderr) output of <code>csaf_checker</code>. All timestamps are in UTC.</p>
                       <pre>{{ result?.runtime_output?.join('\n') }}</pre>
                     </div>
                   </div>
@@ -154,6 +157,7 @@ SPDX-License-Identifier: Apache-2.0
                 <div v-if="result.runtime_output" class="mt-4">
                   <div :class="['alert', resultClass]" role="alert">
                     <h5 class="alert-heading">Details</h5>
+                    <p v-if="result.runtime_output?.length">All timestamps are in UTC</p>
                     <ul>
                       <li v-for="(item, index) in result.runtime_output" :key="index">{{ item }}</li>
                     </ul>
