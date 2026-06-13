@@ -52,3 +52,15 @@ class ScanResponse(BaseModel):
             description="Name of the latest file that has been checked, including directory path"
         ),
     ] = ""
+    start_time: Annotated[
+        int,
+        Field(
+            description="Start time as timestamp"
+        )
+    ] = 0
+    end_time: Annotated[
+        int,
+        Field(
+            description="End time as timestamp"
+        )
+    ] = 0
