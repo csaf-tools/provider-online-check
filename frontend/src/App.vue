@@ -129,7 +129,7 @@ SPDX-License-Identifier: Apache-2.0
                       <button class="btn btn-sm btn-outline-secondary" @click="downloadLog">Download</button>
                     </div>
                     <div class="card-text log-card-size overflow-scroll">
-                      <p>This is the comple log (stderr) output of <code>csaf_checker</code>. All timestamps are in UTC.</p>
+                      <p>This is the complete log (stderr) output of <code>csaf_checker</code>. All timestamps are in UTC.</p>
                       <pre>{{ result?.runtime_output?.join('\n') }}</pre>
                     </div>
                   </div>
