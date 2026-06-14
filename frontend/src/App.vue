@@ -38,12 +38,15 @@ SPDX-License-Identifier: Apache-2.0
                 </button>
               </form>
 
-              <div class="alert alert-light mt-4 d-flex gap-2" role="alert" v-else>
+              <div class="alert alert-light mt-4" role="alert" v-else>
+                <div class="d-flex gap-2">
                   <span>{{ loading ? 'Running check on target': 'Completed the check of'}}</span>
                   <span><code>{{ domain }}</code></span>
                   <span v-if="loading" class="spinner-border spinner-border-sm ms-2 me-auto" role="status" aria-hidden="true"></span>
                   <span v-else class="ms-2 me-auto">✓</span>
                   <button class="btn btn-danger btn-sm" @click="reset">{{ loading ? 'Cancel': 'Start a new check'}}</button>
+                </div>
+                <div v-if="result?.start_time">Duration {{ formatDuration(result?.start_time, result?.end_time) }}</div>
               </div>
 
               <!-- display of requirements messages -->
@@ -63,7 +66,7 @@ SPDX-License-Identifier: Apache-2.0
                 </div>
 
                 <div v-show="scanTime">
-                  Start time of the check: {{ scanTime }}
+                  <div>Start time of the check: {{ scanTime }}</div>
                 </div>
 
                 <h4 :class="trustedProviderStatus" class="small-margin-top medium-font-size">
@@ -551,6 +554,23 @@ export default defineComponent({
     },
     formatTime(ts: number) {
       return new Date(ts * 1000).toLocaleString()
+    },
+    formatDuration(startTime: number, endTime: number) {
+      if (endTime === 0) {
+        endTime = Date.now() / 1000
+      }
+      const duration = endTime - startTime;
+      const hours = Math.floor(duration / 3600);
+      const minutes = Math.floor((duration % 3600) / 60);
+      const seconds = Math.floor((duration % 60));
+
+      return [
+          hours && `${hours}h`,
+          minutes && `${minutes}m`,
+          `${seconds}s`,
+      ]
+          .filter(Boolean)
+          .join(' ');
     }
   }
 })
