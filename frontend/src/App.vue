@@ -27,6 +27,7 @@ SPDX-License-Identifier: Apache-2.0
                     v-model="domain"
                     required
                     placeholder="example.com or https://example.com/.well-known/csaf/provider-metadata.json"
+                    autofocus
                   >
                 </div>
 
