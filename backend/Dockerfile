@@ -63,7 +63,7 @@ ARG CSAF_SHA256
 ARG CSAF_REF
 COPY build_gocsaf.sh /usr/local/bin/
 RUN if [ -n "$CSAF_REF" ]; then \
-        /usr/local/bin/build_gocsaf.sh \
+        /usr/local/bin/build_gocsaf.sh; \
     else \
         mkdir -p /app/bin && \
         cd /app/bin && \
