@@ -133,7 +133,11 @@ SPDX-License-Identifier: Apache-2.0
                       <button class="btn btn-sm btn-outline-secondary" @click="downloadLog">Download</button>
                     </div>
                     <div class="card-text log-card-size overflow-scroll">
-                      <p>This is the complete log (stderr) output of <code>csaf_checker</code>. All timestamps are in UTC.</p>
+                      <p v-if="!result?.runtime_output_capped">This is the complete log (stderr) output of <code>csaf_checker</code>. All timestamps are in UTC.</p>
+                      <p v-else>This is <strong>only a part</strong> of the log (stderr) output of the <code>csaf_checker</code>.
+                        All timestamps are in UTC.<br />
+                        Use Copy to clipboard or Download to get the complete log.
+                      </p>
                       <pre>{{ result?.runtime_output?.join('\n') }}</pre>
                     </div>
                   </div>
@@ -524,6 +528,19 @@ export default defineComponent({
     filterMessageListByNums(nums: number[]): MessageData[] {
       return this.messagesList?.filter((msg: MessageData) => nums.includes(msg.num)) ?? []
     },
+    async fetchLog(): Promise<string> {
+      let output = this.result?.runtime_output
+      if (this.result?.runtime_output_capped) {
+        const response = await axios.post(`${this.backendUrl}/api/scan/start`, {
+          domain: this.domain,
+          session_id: this.session_id,
+          max_lines: -1
+        })
+        output = response?.data?.runtime_output
+      }
+      // runtime_output is a list, join it by newlines
+      return output?.join('\n') ?? ''
+    },
     copyToClipboard(text: string) {
       if (navigator.clipboard) {
         // This is the "normal" modern method, but does not work with HTTP (development setups)
@@ -542,9 +559,8 @@ export default defineComponent({
       // results_checker is a string (not a JSON object), pass it directly
       this.copyToClipboard(this.result?.results_checker ?? '')
     },
-    copyLogToClipboard() {
-      // runtime_output is a list, join it by newlines
-      this.copyToClipboard(this.result?.runtime_output?.join('\n') ?? '')
+    async copyLogToClipboard() {
+      this.fetchLog().then(output => this.copyToClipboard(output))
     },
     sanitizeFilename(name: string): string {
       return name.replace(/^https?:\/\//, '').replace(/[^a-zA-Z0-9._-]/g, '_')
@@ -558,12 +574,14 @@ export default defineComponent({
       URL.revokeObjectURL(a.href)
     },
     downloadLog() {
-      const blob = new Blob([this.result?.runtime_output?.join('\n') ?? ''], { type: 'text/plain' })
-      const a = document.createElement('a')
-      a.href = URL.createObjectURL(blob)
-      a.download = `${this.sanitizeFilename(this.domain ?? '')}-log.txt`
-      a.click()
-      URL.revokeObjectURL(a.href)
+      this.fetchLog().then(output => {
+        const blob = new Blob([output], { type: 'text/plain' })
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(blob)
+        a.download = `${this.sanitizeFilename(this.domain ?? '')}-log.txt`
+        a.click()
+        URL.revokeObjectURL(a.href)
+      })
     },
     formatTime(ts: number) {
       return new Date(ts * 1000).toLocaleString()
