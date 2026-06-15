@@ -27,6 +27,7 @@ SPDX-License-Identifier: Apache-2.0
                     v-model="domain"
                     required
                     placeholder="example.com or https://example.com/.well-known/csaf/provider-metadata.json"
+                    autofocus
                   >
                 </div>
 
@@ -286,6 +287,12 @@ export default defineComponent({
     axios
       .get(`${this.backendUrl}/api/information/`)
       .then(response => this.version = response.data)
+    const params = new URLSearchParams(window.location.search)
+    const domainParam = params.get('domain')
+    if (domainParam) {
+      this.domain = domainParam
+      this.startScan()
+    }
   },
   computed: {
     resultClass() {
@@ -402,6 +409,7 @@ export default defineComponent({
     async scanWork() {
       try {
         this.error = null
+        history.replaceState(null, '', `?domain=${encodeURIComponent(this.domain)}`)
         const response = await axios.post(`${this.backendUrl}/api/scan/start`, {
           domain: this.domain,
           session_id: this.session_id
@@ -445,6 +453,7 @@ export default defineComponent({
       this.result = null
       this.error = null
       this.clearFields()
+      history.replaceState(null, '', window.location.pathname)
     },
     clearFields() {
       this.messagesList = null
