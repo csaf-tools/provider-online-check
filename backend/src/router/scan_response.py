@@ -38,6 +38,15 @@ class ScanResponse(BaseModel):
         list[str],
         Field(description="Runtime output provided by CSAF Checker in verbose mode"),
     ] = []
+    runtime_output_total_lines: Annotated[
+        int,
+        Field(description="Total number of lines in the complete runtime output")
+    ] = 0
+
+    runtime_output_capped: Annotated[
+        bool,
+        Field(description="True if the returned runtime_output was truncated due to line limits")
+    ] = False
     results_checker: Annotated[
         str,
         Field(description="Results of CSAF Checker"),

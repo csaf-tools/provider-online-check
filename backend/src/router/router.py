@@ -118,9 +118,15 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
         # Shorten output
         full_output = data.csaf_checker_output_runtime_log
         displayed_output = full_output
-        used_max_lines = request.max_lines
-        if used_max_lines == -1:
+        if request.max_lines is None:
+            if status in (ScanResponseStatus.DONE_CHECKER, ScanResponseStatus.CACHED_CHECKER):
+                used_max_lines = int(os.environ.get("VERBOSE_OUTPUT_MAX_LINES_DONE_DEFAULT", "10000"))
+            else:
+                used_max_lines = int(os.environ.get("VERBOSE_OUTPUT_MAX_LINES_DEFAULT", "10"))
+        elif request.max_lines == -1:
             used_max_lines = len(full_output)  # Full logs
+        else:
+            used_max_lines = request.max_lines
 
         if request.prioritize_newest_lines:
             # Latest max_lines entries. Lower boundary clamped at start_at_line
@@ -139,6 +145,8 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
             "domain": request.domain,
             "task_id": uuid,
             "runtime_output": displayed_output,
+            "runtime_output_total_lines": len(full_output),
+            "runtime_output_capped": len(displayed_output) < len(full_output),
             "results_checker": data.csaf_checker_output_result,
             "files_checked": data.files_checked,
             "latest_file_checked": data.latest_file_checked,
