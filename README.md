@@ -220,8 +220,9 @@ Docker Compose reads this file automatically.
 | `PORT_BACKEND` | Host port for the backend API. |
 | `PORT_FRONTEND` | Host port for the frontend. |
 | `PORT_VALIDATOR` | Host port for the validator. |
-| `CSAF_CHECKER_VERSION` | Version of the CSAF Checker. |
-| `CSAF_VALIDATOR_VERSION` | Version of the CSAF Validator. |
+| `CSAF_CHECKER_VERSION` | Version of the [gocsaf](https://github.com/gocsaf/csaf) (`csaf_checker`) binary to use. Only used for version display when `CSAF_REF` is set. |
+| `CSAF_VALIDATOR_VERSION` | Version of the [csaf-validator-service](https://github.com/csaf-tools/csaf-validator-service) to use for document validation. |
+| `CSAF_REF` | _empty_ | Build `csaf_checker` from source at this git ref (branch, tag, or commit SHA) instead of downloading a release. |
 | `APP_VERSION` | This App's Version. |
 | `CSAF_SHA256` | The expected checksum of the gocsaf tarball. |
 | `RUNTIME_LOG_MAX_BYTES` | 500000 | Maximum total byte size of runtime log stored per scan, 0 for unlimited. |
@@ -243,7 +244,7 @@ Docker Compose reads this file automatically.
 
 Example `.env`:
 
-```
+```bash
 PORT_BACKEND=8080
 PORT_FRONTEND=8081
 SCAN_SLOTS=5

@@ -27,6 +27,7 @@ SPDX-License-Identifier: Apache-2.0
                     v-model="domain"
                     required
                     placeholder="example.com or https://example.com/.well-known/csaf/provider-metadata.json"
+                    autofocus
                   >
                 </div>
 
@@ -290,6 +291,12 @@ export default defineComponent({
     axios
       .get(`${this.backendUrl}/api/information/`)
       .then(response => this.version = response.data)
+    const params = new URLSearchParams(window.location.search)
+    const domainParam = params.get('domain')
+    if (domainParam) {
+      this.domain = domainParam
+      this.startScan()
+    }
   },
   computed: {
     resultClass() {
@@ -405,6 +412,8 @@ export default defineComponent({
     },
     async scanWork() {
       try {
+        this.error = null
+        history.replaceState(null, '', `?domain=${encodeURIComponent(this.domain)}`)
         const response = await axios.post(`${this.backendUrl}/api/scan/start`, {
           domain: this.domain,
           session_id: this.session_id
@@ -427,6 +436,7 @@ export default defineComponent({
         }
       } catch (err: any) {
         this.clearFields()
+        this.result = null
         this.error = err.response?.data?.detail || err.message || 'An error occurred while starting the scan'
         if (err.response?.data?.detail[0]?.msg) {
           this.error = `${err.response?.data?.detail[0]?.input}: ${err.response?.data?.detail[0]?.msg}`
@@ -445,7 +455,9 @@ export default defineComponent({
       this.loading = false
       this.allowInput = true
       this.result = null
+      this.error = null
       this.clearFields()
+      history.replaceState(null, '', window.location.pathname)
     },
     clearFields() {
       this.messagesList = null

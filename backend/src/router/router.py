@@ -13,6 +13,7 @@
 import asyncio
 import logging
 import os
+from pathlib import Path
 
 import httpx2
 from fastapi import APIRouter, HTTPException, status
@@ -33,8 +34,18 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 ENV_CSAF_CHECKER_VERSION = "CSAF_CHECKER_VERSION"
+ENV_CSAF_CHECKER_REF = "CSAF_REF"
 ENV_CSAF_VALIDATOR_VERSION = "CSAF_VALIDATOR_VERSION"
 ENV_CSAF_PROVIDER_VERSION = "APP_VERSION"
+
+# read the revision once at startup
+CSAF_REF = os.getenv(ENV_CSAF_CHECKER_REF, "")
+CSAF_REVISION = "unknown"
+if CSAF_REF:
+    try:
+        CSAF_REVISION = Path('/app/bin/csaf_revision').read_text().strip()
+    except OSError:
+        CSAF_REVISION = CSAF_REF
 
 
 @router.post(
@@ -153,6 +164,8 @@ async def meta_info() -> InformationResponse:
     """
 
     csaf_checker_version = os.getenv(ENV_CSAF_CHECKER_VERSION, "")
+    if CSAF_REF:
+        csaf_checker_version = f"revision {CSAF_REVISION}"
     csaf_validator_version = os.getenv(ENV_CSAF_VALIDATOR_VERSION, "")
     csaf_provider_version = os.getenv(ENV_CSAF_PROVIDER_VERSION, "")
 

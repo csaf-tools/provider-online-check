@@ -11,6 +11,7 @@ services:
       args:
         - CSAF_CHECKER_VERSION=${CSAF_CHECKER_VERSION:?CSAF_CHECKER_VERSION is not set}
         - CSAF_SHA256=${CSAF_SHA256}
+        - CSAF_REF=${CSAF_REF}
     container_name: backend
     ports:
       - "${PORT_BACKEND:-48090}:8000"
@@ -27,6 +28,7 @@ services:
       - CACHE_TIMEOUT_SECONDS=${CACHE_TIMEOUT_SECONDS:-604800}
       - RUNTIME_LOG_MAX_BYTES=${RUNTIME_LOG_MAX_BYTES:-500000}
       - VERBOSE_OUTPUT_MAX_LINES_DEFAULT=${VERBOSE_OUTPUT_MAX_LINES_DEFAULT:-10}
+      - CSAF_REF=${CSAF_REF}
     restart: unless-stopped
     deploy:
       resources:
