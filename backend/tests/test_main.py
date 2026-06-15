@@ -345,6 +345,8 @@ class TestOutputOptions:
 
         assert shortResponse.status_code == 201
         assert len(shortResponseData["runtime_output"]) == 4
+        assert shortResponseData["runtime_output_capped"] is True
+        assert shortResponseData["runtime_output_total_lines"] >= 4
 
     @pytest.mark.asyncio
     async def test_max_lines_maximum(self):
@@ -366,6 +368,8 @@ class TestOutputOptions:
         assert minusOneResponse.status_code == 201
         assert maxLinesResponse.status_code == 201
         assert len(maxLinesData["runtime_output"]) == len(minusOneData["runtime_output"])
+        assert minusOneData["runtime_output_capped"] is False
+        assert minusOneData["runtime_output_total_lines"] == len(minusOneData["runtime_output"])
 
 
 class TestDomainValidation:

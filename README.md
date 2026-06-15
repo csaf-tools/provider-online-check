@@ -240,6 +240,7 @@ Docker Compose reads this file automatically.
 | `LINTER_SHELLCHECK_OPTS` | Shellcheck rules that should be ignored. |
 | `DOMAIN_BLOCKLIST` | List of domains that are not to be scanned. See section `Blocking Domains` for more info |
 | `VERBOSE_OUTPUT_MAX_LINES_DEFAULT` | Default value for the maximum amount of verbose runtime output displayed at once. Set to -1 for full logs |
+| `VERBOSE_OUTPUT_MAX_LINES_DONE_DEFAULT` | Default value for the maximum amount of verbose runtime output displayed at once for completed (DONE/CACHED) scans. Set to -1 for full logs |
 | `FOOTER_TEXT` | Custom HTML content appended to the footer of the frontend. |
 
 Example `.env`:

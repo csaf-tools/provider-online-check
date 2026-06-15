@@ -3,7 +3,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import os
 from typing import Annotated
 
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -30,12 +29,12 @@ class ScanRequest(BaseModel):
     ] = 0
 
     max_lines: Annotated[
-        int,
+        int | None,
         Field(
-            description="The maximum amount of runtime output lines that should be returned in the response. Set to -1 to get all lines",
+            description="The maximum amount of runtime output lines that should be returned in the response. Set to -1 to get all lines. Omit to use the server default (10 for running scans, 10000 for completed scans)",
             ge=-1,
         ),
-    ] = int(os.environ.get("VERBOSE_OUTPUT_MAX_LINES_DEFAULT", "10"))
+    ] = None
 
     prioritize_newest_lines: Annotated[
         bool, Field(description="Prioritize newer runtime output when shortening")
