@@ -133,11 +133,12 @@ SPDX-License-Identifier: Apache-2.0
                       <button class="btn btn-sm btn-outline-secondary" @click="downloadLog">Download</button>
                     </div>
                     <div class="card-text log-card-size overflow-scroll">
-                      <p v-if="!result?.runtime_output_capped">This is the complete log (stderr) output of <code>csaf_checker</code>. All timestamps are in UTC.</p>
-                      <p v-else>This is <strong>only a part</strong> of the log (stderr) output of the <code>csaf_checker</code>.
-                        All timestamps are in UTC.<br />
-                        Use Copy to clipboard or Download to get the complete log.
-                      </p>
+                      <p v-if="!result?.runtime_output_capped">This is the complete log (stderr)
+                        output of <code>csaf_checker</code> ({{ result?.runtime_output_total_lines }} lines).</p>
+                      <p v-else>This is <strong>only a portion of</strong> the log (stderr) output of <code>csaf_checker</code>,
+                        showing the last {{ result?.runtime_output?.length }} of {{ result?.runtime_output_total_lines }} lines.
+                        Use the buttons <em>Copy to clipboard</em> or <em>Download</em> to get the complete log.</p>
+                      <p>All timestamps are in UTC.</p>
                       <pre>{{ result?.runtime_output?.join('\n') }}</pre>
                     </div>
                   </div>
