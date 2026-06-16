@@ -129,11 +129,24 @@ SPDX-License-Identifier: Apache-2.0
                   <div class="card card-body">
                     <div class="cart-title d-flex gap-2 mb-2">
                       <h5 class="me-auto log-header">Log output</h5>
-                      <button class="btn btn-sm btn-outline-secondary" @click="copyLogToClipboard">Copy to clipboard</button>
-                      <button class="btn btn-sm btn-outline-secondary" @click="downloadLog">Download</button>
+                      <button class="btn btn-sm btn-outline-secondary" @click="copyLogToClipboard">Copy to clipboard
+                        <span v-if="fetchLogCBStatus === 'loading'" class="spinner-border spinner-border-sm ms-2" role="status"></span>
+                        <span v-if="fetchLogCBStatus === 'done'" role="status">✓</span>
+                        <span v-if="fetchLogCBStatus === 'error'">❌</span>
+                      </button>
+                      <button class="btn btn-sm btn-outline-secondary" @click="downloadLog">Download
+                        <span v-if="fetchLogDLStatus === 'loading'" class="spinner-border spinner-border-sm ms-2" role="status"></span>
+                        <span v-if="fetchLogDLStatus === 'done'" role="status">✓</span>
+                        <span v-if="fetchLogDLStatus === 'error'">❌</span>
+                      </button>
                     </div>
                     <div class="card-text log-card-size overflow-scroll">
-                      <p>This is the complete log (stderr) output of <code>csaf_checker</code>. All timestamps are in UTC.</p>
+                      <p v-if="!result?.runtime_output_capped">This is the complete log (stderr)
+                        output of <code>csaf_checker</code> ({{ result?.runtime_output_total_lines }} lines).</p>
+                      <p v-else>This is <strong>only a portion of</strong> the log (stderr) output of <code>csaf_checker</code>,
+                        showing the last {{ result?.runtime_output?.length }} of {{ result?.runtime_output_total_lines }} lines.
+                        Use the buttons <em>Copy to clipboard</em> or <em>Download</em> to get the complete log.</p>
+                      <p>All timestamps are in UTC.</p>
                       <pre>{{ result?.runtime_output?.join('\n') }}</pre>
                     </div>
                   </div>
@@ -251,6 +264,8 @@ interface AppData {
   isShowResultOutput: boolean;
   isShowLogOutput: boolean;
   isShowCacheInfo: boolean;
+  fetchLogCBStatus: string;
+  fetchLogDLStatus: string;
   version: {
     csaf_checker_version: string;
     csaf_validator_version: string;
@@ -285,6 +300,8 @@ export default defineComponent({
       isShowResultOutput: false,
       isShowLogOutput: false,
       isShowCacheInfo: false,
+      fetchLogCBStatus: '',
+      fetchLogDLStatus: '',
     } as AppData
   },
   async mounted() {
@@ -468,6 +485,8 @@ export default defineComponent({
       this.isShowResultOutput = false
       this.isShowLogOutput = false
       this.isShowCacheInfo = false
+      this.fetchLogCBStatus = ''
+      this.fetchLogDLStatus = ''
     },
     parseResultsChecker(results_checker: string): ResultCheckerData {
       return JSON.parse(results_checker)
@@ -524,6 +543,19 @@ export default defineComponent({
     filterMessageListByNums(nums: number[]): MessageData[] {
       return this.messagesList?.filter((msg: MessageData) => nums.includes(msg.num)) ?? []
     },
+    async fetchLog(): Promise<string> {
+      let output = this.result?.runtime_output
+      if (this.result?.runtime_output_capped) {
+        const response = await axios.post(`${this.backendUrl}/api/scan/start`, {
+          domain: this.domain,
+          session_id: this.session_id,
+          max_lines: -1
+        }, { timeout: 20000 })
+        output = response?.data?.runtime_output
+      }
+      // runtime_output is a list, join it by newlines
+      return output?.join('\n') ?? ''
+    },
     copyToClipboard(text: string) {
       if (navigator.clipboard) {
         // This is the "normal" modern method, but does not work with HTTP (development setups)
@@ -542,9 +574,16 @@ export default defineComponent({
       // results_checker is a string (not a JSON object), pass it directly
       this.copyToClipboard(this.result?.results_checker ?? '')
     },
-    copyLogToClipboard() {
-      // runtime_output is a list, join it by newlines
-      this.copyToClipboard(this.result?.runtime_output?.join('\n') ?? '')
+    async copyLogToClipboard() {
+      this.fetchLogCBStatus = 'loading'
+      try {
+        const output = await this.fetchLog()
+        this.copyToClipboard(output)
+        this.fetchLogCBStatus = 'done'
+      } catch (err: any) {
+        this.fetchLogCBStatus = 'error'
+        console.error(err)
+      }
     },
     sanitizeFilename(name: string): string {
       return name.replace(/^https?:\/\//, '').replace(/[^a-zA-Z0-9._-]/g, '_')
@@ -557,13 +596,21 @@ export default defineComponent({
       a.click()
       URL.revokeObjectURL(a.href)
     },
-    downloadLog() {
-      const blob = new Blob([this.result?.runtime_output?.join('\n') ?? ''], { type: 'text/plain' })
-      const a = document.createElement('a')
-      a.href = URL.createObjectURL(blob)
-      a.download = `${this.sanitizeFilename(this.domain ?? '')}-log.txt`
-      a.click()
-      URL.revokeObjectURL(a.href)
+    async downloadLog() {
+      this.fetchLogDLStatus = 'loading'
+      try {
+        const output = await this.fetchLog()
+        const blob = new Blob([output], { type: 'text/plain' })
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(blob)
+        a.download = `${this.sanitizeFilename(this.domain ?? '')}-log.txt`
+        a.click()
+        URL.revokeObjectURL(a.href)
+        this.fetchLogDLStatus = 'done'
+      } catch (err: any) {
+        this.fetchLogDLStatus = 'error'
+        console.error(err)
+      }
     },
     formatTime(ts: number) {
       return new Date(ts * 1000).toLocaleString()
