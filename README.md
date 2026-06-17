@@ -97,7 +97,7 @@ npm run coverage-single
 The version number must adhere to [semantic versioning 2.0.0](https://semver.org/).
 
 * In `.env` set `APP_VERSION` to the new release version
-* In `frontend/package.json` set the version (line 3) to the new release version
+* In `frontend/package.json` (line 3) and `frontend/package-lock.json` (lines 3 and 9) set the version  to the new release version
 * Commit
 * Make a Pull Request, request reviews
 * Merge into branch `main`
