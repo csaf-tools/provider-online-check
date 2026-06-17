@@ -37,9 +37,9 @@ IMAGE_TAG_VALKEY="valkey/valkey:8-alpine"
 
 # Build Images
 docker build -t "$IMAGE_TAG_SYFT" ./dev/sboms/
-docker build -t "$IMAGE_TAG_BACKEND" ./backend/
-docker build -t "$IMAGE_TAG_FRONTEND" ./frontend/
-docker build -t "$IMAGE_TAG_VALIDATOR" ./validator/
+docker compose build backend
+docker compose build frontend
+docker compose build validator
 
 # Run Syft container
 cleanup()
