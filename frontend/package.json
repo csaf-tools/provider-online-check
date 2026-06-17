@@ -1,6 +1,6 @@
 {
   "name": "csaf-provider-scan-frontend",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "CSAF Provider Scan Frontend",
   "scripts": {
     "dev": "vite",
