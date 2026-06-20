@@ -30,6 +30,11 @@ fi
 IMAGE_TAG_SYFT="syft-sboms-image"
 CONTAINER_NAME_SYFT="syft-sboms-active-container"
 
+# Read settings from environment variable file
+set -a
+. "$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )/.env"
+set +a
+
 IMAGE_TAG_BACKEND="csaf-provider-online-check-backend"
 IMAGE_TAG_FRONTEND="csaf-provider-online-check-frontend"
 IMAGE_TAG_VALIDATOR="csaf-provider-online-check-validator"
@@ -37,9 +42,9 @@ IMAGE_TAG_VALKEY="valkey/valkey:8-alpine"
 
 # Build Images
 docker build -t "$IMAGE_TAG_SYFT" ./dev/sboms/
-docker build -t "$IMAGE_TAG_BACKEND" ./backend/
+docker build -t "$IMAGE_TAG_BACKEND" --build-arg "CSAF_SHA256=${CSAF_SHA256}" --build-arg "CSAF_CHECKER_VERSION=${CSAF_CHECKER_VERSION}" ./backend/
 docker build -t "$IMAGE_TAG_FRONTEND" ./frontend/
-docker build -t "$IMAGE_TAG_VALIDATOR" ./validator/
+docker build -t "$IMAGE_TAG_VALIDATOR" --build-arg "CSAF_VALIDATOR_VERSION=${CSAF_VALIDATOR_VERSION}" ./validator/
 
 # Run Syft container
 cleanup()
