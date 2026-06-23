@@ -37,14 +37,11 @@ set +a
 
 IMAGE_TAG_BACKEND="csaf-provider-online-check-backend"
 IMAGE_TAG_FRONTEND="csaf-provider-online-check-frontend"
-IMAGE_TAG_VALIDATOR="csaf-provider-online-check-validator"
-IMAGE_TAG_VALKEY="valkey/valkey:8-alpine"
 
 # Build Images
 docker build -t "$IMAGE_TAG_SYFT" ./dev/sboms/
 docker build -t "$IMAGE_TAG_BACKEND" --build-arg "CSAF_SHA256=${CSAF_SHA256}" --build-arg "CSAF_CHECKER_VERSION=${CSAF_CHECKER_VERSION}" ./backend/
 docker build -t "$IMAGE_TAG_FRONTEND" ./frontend/
-docker build -t "$IMAGE_TAG_VALIDATOR" --build-arg "CSAF_VALIDATOR_VERSION=${CSAF_VALIDATOR_VERSION}" ./validator/
 
 # Run Syft container
 cleanup()
@@ -67,11 +64,3 @@ docker exec "$CONTAINER_NAME_SYFT" syft "$IMAGE_TAG_BACKEND" -o spdx-json="$GENE
 info "Generating SBOMs for frontend"
 docker exec "$CONTAINER_NAME_SYFT" syft "$IMAGE_TAG_FRONTEND" -o cyclonedx-json="$GENERATED_FILE_PATH"sbom-frontend-cyclonedx.json
 docker exec "$CONTAINER_NAME_SYFT" syft "$IMAGE_TAG_FRONTEND" -o spdx-json="$GENERATED_FILE_PATH"sbom-frontend-spdx.json
-
-info "Generating SBOMs for validator"
-docker exec "$CONTAINER_NAME_SYFT" syft "$IMAGE_TAG_VALIDATOR" -o cyclonedx-json="$GENERATED_FILE_PATH"sbom-validator-cyclonedx.json
-docker exec "$CONTAINER_NAME_SYFT" syft "$IMAGE_TAG_VALIDATOR" -o spdx-json="$GENERATED_FILE_PATH"sbom-validator-spdx.json
-
-info "Generating SBOMs for valkey"
-docker exec "$CONTAINER_NAME_SYFT" syft "$IMAGE_TAG_VALKEY" -o cyclonedx-json="$GENERATED_FILE_PATH"sbom-valkey-cyclonedx.json
-docker exec "$CONTAINER_NAME_SYFT" syft "$IMAGE_TAG_VALKEY" -o spdx-json="$GENERATED_FILE_PATH"sbom-valkey-spdx.json
