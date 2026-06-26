@@ -70,11 +70,14 @@ SPDX-License-Identifier: Apache-2.0
                   <div>Start time of the check: {{ scanTime }}</div>
                 </div>
 
-                <h4 :class="trustedProviderStatus" class="small-margin-top medium-font-size">
+                <h4 v-if="role" :class="trustedProviderStatus" class="small-margin-top medium-font-size">
                   <span v-if="trustedProviderStatus === 'text-green'">PASSED:</span>
                   <span v-else>FAILED:</span>
                   {{ role }}
                 </h4>
+                <!-- target is not a CSAF provider -->
+                <h4 v-if="!role" class="text-warning small-margin-top medium-font-size">No CSAF endpoint found</h4>
+                <p v-if="!role">The target does not appear to be a CSAF publisher or provider. No provider metadata could be found or parsed.</p>
                 <MessageGroup
                   v-for="group of groupedTrustedProviderMessages"
                   :key="group.num"
@@ -501,12 +504,18 @@ export default defineComponent({
       }
     },
     setPassed(parsedResultsChecker: ResultCheckerData) {
-      this.passed = parsedResultsChecker?.domains?.[0]?.passed ?? false;
+      this.passed = parsedResultsChecker?.domains?.[0]?.passed ?? false
     },
     setRole(parsedResultsChecker: ResultCheckerData) {
-      this.role = parsedResultsChecker?.domains?.[0]?.role ?? "Unknown Role";
-      this.role = this.role.replace('csaf', 'CSAF').replaceAll('_', ' ');
-      this.role = this.role.replace(/\b\w/g, (c: string) => c.toUpperCase());
+      const rawRole = parsedResultsChecker?.domains?.[0]?.role ?? null
+      if (!rawRole) {
+        // not a CSAF provider
+        this.role = null
+        return
+      }
+      let role = rawRole.replace('csaf', 'CSAF').replaceAll('_', ' ')
+      role = role.replace(/\b\w/g, (c: string) => c.toUpperCase())
+      this.role = role
     },
     initializeListeners() {
       const allMessagesRef = this.$refs.allMessagesRef as HTMLElement
@@ -619,10 +628,10 @@ export default defineComponent({
       if (endTime === 0) {
         endTime = Date.now() / 1000
       }
-      const duration = endTime - startTime;
-      const hours = Math.floor(duration / 3600);
-      const minutes = Math.floor((duration % 3600) / 60);
-      const seconds = Math.floor((duration % 60));
+      const duration = endTime - startTime
+      const hours = Math.floor(duration / 3600)
+      const minutes = Math.floor((duration % 3600) / 60)
+      const seconds = Math.floor((duration % 60))
 
       return [
           hours && `${hours}h`,
@@ -630,7 +639,7 @@ export default defineComponent({
           `${seconds}s`,
       ]
           .filter(Boolean)
-          .join(' ');
+          .join(' ')
     }
   }
 })
