@@ -107,6 +107,34 @@ describe("Testing App...", () => {
         expect(app.vm.domain).toBe('example.com')
 
     })
+    test('startScan DONE_CHECKER not a CSAF provider', async () => {
+        vi.spyOn(axios, 'post').mockResolvedValue({
+            data: {
+                status: "DONE_CHECKER",
+                domain: "example.com",
+                results_checker: JSON.stringify({
+                    domains: [{
+                        passed: false,
+                        requirements: [{
+                            num: 0,
+                            description: "Invalid provider metadata",
+                            messages: [
+                                { type: 1, text: "Fetching provider-metadata.json failed: 404 Not Found" },
+                                { type: 2, text: "Could not parse the Provider-Metadata.json of: example.com" }
+                            ]
+                        }]
+                    }],
+                    date: "2026-06-24T15:13:40Z"
+                })
+            }
+        })
+        app.vm.startScan()
+        await flushPromises()
+        expect(app.vm.role).toBeNull()
+        expect(app.vm.messagesList).toHaveLength(2)
+        expect(app.find('.text-warning').exists()).toBe(true)
+        expect(app.find('.text-warning').text()).toContain('No CSAF endpoint found')
+    })
     test('startScan ERROR', async () => {
         vi.spyOn(axios, 'post').mockImplementation(
             () => new Promise(() =>
@@ -240,6 +268,14 @@ describe("Testing App...", () => {
         const data = { date:"2026-05-22", domains: [{ passed: true }] }
         app.vm.setPassed(data)
         expect(app.vm.passed).toBe(true)
+    })
+    test("setRole: absent role stays null", () => {
+        app.vm.setRole({ date: "2026-06-24", domains: [{ passed: false, requirements: [] }] })
+        expect(app.vm.role).toBeNull()
+    })
+    test("setRole: present role is formatted", () => {
+        app.vm.setRole({ date: "2026-06-24", domains: [{ passed: false, role: "csaf_trusted_provider", requirements: [] }] })
+        expect(app.vm.role).toBe("CSAF Trusted Provider")
     })
     test("displayAllMessagesTitle", () => {
         expect(app.vm.displayAllMessagesTitle).toBe('Show all messages')
