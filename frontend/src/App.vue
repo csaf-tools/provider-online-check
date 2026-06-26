@@ -504,18 +504,18 @@ export default defineComponent({
       }
     },
     setPassed(parsedResultsChecker: ResultCheckerData) {
-      this.passed = parsedResultsChecker?.domains?.[0]?.passed ?? false;
+      this.passed = parsedResultsChecker?.domains?.[0]?.passed ?? false
     },
     setRole(parsedResultsChecker: ResultCheckerData) {
-      const rawRole = parsedResultsChecker?.domains?.[0]?.role ?? null;
+      const rawRole = parsedResultsChecker?.domains?.[0]?.role ?? null
       if (!rawRole) {
         // not a CSAF provider
-        this.role = null;
-        return;
+        this.role = null
+        return
       }
-      let role = rawRole.replace('csaf', 'CSAF').replaceAll('_', ' ');
-      role = role.replace(/\b\w/g, (c: string) => c.toUpperCase());
-      this.role = role;
+      let role = rawRole.replace('csaf', 'CSAF').replaceAll('_', ' ')
+      role = role.replace(/\b\w/g, (c: string) => c.toUpperCase())
+      this.role = role
     },
     initializeListeners() {
       const allMessagesRef = this.$refs.allMessagesRef as HTMLElement
@@ -628,10 +628,10 @@ export default defineComponent({
       if (endTime === 0) {
         endTime = Date.now() / 1000
       }
-      const duration = endTime - startTime;
-      const hours = Math.floor(duration / 3600);
-      const minutes = Math.floor((duration % 3600) / 60);
-      const seconds = Math.floor((duration % 60));
+      const duration = endTime - startTime
+      const hours = Math.floor(duration / 3600)
+      const minutes = Math.floor((duration % 3600) / 60)
+      const seconds = Math.floor((duration % 60))
 
       return [
           hours && `${hours}h`,
@@ -639,7 +639,7 @@ export default defineComponent({
           `${seconds}s`,
       ]
           .filter(Boolean)
-          .join(' ');
+          .join(' ')
     }
   }
 })
