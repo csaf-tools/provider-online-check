@@ -1,0 +1,376 @@
+{
+  "domains": [
+    {
+      "name": "intevation.de",
+      "publisher": {
+        "category": "vendor",
+        "name": "Intevation GmbH",
+        "namespace": "https://intevation.de",
+        "contact_details": "mailto:security@intevation.de, encryption via OpenPGP: https://intevation.de/.well-known/openpgpkey/hu/t5s8ztdbon8yzntexy6oz5y48etqsnbb"
+      },
+      "role": "csaf_trusted_provider",
+      "requirements": [
+        {
+          "num": 1,
+          "description": "Valid CSAF documents",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All advisories validated fine."
+            }
+          ]
+        },
+        {
+          "num": 2,
+          "description": "Filename",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All found filenames are conforming."
+            }
+          ]
+        },
+        {
+          "num": 3,
+          "description": "TLS",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All tested URLs were HTTPS."
+            }
+          ]
+        },
+        {
+          "num": 4,
+          "description": "TLP:WHITE",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All advisories labeled TLP:WHITE were freely accessible."
+            }
+          ]
+        },
+        {
+          "num": 5,
+          "description": "TLP:AMBER and TLP:RED",
+          "messages": [
+            {
+              "type": 0,
+              "text": "No advisories labeled TLP:AMBER or TLP:RED tested for accessibility."
+            }
+          ]
+        },
+        {
+          "num": 6,
+          "description": "Redirects",
+          "messages": [
+            {
+              "type": 0,
+              "text": "No redirections found."
+            }
+          ]
+        },
+        {
+          "num": 7,
+          "description": "provider-metadata.json",
+          "messages": [
+            {
+              "type": 0,
+              "text": "Found good provider metadata."
+            }
+          ]
+        },
+        {
+          "num": 8,
+          "description": "security.txt",
+          "messages": [
+            {
+              "type": 0,
+              "text": "Found valid security.txt within the well-known directory"
+            }
+          ]
+        },
+        {
+          "num": 9,
+          "description": "/.well-known/csaf/provider-metadata.json",
+          "messages": [
+            {
+              "type": 0,
+              "text": "Found /.well-known/csaf/provider-metadata.json"
+            }
+          ]
+        },
+        {
+          "num": 10,
+          "description": "DNS path",
+          "messages": [
+            {
+              "type": 2,
+              "text": "Fetching https://csaf.data.security.intevation.de failed: Get \"https://csaf.data.security.intevation.de\": dial tcp: lookup csaf.data.security.intevation.de on 127.0.0.11:53: no such host"
+            }
+          ]
+        },
+        {
+          "num": 11,
+          "description": "One folder per year",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All CSAF files are in the right folders."
+            }
+          ]
+        },
+        {
+          "num": 12,
+          "description": "index.txt",
+          "messages": [
+            {
+              "type": 2,
+              "text": "Fetching index.txt failed: https://intevation.de/.well-known/csaf/index.txt not found."
+            }
+          ]
+        },
+        {
+          "num": 13,
+          "description": "changes.csv",
+          "messages": [
+            {
+              "type": 2,
+              "text": "Fetching changes.csv failed: https://intevation.de/.well-known/csaf/changes.csv not found."
+            }
+          ]
+        },
+        {
+          "num": 14,
+          "description": "Directory listings",
+          "messages": [
+            {
+              "type": 2,
+              "text": "Fetching https://intevation.de/.well-known/csaf/white/2024/ failed. Status code 403 (403 Forbidden)"
+            },
+            {
+              "type": 2,
+              "text": "Fetching https://intevation.de/.well-known/csaf/white/2026/ failed. Status code 403 (403 Forbidden)"
+            },
+            {
+              "type": 2,
+              "text": "Fetching https://intevation.de/.well-known/csaf/white/2025/ failed. Status code 403 (403 Forbidden)"
+            },
+            {
+              "type": 2,
+              "text": "Not listed advisories: https://intevation.de/.well-known/csaf/white/2024/intevation-os-2024-0001.json, https://intevation.de/.well-known/csaf/white/2025/intevation-os-2025-0001.json, https://intevation.de/.well-known/csaf/white/2025/intevation-os-2025-0002.json, https://intevation.de/.well-known/csaf/white/2025/intevation-os-2025-0003.json, https://intevation.de/.well-known/csaf/white/2025/intevation-os-2025-0004.json, https://intevation.de/.well-known/csaf/white/2026/intevation-openslides-2026-001.json"
+            }
+          ]
+        },
+        {
+          "num": 15,
+          "description": "ROLIE feed",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All checked ROLIE feeds validated fine."
+            }
+          ]
+        },
+        {
+          "num": 16,
+          "description": "ROLIE service document",
+          "messages": [
+            {
+              "type": 0,
+              "text": "ROLIE service document validated fine."
+            }
+          ]
+        },
+        {
+          "num": 17,
+          "description": "ROLIE category document",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All checked ROLIE category documents exist."
+            }
+          ]
+        },
+        {
+          "num": 18,
+          "description": "Integrity",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All checksums match."
+            }
+          ]
+        },
+        {
+          "num": 19,
+          "description": "Signatures",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All signatures verified."
+            }
+          ]
+        },
+        {
+          "num": 20,
+          "description": "Public OpenPGP Key",
+          "messages": [
+            {
+              "type": 0,
+              "text": "1 public OpenPGP key(s) loaded."
+            }
+          ]
+        }
+      ],
+      "passed": true,
+      "evaluated_rules": {
+        "condition": "all",
+        "includes": [
+          {
+            "condition": "all",
+            "includes": [
+              {
+                "condition": "all",
+                "includes": [
+                  {
+                    "condition": "all",
+                    "requirement": 1,
+                    "passed": true
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 2,
+                    "passed": true
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 3,
+                    "passed": true
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 4,
+                    "passed": true
+                  }
+                ]
+              },
+              {
+                "condition": "all",
+                "includes": [
+                  {
+                    "condition": "all",
+                    "requirement": 5,
+                    "passed": true
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 6,
+                    "passed": true
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 7,
+                    "passed": true
+                  }
+                ]
+              },
+              {
+                "condition": "one",
+                "includes": [
+                  {
+                    "condition": "all",
+                    "requirement": 8,
+                    "passed": true
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 9,
+                    "passed": true
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 10,
+                    "passed": false
+                  }
+                ]
+              },
+              {
+                "condition": "one",
+                "includes": [
+                  {
+                    "condition": "all",
+                    "includes": [
+                      {
+                        "condition": "all",
+                        "requirement": 11,
+                        "passed": true
+                      },
+                      {
+                        "condition": "all",
+                        "requirement": 12,
+                        "passed": false
+                      },
+                      {
+                        "condition": "all",
+                        "requirement": 13,
+                        "passed": false
+                      },
+                      {
+                        "condition": "all",
+                        "requirement": 14,
+                        "passed": false
+                      }
+                    ]
+                  },
+                  {
+                    "condition": "all",
+                    "includes": [
+                      {
+                        "condition": "all",
+                        "requirement": 15,
+                        "passed": true
+                      },
+                      {
+                        "condition": "all",
+                        "requirement": 16,
+                        "passed": true
+                      },
+                      {
+                        "condition": "all",
+                        "requirement": 17,
+                        "passed": true
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "condition": "all",
+            "includes": [
+              {
+                "condition": "all",
+                "requirement": 18,
+                "passed": true
+              },
+              {
+                "condition": "all",
+                "requirement": 19,
+                "passed": true
+              },
+              {
+                "condition": "all",
+                "requirement": 20,
+                "passed": true
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "version": "3.5.2-57-gf048ad9",
+  "date": "2026-06-30T07:43:40.47353666Z"
+}

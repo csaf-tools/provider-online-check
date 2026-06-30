@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="message-group small-margin-top">
+  <div class="message-group small-margin-top" :class="passed ? 'group-passed' : 'group-failed'">
     <div class="message-group-header">
       <span class="requirement-desc">{{ description }}</span>
       <span v-if="messages.length > 0" class="message-counts ms-2">
@@ -51,6 +51,7 @@ export default defineComponent({
     num: { type: Number, required: true },
     description: { type: String, required: true },
     messages: { type: Array as () => { text: string; type: number }[], required: true },
+    passed: { type: Boolean, required: true },
   },
   data() {
     return {
@@ -117,5 +118,11 @@ export default defineComponent({
 }
 .toggle-btn:hover {
   text-decoration: underline;
+}
+.group-failed {
+  background-color: lightyellow;
+}
+.group-passed {
+  background-color: #90ee9024;
 }
 </style>

@@ -84,6 +84,7 @@ SPDX-License-Identifier: Apache-2.0
                   :num="group.num"
                   :description="group.description"
                   :messages="group.messages"
+                  :passed="group.passed"
                 />
 
                 <p class="small-margin-top">
@@ -234,13 +235,15 @@ import axios from 'axios'
 import { defineComponent } from 'vue'
 import MessageLine from './MessageLine.vue'
 import MessageGroup from './MessageGroup.vue'
-import VersionDisplay from './VersionDisplay.vue';
+import VersionDisplay from './VersionDisplay.vue'
+import { relevantRequirements, type EvaluatedRule } from './evaluatedRules'
 
 interface ResultCheckerData {
   domains: {
     requirements: {num: number, description: string, messages: {text: string, type: number}[]}[],
     passed: boolean;
     role: string;
+    evaluated_rules?: EvaluatedRule;
   }[];
   date: string;
 }
@@ -249,6 +252,7 @@ interface RequirementGroup {
   num: number;
   description: string;
   messages: { text: string; type: number }[];
+  passed: boolean;
 }
 
 interface AppData {
@@ -260,6 +264,7 @@ interface AppData {
   error: any;
   messagesList: null | MessageData[];
   requirementGroups: RequirementGroup[];
+  relevantRequirementNums: number[] | null;
   scanTime: null | string;
   passed: boolean;
   role: string | null;
@@ -295,6 +300,7 @@ export default defineComponent({
       error: null,
       messagesList: null,
       requirementGroups: [],
+      relevantRequirementNums: null,
       scanTime: null,
       passed: false,
       role: null,
@@ -347,62 +353,23 @@ export default defineComponent({
       return import.meta.env.VITE_FOOTER_TEXT || ''
     },
     trustedProviderMessages() {
-      if (this.messagesList) {
-        const trustedProviderMessages = []
-
-        // requirements 1 (Valid CSAF document), 2 (Filename), 3 (TLS), 4 (TLP:WHITE)
-        // Show all messages
-        trustedProviderMessages.push(...this.filterMessageListByNums([1, 2, 3, 4]))
-
-        // requirements 5 (TLP:AMBER and TLP:RED), 6 (Redirects) and 7 (provider-metadata.json)
-        // Show all messages
-        trustedProviderMessages.push(...this.filterMessageListByNums([5, 6, 7]))
-
-        // requirements min one of 8 (security.txt), 9 (Well-known URL for provider-metadata.json), 10 (DNS path)
-        // One must succeed, then show that message, else show all messages
-        const req8Messages = this.filterMessageListByNums([8])
-        const req9Messages = this.filterMessageListByNums([9])
-        const req10Messages = this.filterMessageListByNums([10])
-        if (req8Messages.length > 0  && req8Messages.filter((msg:MessageData) => msg.type === 2).length === 0) {
-          trustedProviderMessages.push(...req8Messages)
-        } else if (req9Messages.length > 0  && req9Messages.filter((msg:MessageData) => msg.type === 2).length === 0) {
-          trustedProviderMessages.push(...req9Messages)
-        } else if (req10Messages.length > 0  && req10Messages.filter((msg:MessageData) => msg.type === 2).length === 0) {
-          trustedProviderMessages.push(...req10Messages)
-        } else {
-          trustedProviderMessages.push(...req8Messages, ...req9Messages, ...req10Messages)
-        }
-
-        // requirements dir based 11 (One folder per year), 12 (index.txt), 13 (changes.csv), 14 (Directory listings)
-        //           or ROLIE based 15 (ROLIE feed), 16 (ROLIE service document), 17 (ROLIE category document)
-        // Show the dir-based messages or show the ROLIE based messages
-        const dirBaseMessages = this.filterMessageListByNums([11, 12, 13, 14])
-        const rolieBaseMessages = this.filterMessageListByNums([15, 16, 17])
-        if (rolieBaseMessages.filter((msg:MessageData) => msg.type === 2).length
-            <= dirBaseMessages.filter((msg: MessageData) => msg.type === 2).length) {
-          trustedProviderMessages.push(...rolieBaseMessages)
-        } else {
-          trustedProviderMessages.push(...dirBaseMessages)
-        }
-
-        // requirements 18 (Integrity), 19 (Signatures), 20 (Public OpenPGP Key)
-        // Show all messages
-        trustedProviderMessages.push(...this.filterMessageListByNums([18, 19, 20]))
-        return trustedProviderMessages
-      }
-      return null
+      const self = this as any  // FIXME
+      if (!self.messagesList) return null
+      if (!self.relevantRequirementNums) return self.messagesList
+      return self.filterMessageListByNums(self.relevantRequirementNums)
     },
     groupedTrustedProviderMessages(): RequirementGroup[] {
       const flatMessages = this.trustedProviderMessages
       if (!flatMessages) return []
       const groupMap = new Map<number, RequirementGroup>()
       for (const g of this.requirementGroups) {
-        groupMap.set(g.num, { num: g.num, description: g.description, messages: [] })
+        groupMap.set(g.num, { num: g.num, description: g.description, messages: [], passed: true })
       }
       for (const msg of flatMessages) {
         const group = groupMap.get(msg.num)
         if (group) {
           group.messages.push({ text: msg.text, type: msg.type })
+          if (msg.type === 2) group.passed = false
         }
       }
       return [...groupMap.values()].filter(g => g.messages.length > 0)
@@ -482,6 +449,7 @@ export default defineComponent({
     clearFields() {
       this.messagesList = null
       this.requirementGroups = []
+      this.relevantRequirementNums = null
       this.scanTime = null
       this.passed = false
       this.isShowAllMessages = false
@@ -532,8 +500,13 @@ export default defineComponent({
       logOutputRef?.addEventListener('shown.bs.collapse', () => { logOutputRef.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) })
     },
     extractMessagesFromResultsChecker(results_checker: ResultCheckerData) {
-      if (results_checker.domains?.[0]?.requirements) {
-        this.extractMessages(results_checker.domains[0].requirements)
+      const domain = results_checker.domains?.[0]
+      if (domain?.requirements) {
+        this.extractMessages(domain.requirements)
+        const evaluatedRules = domain.evaluated_rules
+        if (evaluatedRules) {
+          this.relevantRequirementNums = relevantRequirements(evaluatedRules)
+        }
       } else {
         this.messagesList = null
       }

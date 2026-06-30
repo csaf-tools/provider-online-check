@@ -1,0 +1,38 @@
+{
+  "domains": [
+    {
+      "name": "example.com",
+      "requirements": [
+        {
+          "num": 0,
+          "description": "Invalid provider metadata",
+          "messages": [
+            {
+              "type": 1,
+              "text": "Unexpected situation while loading provider-metadata.json: fetching \"https://example.com/.well-known/csaf/provider-metadata.json\" failed: 404 Not Found (404)"
+            },
+            {
+              "type": 1,
+              "text": "Unexpected situation while loading provider-metadata.json: Fetching \"https://example.com/.well-known/security.txt\" failed: 404 Not Found (404)"
+            },
+            {
+              "type": 1,
+              "text": "Unexpected situation while loading provider-metadata.json: Fetching \"https://example.com/security.txt\" failed: 404 Not Found (404)"
+            },
+            {
+              "type": 1,
+              "text": "Unexpected situation while loading provider-metadata.json: fetching \"https://csaf.data.security.example.com\" failed: Get \"https://csaf.data.security.example.com\": dial tcp: lookup csaf.data.security.example.com on 127.0.0.11:53: no such host"
+            },
+            {
+              "type": 2,
+              "text": "Could not parse the Provider-Metadata.json of: example.com"
+            }
+          ]
+        }
+      ],
+      "passed": false
+    }
+  ],
+  "version": "3.5.2-57-gf048ad9",
+  "date": "2026-06-30T07:43:21.08348165Z"
+}
