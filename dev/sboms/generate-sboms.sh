@@ -10,6 +10,11 @@ set -euo pipefail
 # Import utils package
 . "$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )/../util.sh"
 
+if ! command -v jq &> /dev/null; then
+    error "jq is required but not installed."
+    exit 1
+fi
+
 # Generates SBOMs in CycloneDX and SPDX formats via syft
 # Uses a Docker-in-Docker approach to build and generate SBOMs inside a container environment
 # Call this script only from its associated make target
