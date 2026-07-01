@@ -352,11 +352,10 @@ export default defineComponent({
     footerText() {
       return import.meta.env.VITE_FOOTER_TEXT || ''
     },
-    trustedProviderMessages() {
-      const self = this as any  // FIXME
-      if (!self.messagesList) return null
-      if (!self.relevantRequirementNums) return self.messagesList
-      return self.filterMessageListByNums(self.relevantRequirementNums)
+    trustedProviderMessages(): null | MessageData[] {
+      if (!this.messagesList) return null
+      if (!this.relevantRequirementNums) return this.messagesList
+      return this.filterMessageListByNums(this.relevantRequirementNums)
     },
     groupedTrustedProviderMessages(): RequirementGroup[] {
       const flatMessages = this.trustedProviderMessages
