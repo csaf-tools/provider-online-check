@@ -14,14 +14,14 @@ const makeMessages = (n: number) =>
 describe('MessageGroup', () => {
     test('renders requirement header', () => {
         const wrapper = mount(MessageGroup, {
-            props: { num: 15, description: 'ROLIE feed', messages: makeMessages(2) },
+            props: { num: 15, description: 'ROLIE feed', messages: makeMessages(2), passed: true },
         })
         expect(wrapper.text()).toContain('ROLIE feed')
     })
 
     test('shows all messages when count <= threshold', () => {
         const wrapper = mount(MessageGroup, {
-            props: { num: 1, description: 'Test', messages: makeMessages(5) },
+            props: { num: 1, description: 'Test', messages: makeMessages(5), passed: false },
         })
         expect(wrapper.findAllComponents(MessageLine)).toHaveLength(5)
         expect(wrapper.text()).not.toContain('more message')
@@ -29,7 +29,7 @@ describe('MessageGroup', () => {
 
     test('truncates to 5, expands and collapses', async () => {
         const wrapper = mount(MessageGroup, {
-            props: { num: 1, description: 'Test', messages: makeMessages(10) },
+            props: { num: 1, description: 'Test', messages: makeMessages(10), passed: true },
         })
         expect(wrapper.findAllComponents(MessageLine)).toHaveLength(5)
         expect(wrapper.text()).toContain('show all 10 messages')
@@ -55,7 +55,7 @@ describe('MessageGroup', () => {
             { text: 'c', type: 2 },
         ]
         const wrapper = mount(MessageGroup, {
-            props: { num: 1, description: 'Test', messages },
+            props: { num: 1, description: 'Test', messages, passed: true },
         })
         expect(wrapper.text()).toContain('1 error')
         expect(wrapper.text()).toContain('1 warning')
