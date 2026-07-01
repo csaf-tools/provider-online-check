@@ -12,14 +12,14 @@ import exampleCom from '../tests/assets/example.com-result.json'
 
 describe('relevantRequirements', () => {
   test('leaf node: passed true returns requirement number', () => {
-    let rule: EvaluatedRule = { condition: 'all', requirement: 3, passed: true }
+    const rule: EvaluatedRule = { condition: 'all', requirement: 3, passed: true }
     expect(relevantRequirements(rule)).toStrictEqual([3])
     rule.condition = 'one'
     expect(relevantRequirements(rule)).toStrictEqual([3])
   })
 
   test('leaf node: passed false returns requirement number', () => {
-    let rule: EvaluatedRule = { condition: 'all', requirement: 5, passed: false }
+    const rule: EvaluatedRule = { condition: 'all', requirement: 5, passed: false }
     expect(relevantRequirements(rule)).toStrictEqual([5])
     rule.condition = 'one'
     expect(relevantRequirements(rule)).toStrictEqual([5])
