@@ -15,11 +15,18 @@ RUN apt-get update && \
     curl \
     docker \
     git \
+    python3 \
     unzip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Install Node.js 22 (apt ships Node 12 which is too old for cyclonedx-npm)
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install --no-install-recommends -y nodejs
+
 RUN curl -sSfL https://get.anchore.io/syft | sh -s -v -- -b /usr/local/bin
+
+RUN npm install --global @cyclonedx/cyclonedx-npm
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 

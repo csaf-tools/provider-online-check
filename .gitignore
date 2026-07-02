@@ -65,3 +65,6 @@ backend/store/validator/cache/*
 
 # Frontend
 frontend/.vite/*
+
+# SBOM destination directory
+/sboms/

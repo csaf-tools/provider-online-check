@@ -175,7 +175,9 @@ If testing untrusted CSAF providers, it is recommended to run the tool only in c
 ## Dependencies
 
 The CSAF Provider Online Check tool provides SBOMs in both CycloneDX and SPDX formats.
-It covers dependencies for the backend, frontend and validator image.
+It covers dependencies for the backend and frontend.
+The cache (valkey) and validator (secvisogram) are not covered as they are independent projects and need their own SBOMs.
+
 The files are generated using syft (https://github.com/anchore/syft)
 
 The files are regularly updated with each release.
