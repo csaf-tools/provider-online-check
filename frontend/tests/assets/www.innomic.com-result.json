@@ -1,0 +1,344 @@
+{
+  "domains": [
+    {
+      "name": "https://www.innomic.com/.well-known/csaf/provider-metadata.json",
+      "publisher": {
+        "category": "vendor",
+        "name": "IDS Innomic Schwingungsmesstechnik GmbH",
+        "namespace": "https://www.innomic.com",
+        "contact_details": "IDS Innomic Schwingungsmesstechnik GmbH\n\nAddress:\nZum Buchhorst 35\n29410 Salzwedel\nGermany\n\nE-mail: info(at)innomic.de",
+        "issuing_authority": "IDS Innomic Schwingungsmesstechnik GmbH PSIRT is responsible for vulnerability handling across all IDS Innomic Schwingungsmesstechnik GmbH products and services."
+      },
+      "role": "csaf_provider",
+      "requirements": [
+        {
+          "num": 1,
+          "description": "Valid CSAF documents",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All advisories validated fine."
+            }
+          ]
+        },
+        {
+          "num": 2,
+          "description": "Filename",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All found filenames are conforming."
+            }
+          ]
+        },
+        {
+          "num": 3,
+          "description": "TLS",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All tested URLs were HTTPS."
+            }
+          ]
+        },
+        {
+          "num": 4,
+          "description": "TLP:WHITE",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All advisories labeled TLP:WHITE were freely accessible."
+            }
+          ]
+        },
+        {
+          "num": 5,
+          "description": "TLP:AMBER and TLP:RED",
+          "messages": [
+            {
+              "type": 0,
+              "text": "No advisories labeled TLP:AMBER or TLP:RED tested for accessibility."
+            }
+          ]
+        },
+        {
+          "num": 6,
+          "description": "Redirects",
+          "messages": [
+            {
+              "type": 0,
+              "text": "No redirections found."
+            }
+          ]
+        },
+        {
+          "num": 7,
+          "description": "provider-metadata.json",
+          "messages": [
+            {
+              "type": 0,
+              "text": "Found good provider metadata."
+            }
+          ]
+        },
+        {
+          "num": 8,
+          "description": "security.txt",
+          "messages": [
+            {
+              "type": 0,
+              "text": "Performed no test of security.txt since the direct url of the provider-metadata.json was used."
+            }
+          ]
+        },
+        {
+          "num": 9,
+          "description": "/.well-known/csaf/provider-metadata.json",
+          "messages": [
+            {
+              "type": 0,
+              "text": "Performed no test on whether the provider-metadata.json is available under the .well-known path since the direct url of the provider-metadata.json was used."
+            }
+          ]
+        },
+        {
+          "num": 10,
+          "description": "DNS path",
+          "messages": [
+            {
+              "type": 0,
+              "text": "Performed no test on the contents of https://csaf.data.security.DOMAIN since the direct url of the provider-metadata.json was used."
+            }
+          ]
+        },
+        {
+          "num": 11,
+          "description": "One folder per year",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All CSAF files are in the right folders."
+            }
+          ]
+        },
+        {
+          "num": 12,
+          "description": "index.txt",
+          "messages": [
+            {
+              "type": 0,
+              "text": "Found https://www.innomic.com/.well-known/csaf/white/index.txt"
+            }
+          ]
+        },
+        {
+          "num": 13,
+          "description": "changes.csv",
+          "messages": [
+            {
+              "type": 0,
+              "text": "Found https://www.innomic.com/.well-known/csaf/white/changes.csv"
+            }
+          ]
+        },
+        {
+          "num": 14,
+          "description": "Directory listings",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All directory listings are valid."
+            }
+          ]
+        },
+        {
+          "num": 15,
+          "description": "ROLIE feed",
+          "messages": [
+            {
+              "type": 2,
+              "text": "ROLIE feed based distribution was not used."
+            }
+          ]
+        },
+        {
+          "num": 16,
+          "description": "ROLIE service document",
+          "messages": [
+            {
+              "type": 1,
+              "text": "No ROLIE service document found."
+            }
+          ]
+        },
+        {
+          "num": 17,
+          "description": "ROLIE category document",
+          "messages": [
+            {
+              "type": 1,
+              "text": "No ROLIE category document found."
+            }
+          ]
+        },
+        {
+          "num": 18,
+          "description": "Integrity",
+          "messages": [
+            {
+              "type": 0,
+              "text": "Fetching https://www.innomic.com/.well-known/csaf/white/2026/ids-2026-0001.json.sha256 failed: Status code 404 (404 Not Found)"
+            },
+            {
+              "type": 0,
+              "text": "Fetching https://www.innomic.com/.well-known/csaf/white/2026/ids-2026-0001.json.sha512 failed: Status code 404 (404 Not Found)"
+            }
+          ]
+        },
+        {
+          "num": 19,
+          "description": "Signatures",
+          "messages": [
+            {
+              "type": 2,
+              "text": "Fetching https://www.innomic.com/.well-known/csaf/white/2026/ids-2026-0001.json.asc failed: status code 404 (404 Not Found)"
+            }
+          ]
+        },
+        {
+          "num": 20,
+          "description": "Public OpenPGP Key",
+          "messages": [
+            {
+              "type": 1,
+              "text": "No public OpenPGP keys found: unknown key public_openpgp_keys."
+            }
+          ]
+        }
+      ],
+      "passed": true,
+      "evaluated_rules": {
+        "condition": "all",
+        "includes": [
+          {
+            "condition": "all",
+            "includes": [
+              {
+                "condition": "all",
+                "requirement": 1,
+                "passed": true
+              },
+              {
+                "condition": "all",
+                "requirement": 2,
+                "passed": true
+              },
+              {
+                "condition": "all",
+                "requirement": 3,
+                "passed": true
+              },
+              {
+                "condition": "all",
+                "requirement": 4,
+                "passed": true
+              }
+            ]
+          },
+          {
+            "condition": "all",
+            "includes": [
+              {
+                "condition": "all",
+                "requirement": 5,
+                "passed": true
+              },
+              {
+                "condition": "all",
+                "requirement": 6,
+                "passed": true
+              },
+              {
+                "condition": "all",
+                "requirement": 7,
+                "passed": true
+              }
+            ]
+          },
+          {
+            "condition": "one",
+            "includes": [
+              {
+                "condition": "all",
+                "requirement": 8,
+                "passed": true
+              },
+              {
+                "condition": "all",
+                "requirement": 9,
+                "passed": true
+              },
+              {
+                "condition": "all",
+                "requirement": 10,
+                "passed": true
+              }
+            ]
+          },
+          {
+            "condition": "one",
+            "includes": [
+              {
+                "condition": "all",
+                "includes": [
+                  {
+                    "condition": "all",
+                    "requirement": 11,
+                    "passed": true
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 12,
+                    "passed": true
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 13,
+                    "passed": true
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 14,
+                    "passed": true
+                  }
+                ]
+              },
+              {
+                "condition": "all",
+                "includes": [
+                  {
+                    "condition": "all",
+                    "requirement": 15,
+                    "passed": false
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 16,
+                    "passed": true
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 17,
+                    "passed": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "version": "3.5.2-57-gf048ad9",
+  "date": "2026-06-30T07:44:43.047933289Z"
+}

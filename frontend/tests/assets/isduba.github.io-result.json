@@ -1,0 +1,421 @@
+{
+  "domains": [
+    {
+      "name": "isduba.github.io",
+      "publisher": {
+        "category": "vendor",
+        "name": "Isduba Development Community",
+        "namespace": "https://github.com/ISDuBA",
+        "contact_details": "Open public issues at https://github.com/ISDuBA or contact one of the recently active developers in confidence.",
+        "issuing_authority": "Developers of the Free Software ISDuBA"
+      },
+      "role": "csaf_trusted_provider",
+      "requirements": [
+        {
+          "num": 1,
+          "description": "Valid CSAF documents",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All advisories validated fine."
+            }
+          ]
+        },
+        {
+          "num": 2,
+          "description": "Filename",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All found filenames are conforming."
+            }
+          ]
+        },
+        {
+          "num": 3,
+          "description": "TLS",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All tested URLs were HTTPS."
+            }
+          ]
+        },
+        {
+          "num": 4,
+          "description": "TLP:WHITE",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All advisories labeled TLP:WHITE were freely accessible."
+            }
+          ]
+        },
+        {
+          "num": 5,
+          "description": "TLP:AMBER and TLP:RED",
+          "messages": [
+            {
+              "type": 0,
+              "text": "No advisories labeled TLP:AMBER or TLP:RED tested for accessibility."
+            }
+          ]
+        },
+        {
+          "num": 6,
+          "description": "Redirects",
+          "messages": [
+            {
+              "type": 0,
+              "text": "No redirections found."
+            }
+          ]
+        },
+        {
+          "num": 7,
+          "description": "provider-metadata.json",
+          "messages": [
+            {
+              "type": 1,
+              "text": "Unexpected situation while loading provider-metadata.json: Fetching \"https://isduba.github.io/.well-known/security.txt\" failed: 404 Not Found (404)"
+            },
+            {
+              "type": 1,
+              "text": "Unexpected situation while loading provider-metadata.json: Fetching \"https://isduba.github.io/security.txt\" failed: 404 Not Found (404)"
+            },
+            {
+              "type": 2,
+              "text": "The content type of https://isduba.github.io/.well-known/csaf/white/2026/isduba-2026-002.json should be 'application/json' but is 'application/json; charset=utf-8'"
+            },
+            {
+              "type": 2,
+              "text": "The content type of https://isduba.github.io/.well-known/csaf/white/2026/isduba-2026-001.json should be 'application/json' but is 'application/json; charset=utf-8'"
+            },
+            {
+              "type": 2,
+              "text": "The content type of https://isduba.github.io/.well-known/csaf/white/2025/isduba-2025-02.json should be 'application/json' but is 'application/json; charset=utf-8'"
+            },
+            {
+              "type": 2,
+              "text": "The content type of https://isduba.github.io/.well-known/csaf/white/2025/isduba-2025-01.json should be 'application/json' but is 'application/json; charset=utf-8'"
+            }
+          ]
+        },
+        {
+          "num": 8,
+          "description": "security.txt",
+          "messages": [
+            {
+              "type": 2,
+              "text": "https://isduba.github.io/.well-known/security.txt: Fetching https://isduba.github.io/.well-known/security.txt failed. Status code 404 (404 Not Found)"
+            },
+            {
+              "type": 2,
+              "text": "https://isduba.github.io/security.txt: Fetching https://isduba.github.io/security.txt failed. Status code 404 (404 Not Found)"
+            }
+          ]
+        },
+        {
+          "num": 9,
+          "description": "/.well-known/csaf/provider-metadata.json",
+          "messages": [
+            {
+              "type": 0,
+              "text": "Found /.well-known/csaf/provider-metadata.json"
+            }
+          ]
+        },
+        {
+          "num": 10,
+          "description": "DNS path",
+          "messages": [
+            {
+              "type": 2,
+              "text": "Fetching https://csaf.data.security.isduba.github.io failed: Get \"https://csaf.data.security.isduba.github.io\": tls: failed to verify certificate: x509: certificate is valid for *.github.com, *.github.io, *.githubusercontent.com, github.com, github.io, githubusercontent.com, not csaf.data.security.isduba.github.io"
+            }
+          ]
+        },
+        {
+          "num": 11,
+          "description": "One folder per year",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All CSAF files are in the right folders."
+            }
+          ]
+        },
+        {
+          "num": 12,
+          "description": "index.txt",
+          "messages": [
+            {
+              "type": 0,
+              "text": "Found https://isduba.github.io/.well-known/csaf/white/index.txt"
+            },
+            {
+              "type": 2,
+              "text": "Fetching index.txt failed: https://isduba.github.io/.well-known/csaf/green/index.txt not found."
+            },
+            {
+              "type": 2,
+              "text": "Fetching index.txt failed: https://isduba.github.io/.well-known/csaf/amber/index.txt not found."
+            },
+            {
+              "type": 2,
+              "text": "Fetching index.txt failed: https://isduba.github.io/.well-known/csaf/red/index.txt not found."
+            }
+          ]
+        },
+        {
+          "num": 13,
+          "description": "changes.csv",
+          "messages": [
+            {
+              "type": 0,
+              "text": "Found https://isduba.github.io/.well-known/csaf/white/changes.csv"
+            },
+            {
+              "type": 2,
+              "text": "Fetching changes.csv failed: https://isduba.github.io/.well-known/csaf/green/changes.csv not found."
+            },
+            {
+              "type": 2,
+              "text": "Fetching changes.csv failed: https://isduba.github.io/.well-known/csaf/amber/changes.csv not found."
+            },
+            {
+              "type": 2,
+              "text": "Fetching changes.csv failed: https://isduba.github.io/.well-known/csaf/red/changes.csv not found."
+            }
+          ]
+        },
+        {
+          "num": 14,
+          "description": "Directory listings",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All directory listings are valid."
+            }
+          ]
+        },
+        {
+          "num": 15,
+          "description": "ROLIE feed",
+          "messages": [
+            {
+              "type": 1,
+              "text": "No entries in https://isduba.github.io/.well-known/csaf/green/csaf-feed-tlp-green.json"
+            },
+            {
+              "type": 1,
+              "text": "No entries in https://isduba.github.io/.well-known/csaf/amber/csaf-feed-tlp-amber.json"
+            },
+            {
+              "type": 1,
+              "text": "No entries in https://isduba.github.io/.well-known/csaf/red/csaf-feed-tlp-red.json"
+            }
+          ]
+        },
+        {
+          "num": 16,
+          "description": "ROLIE service document",
+          "messages": [
+            {
+              "type": 0,
+              "text": "ROLIE service document validated fine."
+            }
+          ]
+        },
+        {
+          "num": 17,
+          "description": "ROLIE category document",
+          "messages": [
+            {
+              "type": 1,
+              "text": "Fetching https://isduba.github.io/.well-known/csaf/white/category-white.json failed. Status code 404 (404 Not Found)"
+            }
+          ]
+        },
+        {
+          "num": 18,
+          "description": "Integrity",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All checksums match."
+            }
+          ]
+        },
+        {
+          "num": 19,
+          "description": "Signatures",
+          "messages": [
+            {
+              "type": 0,
+              "text": "All signatures verified."
+            }
+          ]
+        },
+        {
+          "num": 20,
+          "description": "Public OpenPGP Key",
+          "messages": [
+            {
+              "type": 0,
+              "text": "1 public OpenPGP key(s) loaded."
+            }
+          ]
+        }
+      ],
+      "passed": false,
+      "evaluated_rules": {
+        "condition": "all",
+        "includes": [
+          {
+            "condition": "all",
+            "includes": [
+              {
+                "condition": "all",
+                "includes": [
+                  {
+                    "condition": "all",
+                    "requirement": 1,
+                    "passed": true
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 2,
+                    "passed": true
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 3,
+                    "passed": true
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 4,
+                    "passed": true
+                  }
+                ]
+              },
+              {
+                "condition": "all",
+                "includes": [
+                  {
+                    "condition": "all",
+                    "requirement": 5,
+                    "passed": true
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 6,
+                    "passed": true
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 7,
+                    "passed": false
+                  }
+                ]
+              },
+              {
+                "condition": "one",
+                "includes": [
+                  {
+                    "condition": "all",
+                    "requirement": 8,
+                    "passed": false
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 9,
+                    "passed": true
+                  },
+                  {
+                    "condition": "all",
+                    "requirement": 10,
+                    "passed": false
+                  }
+                ]
+              },
+              {
+                "condition": "one",
+                "includes": [
+                  {
+                    "condition": "all",
+                    "includes": [
+                      {
+                        "condition": "all",
+                        "requirement": 11,
+                        "passed": true
+                      },
+                      {
+                        "condition": "all",
+                        "requirement": 12,
+                        "passed": false
+                      },
+                      {
+                        "condition": "all",
+                        "requirement": 13,
+                        "passed": false
+                      },
+                      {
+                        "condition": "all",
+                        "requirement": 14,
+                        "passed": true
+                      }
+                    ]
+                  },
+                  {
+                    "condition": "all",
+                    "includes": [
+                      {
+                        "condition": "all",
+                        "requirement": 15,
+                        "passed": true
+                      },
+                      {
+                        "condition": "all",
+                        "requirement": 16,
+                        "passed": true
+                      },
+                      {
+                        "condition": "all",
+                        "requirement": 17,
+                        "passed": true
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "condition": "all",
+            "includes": [
+              {
+                "condition": "all",
+                "requirement": 18,
+                "passed": true
+              },
+              {
+                "condition": "all",
+                "requirement": 19,
+                "passed": true
+              },
+              {
+                "condition": "all",
+                "requirement": 20,
+                "passed": true
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "version": "3.5.2-57-gf048ad9",
+  "date": "2026-06-30T07:45:19.410213308Z"
+}

@@ -164,65 +164,50 @@ describe("Testing App...", () => {
         ])
         expect(app.vm.filterMessageListByNums([4])).toStrictEqual([])
     })
-    test('trustedProviderMessages with one message', () => {
-        app.vm.messagesList = [{ text: "Test1", type: 0, num: 1}]
-        expect(app.vm.trustedProviderMessages).toStrictEqual([
-            { text: "Test1", type: 0, num: 1}
-        ])
-    })
-    test('trustedProviderMessages req 8-10', () => {
-        app.vm.messagesList = [
-            { text: "Test8", type: 0, num: 8 },
-            { text: "Test9", type: 2, num: 9 },
-            { text: "Test10", type: 2, num: 10 }
-        ]
-        expect(app.vm.trustedProviderMessages).toStrictEqual([
-            { text: "Test8", type: 0, num: 8 }
-        ])
-        app.vm.messagesList = [
-            { text: "Test8", type: 2, num: 8 },
-            { text: "Test9", type: 0, num: 9 },
-            { text: "Test10", type: 2, num: 10 }
-        ]
-        expect(app.vm.trustedProviderMessages).toStrictEqual([
-            { text: "Test9", type: 0, num: 9 }
-        ])
-        app.vm.messagesList = [
-            { text: "Test8", type: 2, num: 8 },
-            { text: "Test9", type: 2, num: 9 },
-            { text: "Test10", type: 0, num: 10 }
-        ]
-        expect(app.vm.trustedProviderMessages).toStrictEqual([
-            { text: "Test10", type: 0, num: 10 }
-        ])
-        app.vm.messagesList = [
-            { text: "Test8", type: 2, num: 8 },
-            { text: "Test9", type: 2, num: 9 },
-            { text: "Test10", type: 2, num: 10 }
-        ]
-        expect(app.vm.trustedProviderMessages).toStrictEqual([
-            { text: "Test8", type: 2, num: 8 },
-            { text: "Test9", type: 2, num: 9 },
-            { text: "Test10", type: 2, num: 10 }
-        ])
-    })
-    test("trustedProviderMessages dir-based vs ROLIE", () => {
-        app.vm.messagesList = [
-            { text: "Test11", type: 0, num: 11 },
-            { text: "Test15", type: 2, num: 15 }
-        ]
-        expect(app.vm.trustedProviderMessages).toStrictEqual([
-            { text: "Test11", type: 0, num: 11 }
-        ])
-        app.vm.messagesList = [
-            { text: "Test11", type: 2, num: 11 },
-            { text: "Test15", type: 0, num: 15 }
-        ]
-        expect(app.vm.trustedProviderMessages).toStrictEqual([
-            { text: "Test15", type: 0, num: 15 }
-        ])
-        app.vm.messagesList = null;
+    test('trustedProviderMessages: null messagesList returns null', () => {
+        app.vm.messagesList = null
         expect(app.vm.trustedProviderMessages).toBe(null)
+    })
+    test('trustedProviderMessages: no evaluated_rules trail returns full messagesList', () => {
+        app.vm.messagesList = [{ text: "Test1", type: 0, num: 1 }]
+        app.vm.relevantRequirementNums = null
+        expect(app.vm.trustedProviderMessages).toStrictEqual([{ text: "Test1", type: 0, num: 1 }])
+    })
+    test('trustedProviderMessages: filters to relevantRequirementNums from trail', () => {
+        app.vm.messagesList = [
+            { text: "msg8", type: 0, num: 8 },
+            { text: "msg9", type: 2, num: 9 },
+            { text: "msg15", type: 0, num: 15 },
+        ]
+        app.vm.relevantRequirementNums = [8, 15]
+        expect(app.vm.trustedProviderMessages).toStrictEqual([
+            { text: "msg8", type: 0, num: 8 },
+            { text: "msg15", type: 0, num: 15 },
+        ])
+    })
+    test('extractMessagesFromResultsChecker: sets relevantRequirementNums from evaluated_rules', () => {
+        app.vm.extractMessagesFromResultsChecker({
+            date: '2026-06-26T00:00:00Z',
+            domains: [{
+                passed: true,
+                role: 'csaf_trusted_provider',
+                requirements: [
+                    { num: 8, description: 'security.txt', messages: [{ text: 'ok', type: 0 }] },
+                    { num: 9, description: '/.well-known/csaf/provider-metadata.json', messages: [{ text: 'ok', type: 0 }] },
+                ],
+                evaluated_rules: {
+                    condition: 'one',
+                    includes: [
+                        { condition: 'all', requirement: 8, passed: true },
+                        { condition: 'all', requirement: 9, passed: false },
+                    ]
+                }
+            }]
+        })
+        expect(app.vm.relevantRequirementNums).toStrictEqual([8])
+        expect(app.vm.trustedProviderMessages).toStrictEqual([
+            { text: 'ok', type: 0, num: 8 }
+        ])
     })
     test("groupedTrustedProviderMessages groups messages by requirement", () => {
         app.vm.requirementGroups = [
