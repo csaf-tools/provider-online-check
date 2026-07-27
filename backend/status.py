@@ -13,7 +13,6 @@ import json
 import os
 import sys
 from datetime import datetime, timezone
-from pprint import pprint
 from typing import Optional
 
 import httpx2
