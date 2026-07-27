@@ -23,6 +23,7 @@ from ..csaf.csaf_checker import CSAF_BINARY_PATH, CSAF_CHECKER_BINARY
 from ..database.database import Database_Manager
 from ..database.valkey import Valkey_Controller
 from ..slots.slot_manager import Slot_Manager
+from .admin_status_response import AdminStatusResponse, SlotStatusEntry
 from .health_response import HealthResponse
 from .information_response import InformationResponse
 from .scan_request import ScanRequest
@@ -155,6 +156,34 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")
+
+
+@router.get(
+    "/admin/status",
+    response_model=AdminStatusResponse,
+    summary="System and Slot status",
+    description="Current state of all scan slots. Only for sysadmin use.",
+    tags=["devops"],
+    include_in_schema=False,
+)
+async def admin_status() -> AdminStatusResponse:
+    slots = []
+    for slot in Slot_Manager().slots:
+        available = slot.is_available()
+        if not available and slot.running_task is not None:
+            data = slot.running_task.get_data(True)
+            slots.append(SlotStatusEntry(
+                id=slot.id,
+                available=False,
+                domain=data.domain,
+                status=slot.running_task.get_status().name,
+                start_time=data.start_time,
+                files_checked=data.files_checked,
+                latest_file_checked=data.latest_file_checked or None,
+            ))
+        else:
+            slots.append(SlotStatusEntry(id=slot.id, available=True))
+    return AdminStatusResponse(slots=slots)
 
 
 @router.get(

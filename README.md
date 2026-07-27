@@ -274,6 +274,42 @@ a2enmod proxy proxy_http ssl headers
 systemctl restart apache2
 ```
 
+### Status script
+
+A small status script for system administrators shows them the current activity and cache content.
+Run it from inside the backend container:
+
+```shell
+docker compose exec backend ./status.py
+```
+
+Or short with `make`:
+```shell
+make status
+```
+
+The output shows the current health, the currently running checks and cached results:
+
+```
+=== System Health ===
+Status:     healthy
+Free slots: 9 / 10
+csaf_checker_available: True
+valkey_available: True
+validator_available: True
+
+=== Running Scans ===
+Slot  Domain                          Status                Files     Running  Started (UTC)
+   0  redhat.com                      RUNNING_CHECKER          13          2s  2026-07-24T17:49:24
+9 slot(s) idle
+
+=== Cached Check results ===
+Domain                          Result  Role                       Duration  Started (UTC)        Expires (UTC)
+example.com                       FAIL  -                                0s  2026-07-24T17:46:10  2026-07-31T17:46:10
+cert-bund.de                      FAIL  csaf_trusted_provider        8m 13s  2026-07-24T17:35:26  2026-07-31T17:43:39
+intevation.de                     PASS  csaf_trusted_provider            1s  2026-07-24T17:34:01  2026-07-31T17:34:02
+```
+
 ### Blocking Domains
 
 Operators can block certain domains, preventing scans of them entirely.

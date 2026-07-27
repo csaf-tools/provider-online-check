@@ -91,3 +91,8 @@ restrict-network:
 
 persist-restrict-network:
 	netfilter-persistent save
+
+# Status
+
+status:
+	docker compose exec backend ./status.py
