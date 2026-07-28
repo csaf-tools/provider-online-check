@@ -308,4 +308,11 @@ describe("Testing App...", () => {
         expect(app.vm.sanitizeFilename('http://example.com/path?foo=bar'))
             .toBe('example.com_path_foo_bar')
     })
+
+    test("formatDuration", () => {
+        expect(app.vm.formatDuration(1, 90001)).toBe('1d 1h');
+        expect(app.vm.formatDuration(1, 93601)).toBe('1d 2h');
+        expect(app.vm.formatDuration(1, 86401)).toBe('1d'); 
+        expect(app.vm.formatDuration(1, 1)).toBe('0s');
+    })
 })
