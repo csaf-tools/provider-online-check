@@ -28,6 +28,9 @@ ENV/
 .git/
 .gitignore
 
+# ignore pre-compiled csaf_checker: always build inside the image via build_gocsaf.sh
+bin/
+
 # Documentation
 README.md
 
