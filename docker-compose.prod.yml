@@ -21,6 +21,7 @@ services:
       - CSAF_CHECKER_TIMEOUT=${CSAF_CHECKER_TIMEOUT:-3600}
       - DOMAIN_BLOCKLIST=${DOMAIN_BLOCKLIST:-}
       - VALIDATOR_CACHE_RESULTS=${VALIDATOR_CACHE_RESULTS:-1}
+      - TASK_CSAF_CLIENT_TIMEOUT=${TASK_CSAF_CLIENT_TIMEOUT:-30s}
       - TASK_PAUSE_TIME_MAX_BEFORE_RESET=${TASK_PAUSE_TIME_MAX_BEFORE_RESET:-100}
       - TASK_PAUSE_TIME_INTERVAL=${TASK_PAUSE_TIME_INTERVAL:-0.2}
       - TASK_TIME_BEFORE_ORPHANED=${TASK_TIME_BEFORE_ORPHANED:-50}
@@ -78,7 +79,7 @@ services:
       context: ./validator
       target: prod
       args:
-      - CSAF_VALIDATOR_VERSION=${CSAF_VALIDATOR_VERSION:?CSAF_VALIDATOR_VERSION is not set}
+        - CSAF_VALIDATOR_VERSION=${CSAF_VALIDATOR_VERSION:?CSAF_VALIDATOR_VERSION is not set}
     container_name: validator
     ports:
       - "${PORT_VALIDATOR:-48092}:8082"
@@ -92,7 +93,8 @@ services:
     depends_on:
       - valkey
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://0.0.0.0:8082/api/v1/tests"]
+      test:
+        ["CMD", "wget", "-q", "--spider", "http://0.0.0.0:8082/api/v1/tests"]
       interval: 15s
       timeout: 10s
       retries: 3
