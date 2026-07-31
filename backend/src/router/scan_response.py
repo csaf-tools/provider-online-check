@@ -39,17 +39,21 @@ class ScanResponse(BaseModel):
         Field(description="Runtime output provided by CSAF Checker in verbose mode"),
     ] = []
     runtime_output_total_lines: Annotated[
-        int,
-        Field(description="Total number of lines in the complete runtime output")
+        int, Field(description="Total number of lines in the complete runtime output")
     ] = 0
 
     runtime_output_capped: Annotated[
         bool,
-        Field(description="True if the returned runtime_output was truncated due to line limits")
+        Field(
+            description="True if the returned runtime_output was truncated due to line limits"
+        ),
     ] = False
     results_checker: Annotated[
         str,
         Field(description="Results of CSAF Checker"),
+    ] = ""
+    pmd_path: Annotated[
+        str, Field(description="Path to the PMD that is being used by CSAF Checker")
     ] = ""
 
     files_checked: Annotated[
@@ -61,15 +65,5 @@ class ScanResponse(BaseModel):
             description="Name of the latest file that has been checked, including directory path"
         ),
     ] = ""
-    start_time: Annotated[
-        int,
-        Field(
-            description="Start time as timestamp"
-        )
-    ] = 0
-    end_time: Annotated[
-        int,
-        Field(
-            description="End time as timestamp"
-        )
-    ] = 0
+    start_time: Annotated[int, Field(description="Start time as timestamp")] = 0
+    end_time: Annotated[int, Field(description="End time as timestamp")] = 0
