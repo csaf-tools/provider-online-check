@@ -236,6 +236,7 @@ Docker Compose reads this file automatically.
 | `CSAF_CHECKER_TIMEOUT` | Timeout for csaf_checker in seconds, 0 for unlimited. |
 | `CACHE_TIMEOUT_SECONDS` | Lifetime of a cached csaf_checker result. |
 | `VALIDATOR_CACHE_RESULTS` | Enables validator output to be saved as cache files. 1 is enabled, 0 disabled. |
+| `TASK_CSAF_CLIENT_TIMEOUT` | Timeout for target domain requests. Mirrors CSAF Checkers 'client_timeout' parameter. Format example: '30s' for 30 seconds. |
 | `TASK_PAUSE_TIME_MAX_BEFORE_RESET` | Maximum time in seconds before a paused task is forced to stop. |
 | `TASK_PAUSE_TIME_INTERVAL` | Second interval where the status of a paused task is queried. |
 | `TASK_TIME_BEFORE_ORPHANED` | Time in seconds a task can run without it's status being requested by a user before being considered orphaned. |

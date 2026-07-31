@@ -59,6 +59,13 @@ class CSAF_Checker(BaseModel):
         Field(description="Asynchronous task running csaf checker"),
     ] = None
 
+    _csaf_client_timeout: Annotated[
+        str,
+        Field(
+            description="Timeout for target domain requests. Mirrors CSAF Checkers 'client_timeout' parameter."
+        ),
+    ] = str(os.environ.get("TASK_CSAF_CLIENT_TIMEOUT", "30s"))
+
     _max_wait_time: Annotated[
         int,
         Field(
@@ -106,6 +113,10 @@ class CSAF_Checker(BaseModel):
                 args.append(
                     f"--validator_cache={CACHE_PATH_VALIDATOR}{data.validator_cache_file}"
                 )
+        
+        args.append(
+            f"--client_timeout={self._csaf_client_timeout}"
+        )
 
         # Write args. `--` before the domain ensures it is treated as a positional
         # argument and not a flag, even if it starts with `-`.
