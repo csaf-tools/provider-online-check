@@ -81,6 +81,7 @@ class TestWorkingDomainTask:
 
         await waitUntilLoopStepIncremented(task)
         assert task.get_status() == Domain_Task_Status.DONE
+        assert task.get_data(True).pmd_path == test_domain_pmd
 
     @pytest.mark.asyncio
     async def test_run_through_pmd(self):
@@ -98,6 +99,7 @@ class TestWorkingDomainTask:
 
         await waitUntilLoopStepIncremented(task)
         assert task.get_status() == Domain_Task_Status.DONE
+        assert task.get_data(True).pmd_path == test_domain_pmd
 
     @pytest.mark.asyncio
     async def test_start_and_stop(self):

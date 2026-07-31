@@ -13,10 +13,18 @@ class SlotStatusEntry(BaseModel):
     available: Annotated[bool, Field(description="If available / has a task")]
     domain: Annotated[Optional[str], Field(description="Domain being checked")] = None
     status: Annotated[Optional[str], Field(description="Scan status")] = None
-    start_time: Annotated[Optional[int], Field(description="Task start timestamp")] = None
-    files_checked: Annotated[Optional[int], Field(description="Number of files checked")] = None
-    latest_file_checked: Annotated[Optional[str], Field(description="Last checked file URL")] = None
+    start_time: Annotated[
+        Optional[int], Field(description="Task start timestamp")
+    ] = None
+    files_checked: Annotated[
+        Optional[int], Field(description="Number of files checked")
+    ] = None
+    latest_file_checked: Annotated[
+        Optional[str], Field(description="Last checked file URL")
+    ] = None
 
 
 class AdminStatusResponse(BaseModel):
-    slots: Annotated[list[SlotStatusEntry], Field(description="State of all scan slots")]
+    slots: Annotated[
+        list[SlotStatusEntry], Field(description="State of all scan slots")
+    ]
