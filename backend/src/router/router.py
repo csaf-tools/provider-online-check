@@ -44,7 +44,7 @@ CSAF_REF = os.getenv(ENV_CSAF_CHECKER_REF, "")
 CSAF_REVISION = "unknown"
 if CSAF_REF:
     try:
-        CSAF_REVISION = Path('/app/bin/csaf_revision').read_text().strip()
+        CSAF_REVISION = Path("/app/bin/csaf_revision").read_text().strip()
     except OSError:
         CSAF_REVISION = CSAF_REF
 
@@ -120,10 +120,17 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
         full_output = data.csaf_checker_output_runtime_log
         displayed_output = full_output
         if request.max_lines is None:
-            if status in (ScanResponseStatus.DONE_CHECKER, ScanResponseStatus.CACHED_CHECKER):
-                used_max_lines = int(os.environ.get("VERBOSE_OUTPUT_MAX_LINES_DONE_DEFAULT", "10000"))
+            if status in (
+                ScanResponseStatus.DONE_CHECKER,
+                ScanResponseStatus.CACHED_CHECKER,
+            ):
+                used_max_lines = int(
+                    os.environ.get("VERBOSE_OUTPUT_MAX_LINES_DONE_DEFAULT", "10000")
+                )
             else:
-                used_max_lines = int(os.environ.get("VERBOSE_OUTPUT_MAX_LINES_DEFAULT", "10"))
+                used_max_lines = int(
+                    os.environ.get("VERBOSE_OUTPUT_MAX_LINES_DEFAULT", "10")
+                )
         elif request.max_lines == -1:
             used_max_lines = len(full_output)  # Full logs
         else:
@@ -152,7 +159,7 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
             "files_checked": data.files_checked,
             "latest_file_checked": data.latest_file_checked,
             "start_time": data.start_time,
-            "end_time": data.end_time
+            "end_time": data.end_time,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")
@@ -172,15 +179,17 @@ async def admin_status() -> AdminStatusResponse:
         available = slot.is_available()
         if not available and slot.running_task is not None:
             data = slot.running_task.get_data(True)
-            slots.append(SlotStatusEntry(
-                id=slot.id,
-                available=False,
-                domain=data.domain,
-                status=slot.running_task.get_status().name,
-                start_time=data.start_time,
-                files_checked=data.files_checked,
-                latest_file_checked=data.latest_file_checked or None,
-            ))
+            slots.append(
+                SlotStatusEntry(
+                    id=slot.id,
+                    available=False,
+                    domain=data.domain,
+                    status=slot.running_task.get_status().name,
+                    start_time=data.start_time,
+                    files_checked=data.files_checked,
+                    latest_file_checked=data.latest_file_checked or None,
+                )
+            )
         else:
             slots.append(SlotStatusEntry(id=slot.id, available=True))
     return AdminStatusResponse(slots=slots)

@@ -73,7 +73,9 @@ class CSAF_Checker(BaseModel):
 
     _log_line_size_limit: Annotated[
         int,
-        Field(description="Max byte size of a single log line. Lines exceeding this limit get truncated and split into multiple lines"),
+        Field(
+            description="Max byte size of a single log line. Lines exceeding this limit get truncated and split into multiple lines"
+        ),
     ] = int(os.environ.get("TASK_LOG_LINE_LIMIT", "65536"))
 
     def pause(self):
@@ -225,18 +227,25 @@ class CSAF_Checker(BaseModel):
             # Catch, and truncate limit breaking lines
             try:
                 line = await self._running_task_checker.stdout.readline()
-            except Exception as e:
+            except Exception:
                 if inJSONStructure:
-                    logger.info(f"Log line limit reached for CSAF results -> JSON structure is broken")
-                    return (1, f"Error: CSAF result line has exceeded log line byte limit.")
+                    logger.info(
+                        "Log line limit reached for CSAF Checker results -> JSON structure is broken"
+                    )
+                    return (
+                        1,
+                        "Error: CSAF Checker result line has exceeded log line byte limit.",
+                    )
 
-                line = await self._running_task_checker.stdout.read(self._log_line_size_limit)
-            
+                line = await self._running_task_checker.stdout.read(
+                    self._log_line_size_limit
+                )
+
             self._loop_step = self._loop_step + 1
 
             if not line:
                 break
-            
+
             decoded_line = line.decode(errors="replace").rstrip("\n")
 
             # Once a single '{' is read, it is assumed that the csaf results are printed out
