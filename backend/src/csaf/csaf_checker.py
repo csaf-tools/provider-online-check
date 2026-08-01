@@ -79,6 +79,13 @@ class CSAF_Checker(BaseModel):
         Field(description="Interval used for task sleeping while the task is paused"),
     ] = float(os.environ.get("TASK_PAUSE_TIME_INTERVAL", "0.2"))
 
+    _log_line_size_limit: Annotated[
+        int,
+        Field(
+            description="Max byte size of a single log line. Lines exceeding this limit get truncated and split into multiple lines"
+        ),
+    ] = int(os.environ.get("TASK_LOG_LINE_LIMIT", "65536"))
+
     def pause(self):
         self._signal_paused = True
 
@@ -125,6 +132,7 @@ class CSAF_Checker(BaseModel):
         self._running_task_checker = await asyncio.create_subprocess_exec(
             os.path.abspath(self.__csaf_checker_path()),
             *args,
+            limit=self._log_line_size_limit,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT,
             cwd=CSAF_BINARY_PATH,
@@ -226,7 +234,22 @@ class CSAF_Checker(BaseModel):
             self._signal_paused = False
 
             # Interpret output
-            line = await self._running_task_checker.stdout.readline()
+            # Catch, and truncate limit breaking lines
+            try:
+                line = await self._running_task_checker.stdout.readline()
+            except Exception:
+                if inJSONStructure:
+                    logger.info(
+                        "Log line limit reached for CSAF Checker results -> JSON structure is broken"
+                    )
+                    return (
+                        1,
+                        "Error: CSAF Checker result line has exceeded log line byte limit.",
+                    )
+
+                line = await self._running_task_checker.stdout.read(
+                    self._log_line_size_limit
+                )
 
             self._loop_step = self._loop_step + 1
 

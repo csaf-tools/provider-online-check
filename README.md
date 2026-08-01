@@ -240,6 +240,7 @@ Docker Compose reads this file automatically.
 | `TASK_PAUSE_TIME_MAX_BEFORE_RESET` | Maximum time in seconds before a paused task is forced to stop. |
 | `TASK_PAUSE_TIME_INTERVAL` | Second interval where the status of a paused task is queried. |
 | `TASK_TIME_BEFORE_ORPHANED` | Time in seconds a task can run without it's status being requested by a user before being considered orphaned. |
+| `TASK_LOG_LINE_LIMIT` | Max byte size of a single log line. Lines exceeding this limit get truncated and split into multiple lines. |
 | `LINTER_SHELLCHECK_OPTS` | Shellcheck rules that should be ignored. |
 | `DOMAIN_BLOCKLIST` | List of domains that are not to be scanned. See section `Blocking Domains` for more info |
 | `VERBOSE_OUTPUT_MAX_LINES_DEFAULT` | Default value for the maximum amount of verbose runtime output displayed at once. Set to -1 for full logs |
