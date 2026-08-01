@@ -15,6 +15,7 @@ from typing import Annotated, Optional
 from pydantic import BaseModel, Field
 
 from ..database.domain_task_data import Domain_Task_Data
+from ..database.valkey import Valkey_Controller
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +59,13 @@ class CSAF_Checker(BaseModel):
         Optional[asyncio.subprocess.Process],
         Field(description="Asynchronous task running csaf checker"),
     ] = None
+
+    _csaf_client_timeout: Annotated[
+        str,
+        Field(
+            description="Timeout for target domain requests. Mirrors CSAF Checkers 'client_timeout' parameter."
+        ),
+    ] = str(os.environ.get("TASK_CSAF_CLIENT_TIMEOUT", "30s"))
 
     _max_wait_time: Annotated[
         int,
@@ -113,6 +121,8 @@ class CSAF_Checker(BaseModel):
                 args.append(
                     f"--validator_cache={CACHE_PATH_VALIDATOR}{data.validator_cache_file}"
                 )
+
+        args.append(f"--client_timeout={self._csaf_client_timeout}")
 
         # Write args. `--` before the domain ensures it is treated as a positional
         # argument and not a flag, even if it starts with `-`.
@@ -262,6 +272,16 @@ class CSAF_Checker(BaseModel):
 
                     # Extract URL
                     data.latest_file_checked = decoded_line.split("[GET]:")[-1]
+                elif "PMD used " in decoded_line:
+                    # Line indicates the PMD
+                    data.pmd_path = decoded_line.split("PMD used ")[-1].replace('"', "")
+
+                    logger.info(f"Raw line: {decoded_line}")
+                    logger.info(f"Extracted PMD path: {data.pmd_path}")
+
+                    # Check if PMD is in blocklist
+                    if Valkey_Controller().is_domain_in_domain_blocklist(data.pmd_path):
+                        return (1, f"Error: PMD is in blocklist: {data.pmd_path}")
 
         if exitCode != 0:
             if exitCode in (-9, -137):

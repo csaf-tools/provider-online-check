@@ -81,6 +81,10 @@ class Domain_Task_Data(BaseModel):
         ),
     ] = ""
 
+    pmd_path: Annotated[
+        str, Field(description="Path to the PMD that is being used by CSAF Checker")
+    ] = ""
+
     @classmethod
     def create(cls, domain: str) -> "Domain_Task_Data":
         data = {

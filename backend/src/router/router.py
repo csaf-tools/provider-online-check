@@ -71,14 +71,12 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
         HTTPException: If the scan cannot be initiated
     """
     try:
-        # ----------------- Important thoughts -----------------
+        # ----------------- Notes -----------------
         # Starting a scan can have multiple response types:
         #   - Domain already processed by a slotted domain task (Return UUID + Running domain task data)
         #   - Domain not processed, but recently cached (Return Cached domain task data)
         #   - Domain not processed, but no slots available (Return Error)
         #   - Domain not processed and slot available. (Return UUID + Running domain task data)
-        #
-        # Either start_scan should display data or redirect to get_data (in case no error has been returned)
         # ------------------------------------------------------
         uuid = Slot_Manager().start_domain_task(request)
         status = ScanResponseStatus.ERROR
@@ -106,14 +104,11 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
             if data is not None:
                 status = ScanResponseStatus.CACHED_CHECKER
 
-        if data is None or errorMsg != "":
+        if data is None:
             return {
                 "status": ScanResponseStatus.ERROR,
                 "domain": request.domain,
                 "error": errorMsg,
-                "runtime_output": (
-                    data.csaf_checker_output_runtime_log if data is not None else []
-                ),
             }
 
         # Shorten output
@@ -147,7 +142,17 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
             # max_lines entries starting from start_at_line
             # fmt: off
             displayed_output = full_output[request.start_at_line:(request.start_at_line + used_max_lines)]  # Slicing is boundary safe
-
+        
+        if errorMsg != "":
+            return {
+                "status": ScanResponseStatus.ERROR,
+                "domain": request.domain,
+                "error": errorMsg,
+                "runtime_output": displayed_output,
+                "runtime_output_total_lines": len(full_output),
+                "runtime_output_capped": len(displayed_output) < len(full_output),
+            }
+        
         return {
             "status": status,
             "domain": request.domain,
@@ -156,6 +161,7 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
             "runtime_output_total_lines": len(full_output),
             "runtime_output_capped": len(displayed_output) < len(full_output),
             "results_checker": data.csaf_checker_output_result,
+            "pmd_path": data.pmd_path,
             "files_checked": data.files_checked,
             "latest_file_checked": data.latest_file_checked,
             "start_time": data.start_time,
