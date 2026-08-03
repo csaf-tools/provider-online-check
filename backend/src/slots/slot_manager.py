@@ -61,7 +61,7 @@ class Slot_Manager:
         Returns uuid of relevant domain task.
         """
         # Check database cache first
-        if not request.skip_cache:
+        if not request.skip_cache and not request.observe_rerun:
             cached_task_data = Database_Manager().load_task_by_domain(request.domain)
             if cached_task_data is not None:
                 if cached_task_data.cache_is_outdated():
@@ -76,6 +76,7 @@ class Slot_Manager:
 
         # Search for a running task that operates on the same domain
         # Return that task id, if it exists (avoid working on the same domain twice)
+        # Ignores completed tasks; Cache should be used instead if already done tasks are queried
         available_slot = None
         slot_with_identical_running_task = self.get_slot_by_domain(request.domain)
         if slot_with_identical_running_task is not None:
@@ -83,13 +84,15 @@ class Slot_Manager:
                 slot_with_identical_running_task.running_task.stop_task()
 
                 available_slot = slot_with_identical_running_task
-            else:
+            elif not slot_with_identical_running_task.is_available():
                 logger.info(
                     f"A task is already operating for {request.domain} in slot id {slot_with_identical_running_task.id}"
                 )
                 return slot_with_identical_running_task.running_task.get_data(
                     False
                 ).uuid
+            else:
+                available_slot = slot_with_identical_running_task
 
         # Find available slot
         if available_slot is None:
@@ -104,7 +107,8 @@ class Slot_Manager:
         )
 
         # Start Checker
-        domain_task_uuid = available_slot.start_domain_task(request)
+        if not request.observe_rerun:
+            domain_task_uuid = available_slot.start_domain_task(request)
 
         return domain_task_uuid
 

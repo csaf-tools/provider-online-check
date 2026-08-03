@@ -45,7 +45,8 @@ SPDX-License-Identifier: Apache-2.0
                   <span><code>{{ domain }}</code></span>
                   <span v-if="loading" class="spinner-border spinner-border-sm ms-2 me-auto" role="status" aria-hidden="true"></span>
                   <span v-else class="ms-2 me-auto">✓</span>
-                  <button class="btn btn-danger btn-sm" @click="reset">{{ loading ? 'Cancel': 'Start a new check'}}</button>
+                  <button class="btn btn-warning btn-sm" @click="reset">{{ loading ? 'Cancel': 'Start a new check'}}</button>
+                  <button class="btn btn-danger btn-sm" v-if="!loading" @click="rescan">Rerun without cache</button>
                 </div>
                 <div v-if="result?.start_time">Duration {{ formatDuration(result?.start_time, result?.end_time) }}</div>
               </div>
@@ -319,8 +320,12 @@ export default defineComponent({
       .then(response => this.version = response.data)
     const params = new URLSearchParams(window.location.search)
     const domainParam = params.get('domain')
+    const observeRerun = params.get('observe_rerun')
+    this.observe_rerun = false
     if (domainParam) {
       this.domain = domainParam
+      if(observeRerun)
+        this.observe_rerun = observeRerun
       this.startScan()
     }
   },
@@ -399,16 +404,19 @@ export default defineComponent({
     async scanWork() {
       try {
         this.error = null
-        history.replaceState(null, '', `?domain=${encodeURIComponent(this.domain)}`)
+        history.replaceState(null, '', `?domain=${encodeURIComponent(this.domain)}&observe_rerun=${encodeURIComponent(this.observe_rerun)}`)
         const response = await axios.post(`${this.backendUrl}/api/scan/start`, {
           domain: this.domain,
-          session_id: this.session_id
+          session_id: this.session_id,
+          skip_cache: this.skip_cache,
+          observe_rerun: this.observe_rerun,
         })
         this.result = this.loading ? response.data: null
         if (this.result?.domain) {
           this.domain = this.result.domain
         }
         if (['DONE_CHECKER', 'CACHED_CHECKER'].includes(this.result?.status)) {
+          this.observe_rerun = false
           const parsedResultsChecker = this.parseResultsChecker(this.result.results_checker)
           this.extractMessagesFromResultsChecker(parsedResultsChecker)
           this.setScanTime(parsedResultsChecker)
@@ -437,7 +445,16 @@ export default defineComponent({
         }
       }
     },
+    rescan() {
+      this.skip_cache = true
+      this.observe_rerun = false
+      this.startScan()
+      this.skip_cache = false
+      this.observe_rerun = true
+    },
     reset() {
+      this.skip_cache = false
+      this.observe_rerun = false
       this.loading = false
       this.allowInput = true
       this.result = null
