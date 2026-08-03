@@ -142,7 +142,7 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
             # max_lines entries starting from start_at_line
             # fmt: off
             displayed_output = full_output[request.start_at_line:(request.start_at_line + used_max_lines)]  # Slicing is boundary safe
-        
+
         if errorMsg != "":
             return {
                 "status": ScanResponseStatus.ERROR,
@@ -152,7 +152,7 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
                 "runtime_output_total_lines": len(full_output),
                 "runtime_output_capped": len(displayed_output) < len(full_output),
             }
-        
+
         return {
             "status": status,
             "domain": request.domain,
