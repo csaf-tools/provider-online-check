@@ -80,11 +80,7 @@ services:
       start_period: 10s
 
   validator:
-    build:
-      context: ./validator
-      target: dev
-      args:
-        - CSAF_VALIDATOR_VERSION=${CSAF_VALIDATOR_VERSION:?CSAF_VALIDATOR_VERSION is not set}
+    image: ghcr.io/secvisogram/csaf-validator-service:${CSAF_VALIDATOR_VERSION:?CSAF_VALIDATOR_VERSION is not set}
     container_name: validator
     ports:
       - "${PORT_VALIDATOR:-48092}:8082"
