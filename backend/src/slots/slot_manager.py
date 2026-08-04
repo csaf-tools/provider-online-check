@@ -78,21 +78,24 @@ class Slot_Manager:
         # Return that task id, if it exists (avoid working on the same domain twice)
         # Ignores completed tasks; Cache should be used instead if already done tasks are queried
         available_slot = None
+        domain_task_uuid = ""
         slot_with_identical_running_task = self.get_slot_by_domain(request.domain)
         if slot_with_identical_running_task is not None:
             if request.clear_any_running:
                 slot_with_identical_running_task.running_task.stop_task()
 
                 available_slot = slot_with_identical_running_task
-            elif not slot_with_identical_running_task.is_available():
-                logger.info(
-                    f"A task is already operating for {request.domain} in slot id {slot_with_identical_running_task.id}"
-                )
-                return slot_with_identical_running_task.running_task.get_data(
-                    False
-                ).uuid
             else:
                 available_slot = slot_with_identical_running_task
+                domain_task_uuid = slot_with_identical_running_task.running_task.get_data(
+                    False
+                ).uuid
+
+                if not slot_with_identical_running_task.is_available():
+                    logger.info(
+                        f"A task is already operating for {request.domain} in slot id {slot_with_identical_running_task.id}"
+                    )
+                    return domain_task_uuid
 
         # Find available slot
         if available_slot is None:
@@ -107,7 +110,7 @@ class Slot_Manager:
         )
 
         # Start Checker
-        if not request.observe_rerun:
+        if request.skip_cache or not request.observe_rerun:
             domain_task_uuid = available_slot.start_domain_task(request)
 
         return domain_task_uuid

@@ -275,7 +275,6 @@ interface AppData {
   isShowCacheInfo: boolean;
   fetchLogCBStatus: string;
   fetchLogDLStatus: string;
-  skip_cache: boolean;
   observe_rerun: boolean;
   version: {
     csaf_checker_version: string;
@@ -314,7 +313,6 @@ export default defineComponent({
       isShowCacheInfo: false,
       fetchLogCBStatus: '',
       fetchLogDLStatus: '',
-      skip_cache: false,
       observe_rerun: false,
     } as AppData
   },
@@ -393,27 +391,36 @@ export default defineComponent({
     }
   },
   methods: {
-    async startScan() {
+    async startScan(skip_cache = false) {
       this.loading = true
       this.allowInput = false
       this.result = null
       this.messagesList = null
       this.error = null
       this.clearFields()
-      this.scanWork()
+      this.scanWork(skip_cache)
     },
-    async scanWork() {
+    async scanWork(skip_cache = false) {
       try {
+        let skipCache = false
+        if (typeof skip_cache === 'boolean') {
+          skipCache = skip_cache
+        }
+
         this.error = null
         const url = `?domain=${encodeURIComponent(this.domain)}` + (this.observe_rerun ? '&observe_rerun=true' : '')
         history.replaceState(null, '', url)
         const response = await axios.post(`${this.backendUrl}/api/scan/start`, {
           domain: this.domain,
           session_id: this.session_id,
-          skip_cache: this.skip_cache,
+          skip_cache: skipCache,
           observe_rerun: this.observe_rerun,
         })
-        this.skip_cache = false
+
+        if ( skipCache ) {
+          this.observe_rerun = true
+        }
+
         this.result = this.loading ? response.data: null
         if (this.result?.domain) {
           this.domain = this.result.domain
@@ -449,12 +456,9 @@ export default defineComponent({
       }
     },
     rescan() {
-      this.skip_cache = true
-      this.observe_rerun = true
-      this.startScan()
+      this.startScan(true)
     },
     reset() {
-      this.skip_cache = false
       this.observe_rerun = false
       this.loading = false
       this.allowInput = true
