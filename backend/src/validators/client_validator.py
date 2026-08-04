@@ -25,6 +25,6 @@ def validate_client_blocklist_check(session_id: str, domain: str) -> str:
 
     # Valkey blocklist check
     if Valkey_Controller().is_session_id_in_client_blocklist(session_id, domain):
-        raise ValueError("Session ID is blocked")
+        raise ValueError("User session ID is blocked. Possible reasons: operator policy, legal requirements, abuse prevention, or a request by the domain operator. Contact the operator if you believe this is an error.")
 
     return session_id

@@ -87,6 +87,6 @@ def validate_domain_blocklist_check(domain: str) -> str:
 
     # Valkey blocklist check
     if Valkey_Controller().is_domain_in_domain_blocklist(domain):
-        raise ValueError("Session ID is blocked")
+        raise ValueError("This domain has been blocked from scanning. Possible reasons: operator policy, legal requirements, abuse prevention, or a request by the domain operator. Contact the operator if you believe this is an error.")
 
     return v
