@@ -275,6 +275,8 @@ interface AppData {
   isShowCacheInfo: boolean;
   fetchLogCBStatus: string;
   fetchLogDLStatus: string;
+  skip_cache: boolean;
+  observe_rerun: boolean;
   version: {
     csaf_checker_version: string;
     csaf_validator_version: string;
@@ -312,6 +314,8 @@ export default defineComponent({
       isShowCacheInfo: false,
       fetchLogCBStatus: '',
       fetchLogDLStatus: '',
+      skip_cache: false,
+      observe_rerun: false,
     } as AppData
   },
   async mounted() {
@@ -320,12 +324,9 @@ export default defineComponent({
       .then(response => this.version = response.data)
     const params = new URLSearchParams(window.location.search)
     const domainParam = params.get('domain')
-    const observeRerun = params.get('observe_rerun')
-    this.observe_rerun = false
     if (domainParam) {
       this.domain = domainParam
-      if(observeRerun)
-        this.observe_rerun = observeRerun
+      this.observe_rerun = params.get('observe_rerun') === 'true'
       this.startScan()
     }
   },
@@ -404,13 +405,15 @@ export default defineComponent({
     async scanWork() {
       try {
         this.error = null
-        history.replaceState(null, '', `?domain=${encodeURIComponent(this.domain)}&observe_rerun=${encodeURIComponent(this.observe_rerun)}`)
+        const url = `?domain=${encodeURIComponent(this.domain)}` + (this.observe_rerun ? '&observe_rerun=true' : '')
+        history.replaceState(null, '', url)
         const response = await axios.post(`${this.backendUrl}/api/scan/start`, {
           domain: this.domain,
           session_id: this.session_id,
           skip_cache: this.skip_cache,
           observe_rerun: this.observe_rerun,
         })
+        this.skip_cache = false
         this.result = this.loading ? response.data: null
         if (this.result?.domain) {
           this.domain = this.result.domain
@@ -447,10 +450,8 @@ export default defineComponent({
     },
     rescan() {
       this.skip_cache = true
-      this.observe_rerun = false
-      this.startScan()
-      this.skip_cache = false
       this.observe_rerun = true
+      this.startScan()
     },
     reset() {
       this.skip_cache = false
