@@ -7,8 +7,11 @@
 
 set -e
 
+
+sleep infinity
+
 # Due to docker compose volume mounting, we need to reinstall all pip packages
-pip install -r requirements.txt
+pip install --no-cache-dir .
 
 # Install csaf binary as well
 : "${CSAF_CHECKER_VERSION:?CSAF_CHECKER_VERSION is not set}"

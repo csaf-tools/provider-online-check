@@ -19,7 +19,7 @@ UI and integration tests for the CSAF Provider Scan.
 
 1. Install test dependencies:
 ```bash
-pip install -r requirements.txt
+pip install .
 ```
 
 2. Ensure both frontend and backend are running:
