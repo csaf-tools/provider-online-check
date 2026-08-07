@@ -31,9 +31,9 @@ maintainers = [
   {name = "Intevation", email = "intevation@intevation.de "},
 ]
 description = "A web application, which allows to check a CSAF trusted provider online."
-readme = "../README.md"
+readme = "./README.md"
 license = "Apache-2.0"
-license-files = ["../LICENSES/.*"]
+license-files = ["./LICENSES/.*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -47,4 +47,4 @@ profile = "black"
 
 [project.urls]
 Homepage = "https://check.provider.csaf.dev/"
-Repository = "github.com/Intevation/csaf-online-provider"
+Repository = "https://github.com/Intevation/csaf-online-provider"
