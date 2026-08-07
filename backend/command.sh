@@ -7,9 +7,6 @@
 
 set -e
 
-
-sleep infinity
-
 # Due to docker compose volume mounting, we need to reinstall all pip packages
 pip install --no-cache-dir .
 
