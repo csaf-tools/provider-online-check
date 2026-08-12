@@ -41,7 +41,7 @@ SPDX-License-Identifier: Apache-2.0
 
               <div class="alert alert-light mt-4" role="alert" v-else>
                 <div class="d-flex gap-2">
-                  <span>{{ loading ? 'Running&nbsp;check&nbsp;on&nbsp;target': 'Completed&nbsp;the&nbsp;check&nbsp;of'}}</span>
+                  <span>{{ loading ? 'Running check on target'.replaceAll(' ', '&nbsp;'): 'Completed the check of'.replaceAll(' ', '&nbsp;')}}</span>
                   <span><code>{{ domain }}</code></span>
                   <span v-if="loading" class="spinner-border spinner-border-sm ms-2 me-auto" role="status" aria-hidden="true"></span>
                   <span v-else class="ms-2 me-auto">✓</span>
