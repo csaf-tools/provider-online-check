@@ -67,6 +67,17 @@ class TestInformationEndpoint:
         assert "openapi" in data
 
 
+class TestAdminEndpoint:
+    """Tests for the admin status endpoint"""
+
+    def test_admin_status(self):
+        """admin status endpoint returns expected fields"""
+        response = client.get("/api/admin/status")
+        data = response.json()
+        assert response.status_code == 200
+        assert "slots" in data
+        assert len(data["slots"]) == 10
+
 class TestHealthEndpoint:
     """Tests for the health check endpoint"""
 

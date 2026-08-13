@@ -45,7 +45,8 @@ SPDX-License-Identifier: Apache-2.0
                   <span><code>{{ domain }}</code></span>
                   <span v-if="loading" class="spinner-border spinner-border-sm ms-2 me-auto" role="status" aria-hidden="true"></span>
                   <span v-else class="ms-2 me-auto">✓</span>
-                  <button class="btn btn-danger btn-sm" @click="reset">{{ loading ? 'Cancel': 'Start a new check'}}</button>
+                  <button class="btn btn-warning btn-sm" @click="reset">{{ loading ? 'Cancel': 'Start a new check'}}</button>
+                  <button class="btn btn-danger btn-sm" v-if="!loading" @click="rescan">Rerun without cache</button>
                 </div>
                 <div v-if="result?.start_time">Duration: {{ formatDuration(result?.start_time, result?.end_time) }}</div>
               </div>
@@ -274,6 +275,7 @@ interface AppData {
   isShowCacheInfo: boolean;
   fetchLogCBStatus: string;
   fetchLogDLStatus: string;
+  observe_rerun: boolean;
   version: {
     csaf_checker_version: string;
     csaf_validator_version: string;
@@ -311,6 +313,7 @@ export default defineComponent({
       isShowCacheInfo: false,
       fetchLogCBStatus: '',
       fetchLogDLStatus: '',
+      observe_rerun: false,
     } as AppData
   },
   async mounted() {
@@ -321,6 +324,7 @@ export default defineComponent({
     const domainParam = params.get('domain')
     if (domainParam) {
       this.domain = domainParam
+      this.observe_rerun = params.get('observe_rerun') === 'true'
       this.startScan()
     }
   },
@@ -387,28 +391,42 @@ export default defineComponent({
     }
   },
   methods: {
-    async startScan() {
+    async startScan(skip_cache = false) {
       this.loading = true
       this.allowInput = false
       this.result = null
       this.messagesList = null
       this.error = null
       this.clearFields()
-      this.scanWork()
+      this.scanWork(skip_cache)
     },
-    async scanWork() {
+    async scanWork(skip_cache = false) {
       try {
+        let skipCache = false
+        if (typeof skip_cache === 'boolean') {
+          skipCache = skip_cache
+        }
+
         this.error = null
-        history.replaceState(null, '', `?domain=${encodeURIComponent(this.domain)}`)
+        const url = `?domain=${encodeURIComponent(this.domain)}` + (this.observe_rerun ? '&observe_rerun=true' : '')
+        history.replaceState(null, '', url)
         const response = await axios.post(`${this.backendUrl}/api/scan/start`, {
           domain: this.domain,
-          session_id: this.session_id
+          session_id: this.session_id,
+          skip_cache: skipCache,
+          observe_rerun: this.observe_rerun,
         })
+
+        if ( skipCache ) {
+          this.observe_rerun = true
+        }
+
         this.result = this.loading ? response.data: null
         if (this.result?.domain) {
           this.domain = this.result.domain
         }
         if (['DONE_CHECKER', 'CACHED_CHECKER'].includes(this.result?.status)) {
+          this.observe_rerun = false
           const parsedResultsChecker = this.parseResultsChecker(this.result.results_checker)
           this.extractMessagesFromResultsChecker(parsedResultsChecker)
           this.setScanTime(parsedResultsChecker)
@@ -437,7 +455,11 @@ export default defineComponent({
         }
       }
     },
+    rescan() {
+      this.startScan(true)
+    },
     reset() {
+      this.observe_rerun = false
       this.loading = false
       this.allowInput = true
       this.result = null
