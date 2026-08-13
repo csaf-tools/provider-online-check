@@ -49,6 +49,7 @@ SPDX-License-Identifier: Apache-2.0
                   <button class="btn btn-danger btn-sm" v-if="!loading" @click="rescan">Rerun without cache</button>
                 </div>
                 <div v-if="result?.start_time">Duration: {{ formatDuration(result?.start_time, result?.end_time) }}</div>
+                <div v-if="pmd_path">PMD: <a :href="pmd_path" target="_blank" title="Link to PMD">{{ pmd_path }}</a></div>
               </div>
 
               <!-- display of requirements messages -->
@@ -275,6 +276,7 @@ interface AppData {
   isShowCacheInfo: boolean;
   fetchLogCBStatus: string;
   fetchLogDLStatus: string;
+  pmd_path: string;
   observe_rerun: boolean;
   version: {
     csaf_checker_version: string;
@@ -313,6 +315,7 @@ export default defineComponent({
       isShowCacheInfo: false,
       fetchLogCBStatus: '',
       fetchLogDLStatus: '',
+      pmd_path: '',
       observe_rerun: false,
     } as AppData
   },
@@ -425,6 +428,7 @@ export default defineComponent({
         if (this.result?.domain) {
           this.domain = this.result.domain
         }
+        this.pmd_path = this.result?.pmd_path
         if (['DONE_CHECKER', 'CACHED_CHECKER'].includes(this.result?.status)) {
           this.observe_rerun = false
           const parsedResultsChecker = this.parseResultsChecker(this.result.results_checker)
