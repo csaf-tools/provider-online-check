@@ -84,7 +84,7 @@ SPDX-License-Identifier: Apache-2.0
                   :num="group.num"
                   :description="group.description"
                   :messages="group.messages"
-                  :passed="group.passed"
+                  :passed="group.passed ?? false"
                 />
 
                 <p class="small-margin-top">
@@ -252,7 +252,7 @@ interface RequirementGroup {
   num: number;
   description: string;
   messages: { text: string; type: number }[];
-  passed: boolean;
+  passed?: boolean;
 }
 
 interface AppData {
