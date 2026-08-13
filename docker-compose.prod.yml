@@ -104,6 +104,7 @@ services:
       - scanner
     volumes:
       - valkey-data:/data
+      - validator-store:/app/store/validator/cache/
     healthcheck:
       test: ["CMD", "valkey-cli", "ping"]
       interval: 30s
@@ -117,6 +118,7 @@ services:
 
 volumes:
   valkey-data:
+  validator-store:
 
 networks:
   scanner:
