@@ -41,14 +41,14 @@ SPDX-License-Identifier: Apache-2.0
 
               <div class="alert alert-light mt-4" role="alert" v-else>
                 <div class="d-flex gap-2">
-                  <span>{{ loading ? 'Running check on target': 'Completed the check of'}}</span>
+                  <span>{{ loading ? 'Running check on target'.replaceAll(' ', '&nbsp;'): 'Completed the check of'.replaceAll(' ', '&nbsp;')}}</span>
                   <span><code>{{ domain }}</code></span>
                   <span v-if="loading" class="spinner-border spinner-border-sm ms-2 me-auto" role="status" aria-hidden="true"></span>
                   <span v-else class="ms-2 me-auto">✓</span>
                   <button class="btn btn-warning btn-sm" @click="reset">{{ loading ? 'Cancel': 'Start a new check'}}</button>
                   <button class="btn btn-danger btn-sm" v-if="!loading" @click="rescan">Rerun without cache</button>
                 </div>
-                <div v-if="result?.start_time">Duration {{ formatDuration(result?.start_time, result?.end_time) }}</div>
+                <div v-if="result?.start_time">Duration: {{ formatDuration(result?.start_time, result?.end_time) }}</div>
               </div>
 
               <!-- display of requirements messages -->
@@ -85,7 +85,7 @@ SPDX-License-Identifier: Apache-2.0
                   :num="group.num"
                   :description="group.description"
                   :messages="group.messages"
-                  :passed="group.passed"
+                  :passed="group.passed ?? false"
                 />
 
                 <p class="small-margin-top">
@@ -253,7 +253,7 @@ interface RequirementGroup {
   num: number;
   description: string;
   messages: { text: string; type: number }[];
-  passed: boolean;
+  passed?: boolean;
 }
 
 interface AppData {

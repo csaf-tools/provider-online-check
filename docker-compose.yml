@@ -17,6 +17,7 @@ services:
       - "${PORT_BACKEND:-443}:8000"
     volumes:
       - ./backend:/app
+      - validator-store:/app/store/validator/cache/
     environment:
       - SCAN_SLOTS=${SCAN_SLOTS:-10}
       - CSAF_CHECKER_TIMEOUT=${CSAF_CHECKER_TIMEOUT:-3600}
@@ -124,3 +125,6 @@ networks:
         # these must match the source ranges in dev/restrict-network.sh
         - subnet: 172.30.0.0/24
         - subnet: fd00:30::/64
+
+volumes:
+  validator-store: {}
