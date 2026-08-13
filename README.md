@@ -32,6 +32,10 @@ Considerations:
 
  * When in doubt, too much stress on the CSAF Providers will be prevented.
 
+## Screenshot
+
+<a href="docs/screenshots/scan-wid.cert-bund.de.png"><img src="docs/screenshots/scan-wid.cert-bund.de.png" alt="Screenshot of a scan result" width="200"></a>
+
 ## Getting started
 
 ### Get the repository
