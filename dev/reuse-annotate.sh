@@ -40,11 +40,12 @@ for filename in "${filenames[@]}"; do
         continue
     fi
 
-    # For .json files the annotation is in the sidecar .license file
-    case "$filename" in
-        *.json) se_target="${filename}.license" ;;
-        *)      se_target="$filename" ;;
-    esac
+    # If a sidecar .license file exists, use it to check for the SE line
+    if [ -f "${filename}.license" ]; then
+        se_target="${filename}.license"
+    else
+        se_target="$filename"
+    fi
 
     if $check_only; then
         if [ ! -f "$se_target" ] || ! grep -qE '^[[:space:]#/;*]*Software-Engineering:' "$se_target"; then

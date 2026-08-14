@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
               <p>Check a CSAF Provider's metadata and all its documents for validity.<br />
                 Learn more about CSAF (Common Security Advisory Framework) at <a href="https://csaf.io" target="_blank">csaf.io</a>.</p>
 
-              <form @submit.prevent="startScan" v-if="allowInput">
+              <form @submit.prevent="startScanForForm" v-if="allowInput">
                 <div class="mb-3">
                   <label for="domainInput" class="form-label">Enter a domain name or <a href="https://docs.oasis-open.org/csaf/csaf/v2.1/csaf-v2.1.html#717-requirement-7-provider-metadatajson-" title="Provider Metadata File" target="_blank">PMD</a> to start the check:</label>
                   <input
@@ -41,13 +41,15 @@ SPDX-License-Identifier: Apache-2.0
 
               <div class="alert alert-light mt-4" role="alert" v-else>
                 <div class="d-flex gap-2">
-                  <span>{{ loading ? 'Running check on target': 'Completed the check of'}}</span>
+                  <span>{{ loading ? 'Running check on target'.replaceAll(' ', '&nbsp;'): 'Completed the check of'.replaceAll(' ', '&nbsp;')}}</span>
                   <span><code>{{ domain }}</code></span>
                   <span v-if="loading" class="spinner-border spinner-border-sm ms-2 me-auto" role="status" aria-hidden="true"></span>
                   <span v-else class="ms-2 me-auto">✓</span>
-                  <button class="btn btn-danger btn-sm" @click="reset">{{ loading ? 'Cancel': 'Start a new check'}}</button>
+                  <button class="btn btn-warning btn-sm" @click="reset">{{ loading ? 'Cancel': 'Start a new check'}}</button>
+                  <button class="btn btn-danger btn-sm" v-if="!loading" @click="rescan">Rerun without cache</button>
                 </div>
-                <div v-if="result?.start_time">Duration {{ formatDuration(result?.start_time, result?.end_time) }}</div>
+                <div v-if="result?.start_time">Duration: {{ formatDuration(result?.start_time, result?.end_time) }}</div>
+                <div v-if="pmd_path">PMD: <a :href="pmd_path" target="_blank" title="Link to PMD">{{ pmd_path }}</a></div>
               </div>
 
               <!-- display of requirements messages -->
@@ -84,7 +86,7 @@ SPDX-License-Identifier: Apache-2.0
                   :num="group.num"
                   :description="group.description"
                   :messages="group.messages"
-                  :passed="group.passed"
+                  :passed="group.passed ?? false"
                 />
 
                 <p class="small-margin-top">
@@ -252,7 +254,7 @@ interface RequirementGroup {
   num: number;
   description: string;
   messages: { text: string; type: number }[];
-  passed: boolean;
+  passed?: boolean;
 }
 
 interface AppData {
@@ -274,6 +276,8 @@ interface AppData {
   isShowCacheInfo: boolean;
   fetchLogCBStatus: string;
   fetchLogDLStatus: string;
+  pmd_path: string;
+  observe_rerun: boolean;
   version: {
     csaf_checker_version: string;
     csaf_validator_version: string;
@@ -311,6 +315,8 @@ export default defineComponent({
       isShowCacheInfo: false,
       fetchLogCBStatus: '',
       fetchLogDLStatus: '',
+      pmd_path: '',
+      observe_rerun: false,
     } as AppData
   },
   async mounted() {
@@ -321,6 +327,7 @@ export default defineComponent({
     const domainParam = params.get('domain')
     if (domainParam) {
       this.domain = domainParam
+      this.observe_rerun = params.get('observe_rerun') === 'true'
       this.startScan()
     }
   },
@@ -387,28 +394,38 @@ export default defineComponent({
     }
   },
   methods: {
-    async startScan() {
+    async startScan(skipCache = false) {
       this.loading = true
       this.allowInput = false
       this.result = null
       this.messagesList = null
       this.error = null
       this.clearFields()
-      this.scanWork()
+      this.scanWork(skipCache)
     },
-    async scanWork() {
+    async scanWork(skipCache = false) {
       try {
         this.error = null
-        history.replaceState(null, '', `?domain=${encodeURIComponent(this.domain)}`)
+        const url = `?domain=${encodeURIComponent(this.domain)}` + (this.observe_rerun ? '&observe_rerun=true' : '')
+        history.replaceState(null, '', url)
         const response = await axios.post(`${this.backendUrl}/api/scan/start`, {
           domain: this.domain,
-          session_id: this.session_id
+          session_id: this.session_id,
+          skip_cache: skipCache,
+          observe_rerun: this.observe_rerun,
         })
+
+        if ( skipCache ) {
+          this.observe_rerun = true
+        }
+
         this.result = this.loading ? response.data: null
         if (this.result?.domain) {
           this.domain = this.result.domain
         }
+        this.pmd_path = this.result?.pmd_path
         if (['DONE_CHECKER', 'CACHED_CHECKER'].includes(this.result?.status)) {
+          this.observe_rerun = false
           const parsedResultsChecker = this.parseResultsChecker(this.result.results_checker)
           this.extractMessagesFromResultsChecker(parsedResultsChecker)
           this.setScanTime(parsedResultsChecker)
@@ -437,7 +454,14 @@ export default defineComponent({
         }
       }
     },
+    rescan() {
+      this.startScan(true)
+    },
+    startScanForForm() {
+      this.startScan(false)
+    },
     reset() {
+      this.observe_rerun = false
       this.loading = false
       this.allowInput = true
       this.result = null

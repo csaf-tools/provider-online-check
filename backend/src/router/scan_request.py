@@ -47,6 +47,13 @@ class ScanRequest(BaseModel):
         ),
     ] = False
 
+    observe_rerun: Annotated[
+        bool,
+        Field(
+            description="When enabled, the cache will be skipped, but no new task will be created either."
+        ),
+    ] = False
+
     clear_any_running: Annotated[
         bool,
         Field(
