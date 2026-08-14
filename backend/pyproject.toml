@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2026 German Federal Office for Information Security (BSI) <https://www.bsi.bund.de>
+# Software-Engineering: 2026 Intevation GmbH <https://intevation.de>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 [build-system]
 requires = ["setuptools >= 77.0.3"]
 build-backend = "setuptools.build_meta"
@@ -5,7 +10,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "csaf-provider-scan-backend"
 version = "0.1.0"
-requires_python = ">=3.10"
+requires-python = ">=3.10"
 dependencies = [
     "fastapi>=0,<1",
     "uvicorn[standard]>=0,<1",
@@ -31,9 +36,7 @@ maintainers = [
   {name = "Intevation", email = "intevation@intevation.de "},
 ]
 description = "A web application, which allows to check a CSAF trusted provider online."
-readme = "./README.md"
 license = "Apache-2.0"
-license-files = ["./LICENSES/.*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
