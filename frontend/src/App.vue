@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
               <p>Check a CSAF Provider's metadata and all its documents for validity.<br />
                 Learn more about CSAF (Common Security Advisory Framework) at <a href="https://csaf.io" target="_blank">csaf.io</a>.</p>
 
-              <form @submit.prevent="startScan" v-if="allowInput">
+              <form @submit.prevent="startScanForForm" v-if="allowInput">
                 <div class="mb-3">
                   <label for="domainInput" class="form-label">Enter a domain name or <a href="https://docs.oasis-open.org/csaf/csaf/v2.1/csaf-v2.1.html#717-requirement-7-provider-metadatajson-" title="Provider Metadata File" target="_blank">PMD</a> to start the check:</label>
                   <input
@@ -394,22 +394,17 @@ export default defineComponent({
     }
   },
   methods: {
-    async startScan(skip_cache = false) {
+    async startScan(skipCache = false) {
       this.loading = true
       this.allowInput = false
       this.result = null
       this.messagesList = null
       this.error = null
       this.clearFields()
-      this.scanWork(skip_cache)
+      this.scanWork(skipCache)
     },
-    async scanWork(skip_cache = false) {
+    async scanWork(skipCache = false) {
       try {
-        let skipCache = false
-        if (typeof skip_cache === 'boolean') {
-          skipCache = skip_cache
-        }
-
         this.error = null
         const url = `?domain=${encodeURIComponent(this.domain)}` + (this.observe_rerun ? '&observe_rerun=true' : '')
         history.replaceState(null, '', url)
@@ -461,6 +456,9 @@ export default defineComponent({
     },
     rescan() {
       this.startScan(true)
+    },
+    startScanForForm() {
+      this.startScan(false)
     },
     reset() {
       this.observe_rerun = false
