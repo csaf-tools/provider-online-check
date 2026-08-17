@@ -87,6 +87,7 @@ SPDX-License-Identifier: Apache-2.0
                   :description="group.description"
                   :messages="group.messages"
                   :passed="group.passed ?? false"
+                  :reqUrl="getRequirementsURL(group.num)"
                 />
 
                 <p class="small-margin-top">
@@ -639,6 +640,52 @@ export default defineComponent({
       ]
           .filter(Boolean)
           .join(' ')
+    },
+    getRequirementsURL(num: number): string {
+      switch(num) {
+        case 1:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#711-requirement-1-valid-csaf-document'
+        case 2:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#712-requirement-2-filename'
+        case 3:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#713-requirement-3-tls'
+        case 4:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#714-requirement-4-tlpwhite'
+        case 5:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#715-requirement-5-tlpamber-and-tlpred'
+        case 6:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#716-requirement-6-no-redirects'
+        case 7:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#717-requirement-7-provider-metadatajson'
+        case 8:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#718-requirement-8-securitytxt'
+        case 9:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#719-requirement-9-well-known-url-for-provider-metadatajson'
+        case 10:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7110-requirement-10-dns-path'
+        case 11:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7111-requirement-11-one-folder-per-year'
+        case 12:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7112-requirement-12-indextxt'
+        case 13:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7113-requirement-13-changescsv'
+        case 14:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7114-requirement-14-directory-listings'
+        case 15:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7115-requirement-15-rolie-feed'
+        case 16:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7116-requirement-16-rolie-service-document'
+        case 17:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7117-requirement-17-rolie-category-document'
+        case 18:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7118-requirement-18-integrity'
+        case 19:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7119-requirement-19-signatures'
+        case 20:
+          return 'https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html#7120-requirement-20-public-openpgp-key'
+        default:
+          return ''
+      }
     }
   }
 })
