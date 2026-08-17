@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: 2026 German Federal Office for Information Security (BSI) <https://www.bsi.bund.de>
+# Software-Engineering: 2026 Intevation GmbH <https://intevation.de>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "csaf-provider-scan-backend"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0,<1",
+    "uvicorn[standard]>=0,<1",
+    "pydantic>=2,<3",
+    "pydantic-settings>=2,<3",
+    "valkey>=6,<7",
+    "rq>=2,<3",
+    "python-dotenv>=1,<2",
+    "httpx2>=2,<3",
+    "pytest>=9,<10",
+    "pytest-asyncio>=1,<2",
+    "pytest-timeout>=2,<3",
+    "black>=26,<27",
+    "isort>=7,<8",
+    "flake8>=7,<8",
+    "mypy>=1,<2",
+    "coverage>=7,<8",
+]
+authors = [
+  {name = "Intevation", email = "intevation@intevation.de "},
+]
+maintainers = [
+  {name = "Intevation", email = "intevation@intevation.de "},
+]
+description = "A web application, which allows to check a CSAF trusted provider online."
+license = "Apache-2.0"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.isort]
+profile = "black"
+
+[project.urls]
+Homepage = "https://check.provider.csaf.dev/"
+Repository = "https://github.com/Intevation/csaf-online-provider"

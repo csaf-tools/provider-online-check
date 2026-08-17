@@ -207,7 +207,7 @@ This repository uses the [Conventional Commits](https://www.conventionalcommits.
 #### Backend
 - Python 3.10+
 - Valkey
-- Python packages: FastAPI, uvicorn, pydantic, valkey, rq (see [backend/requirements.txt](backend/requirements.txt))
+- Python packages: FastAPI, uvicorn, pydantic, valkey, rq (see [backend/pyproject.toml](backend/pyproject.toml))
 
 #### Frontend
 - Node.js 18+
