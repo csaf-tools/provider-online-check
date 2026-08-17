@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="message-group small-margin-top" :class="passed ? 'group-passed' : 'group-failed'">
     <div class="message-group-header">
-      <span class="requirement-desc">{{ description }} <a v-if="!!reqUrl && !passed" :href="reqUrl" target="_blank">Link</a></span>
+      <span class="requirement-desc">{{ description }} <a v-if="!!reqUrl" :href="reqUrl" target="_blank">§ ↗</a></span>
       <span v-if="messages.length > 0" class="message-counts ms-2">
         <span v-if="errorCount > 0" class="badge bg-danger me-1">{{ errorCount }} error{{ errorCount !== 1 ? 's' : '' }}</span>
         <span v-if="warnCount > 0" class="badge bg-warning text-dark me-1">{{ warnCount }} warning{{ warnCount !== 1 ? 's' : '' }}</span>
