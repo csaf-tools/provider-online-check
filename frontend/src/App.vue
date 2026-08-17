@@ -395,22 +395,17 @@ export default defineComponent({
     }
   },
   methods: {
-    async startScan(skip_cache = false) {
+    async startScan(skipCache = false) {
       this.loading = true
       this.allowInput = false
       this.result = null
       this.messagesList = null
       this.error = null
       this.clearFields()
-      this.scanWork(skip_cache)
+      this.scanWork(skipCache)
     },
-    async scanWork(skip_cache = false) {
+    async scanWork(skipCache = false) {
       try {
-        let skipCache = false
-        if (typeof skip_cache === 'boolean') {
-          skipCache = skip_cache
-        }
-
         this.error = null
         const url = `?domain=${encodeURIComponent(this.domain)}` + (this.observe_rerun ? '&observe_rerun=true' : '')
         history.replaceState(null, '', url)

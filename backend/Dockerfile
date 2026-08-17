@@ -30,8 +30,9 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml .
+# pip/setuptools are too old on ubuntu 22.04
+RUN pip install --upgrade pip setuptools && pip install .
 
 # --- Dev target ---
 FROM base AS dev

@@ -21,7 +21,7 @@ done
 
 if [ -n "$INSTALL" ]
 then
-    pip install --no-cache-dir -r requirements.txt || true
+    pip install --no-cache-dir . || true
 fi
 
 if [ -n "$NOT_IN_BACKEND" ]
