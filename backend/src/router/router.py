@@ -13,7 +13,7 @@
 import asyncio
 import logging
 import os
-from pathlib import Path
+import subprocess
 
 import httpx2
 from fastapi import APIRouter, HTTPException, status
@@ -34,19 +34,21 @@ router = APIRouter()
 
 logger = logging.getLogger(__name__)
 
-ENV_CSAF_CHECKER_VERSION = "CSAF_CHECKER_VERSION"
-ENV_CSAF_CHECKER_REF = "CSAF_REF"
 ENV_CSAF_VALIDATOR_VERSION = "CSAF_VALIDATOR_VERSION"
 ENV_CSAF_PROVIDER_VERSION = "APP_VERSION"
 
-# read the revision once at startup
-CSAF_REF = os.getenv(ENV_CSAF_CHECKER_REF, "")
-CSAF_REVISION = "unknown"
-if CSAF_REF:
-    try:
-        CSAF_REVISION = Path("/app/bin/csaf_revision").read_text().strip()
-    except OSError:
-        CSAF_REVISION = CSAF_REF
+# Read csaf_checker version once at startup by running the binary
+CSAF_CHECKER_VERSION = "unknown"
+try:
+    result = subprocess.run(
+        [os.path.abspath(os.path.join(CSAF_BINARY_PATH, CSAF_CHECKER_BINARY)), "--version"],
+        capture_output=True,
+        text=True,
+        timeout=2,
+    )
+    CSAF_CHECKER_VERSION = (result.stdout or result.stderr).strip()
+except Exception as exc:
+    logger.warning(f"Could not determine csaf_checker version: {exc}")
 
 
 @router.post(
@@ -215,9 +217,7 @@ async def meta_info() -> InformationResponse:
         InformationResponse with provider information
     """
 
-    csaf_checker_version = os.getenv(ENV_CSAF_CHECKER_VERSION, "")
-    if CSAF_REF:
-        csaf_checker_version = f"revision {CSAF_REVISION}"
+    csaf_checker_version = CSAF_CHECKER_VERSION
     csaf_validator_version = os.getenv(ENV_CSAF_VALIDATOR_VERSION, "")
     csaf_provider_version = os.getenv(ENV_CSAF_PROVIDER_VERSION, "")
 

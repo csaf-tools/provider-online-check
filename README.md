@@ -226,7 +226,7 @@ Docker Compose reads this file automatically.
 | `PORT_BACKEND` | Host port for the backend API. |
 | `PORT_FRONTEND` | Host port for the frontend. |
 | `PORT_VALIDATOR` | Host port for the validator. |
-| `CSAF_CHECKER_VERSION` | Version of the [gocsaf](https://github.com/gocsaf/csaf) (`csaf_checker`) binary to use. Only used for version display when `CSAF_REF` is set. |
+| `CSAF_CHECKER_VERSION` | Version of the [gocsaf](https://github.com/gocsaf/csaf) (`csaf_checker`) binary to use. |
 | `CSAF_VALIDATOR_VERSION` | Version of the [csaf-validator-service](https://github.com/csaf-tools/csaf-validator-service) to use for document validation. Min version: `2.0.30` |
 | `CSAF_REF` | _empty_ | Build `csaf_checker` from source at this git ref (branch, tag, or commit SHA) instead of downloading a release. |
 | `APP_VERSION` | This App's Version. |
