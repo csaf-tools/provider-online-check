@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+SPDX-FileCopyrightText: 2026 German Federal Office for Information Security (BSI) <https://www.bsi.bund.de>
+Software-Engineering: 2026 Intevation GmbH <https://intevation.de>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+<svg
+   viewBox="0 0 899.02997 1025.724"
+   version="1.1"
+   id="svg9"
+   sodipodi:docname="logo.svg"
+   width="899.02997"
+   height="1025.724"
+   inkscape:version="1.4.4 (unknown)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs9" />
+  <sodipodi:namedview
+     id="namedview9"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showguides="true"
+     inkscape:zoom="0.20832246"
+     inkscape:cx="-21.601127"
+     inkscape:cy="136.80714"
+     inkscape:window-width="1680"
+     inkscape:window-height="1002"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g9">
+    <sodipodi:guide
+       position="166.50844,1283"
+       orientation="0,-1"
+       id="guide9"
+       inkscape:locked="false" />
+  </sodipodi:namedview>
+  <g
+     transform="matrix(0.1,0,0,-0.1,-238.88504,1111.724)"
+     fill="currentColor"
+     stroke="none"
+     id="g9">
+    <path
+       id="path2"
+       d="m 2364.8491,11117.24 c 0.7758,-454.366 7.9455,-858.142 10.293,-1330.8789 2.4992,-503.2828 20.8554,-948.3633 56.8554,-1387.3633 175.535,-1301.6538 184.6878,-1190.3344 385.9375,-2161.8164 l 297.0704,-1184.1797 c 133,-387 368.996,-921.0078 570.996,-1288.0078 624,-1140 1411,-1966 2425,-2550 100.1487,-57.8323 204.4894,-96.333 352.168,-166.9141 27.9437,-14.6666 55.9376,-35.1367 83.8281,-49.08199 151,-76 293.0079,-139.0039 313.0079,-139.0039 20,0 161.9882,63.0039 312.9882,139.0039 27.878,13.93899 55.858,34.40279 83.7891,49.06249 147.6945,70.5874 252.0451,109.0936 352.207,166.9336 1014,584 1801,1410 2425.0003,2550 202,367 438.016,901.0078 571.016,1288.0078 l 297.05,1184.1797 c 201.249,971.482 210.403,860.1626 385.938,2161.8164 36,439 54.356,884.0813 56.855,1387.3633 2.348,472.7369 9.517,876.5129 10.293,1330.8789 h -4455.664 -78.9648 z" />
+    <text
+       xml:space="preserve"
+       style="font-size:200px;line-height:1.25;font-family:sans-serif;text-align:center;text-anchor:middle;stroke-width:10"
+       x="19333.734"
+       y="-7181.0347"
+       id="text10"
+       transform="scale(1,-1)"><tspan
+         sodipodi:role="line"
+         id="tspan10"
+         style="stroke-width:10"
+         x="19333.734"
+         y="-7181.0347" /></text>
+    <path
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:10px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 4847.9435,4517.5711 6670.4187,3159.7089 10792.568,8432.152 10041.207,9007.9751 6511.1455,4340.8268 5353.1154,5138.4849 Z"
+       id="path12"
+       sodipodi:nodetypes="ccccccc" />
+    <text
+       xml:space="preserve"
+       style="font-size:6931.58px;line-height:1.25;font-family:'Liberation Serif';-inkscape-font-specification:'Liberation Serif';text-align:center;text-anchor:middle;stroke-width:346.58"
+       x="5644.478"
+       y="-5518.4849"
+       id="text12"
+       transform="scale(1,-1)"><tspan
+         sodipodi:role="line"
+         id="tspan12"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';fill:#ffffff;fill-opacity:1;stroke-width:346.58"
+         x="5644.478"
+         y="-5518.4849">P</tspan></text>
+  </g>
+</svg>
