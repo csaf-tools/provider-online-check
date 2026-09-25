@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-FROM ubuntu:22.04
+FROM ubuntu:26.04
 
 # Setup
 WORKDIR /app/
@@ -13,7 +13,7 @@ RUN apt-get update && \
     apt-get install --no-install-recommends -y \
     ca-certificates \
     curl \
-    docker \
+    docker.io \
     git \
     unzip \
     && apt-get clean \

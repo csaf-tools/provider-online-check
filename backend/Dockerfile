@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # --- Shared base ---
-FROM ubuntu:22.04 AS base
+FROM ubuntu:26.04 AS base
 
 ARG CSAF_CHECKER_VERSION
 ENV CSAF_CHECKER_VERSION=${CSAF_CHECKER_VERSION}
@@ -15,6 +15,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
+    python3-venv \
     curl && \
     if [ -n "$CSAF_REF" ]; then \
         apt-get install -y --no-install-recommends git make && \
@@ -23,7 +24,9 @@ RUN apt-get update && \
     fi && \
     rm -rf /var/lib/apt/lists/*
 
-ENV PATH="/usr/local/go/bin:${PATH}"
+# Virtual Python Environment
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:/usr/local/go/bin:$PATH"
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app
@@ -31,8 +34,8 @@ ENV PYTHONUNBUFFERED=1 \
 WORKDIR /app
 
 COPY pyproject.toml .
-# pip/setuptools are too old on ubuntu 22.04
-RUN pip install --upgrade pip setuptools && pip install .
+
+RUN pip install --upgrade pip && pip install .
 
 # --- Dev target ---
 FROM base AS dev
