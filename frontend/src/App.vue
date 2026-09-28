@@ -219,6 +219,10 @@ SPDX-License-Identifier: Apache-2.0
                 <a :href="apiDocsUrl" target="_blank">
                   API Documentation
                 </a>
+                &nbsp;
+                <a href="https://github.com/csaf-tools/provider-online-check/blob/main/README.md#feedback--contact" target="_blank">
+                  Feedback &amp; Contact
+                </a>
               </p>
               <p v-if="footerText" v-html="footerText"></p>
               <VersionDisplay :checkerVersion="version?.csaf_checker_version"
