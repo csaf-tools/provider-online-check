@@ -316,6 +316,49 @@ cert-bund.de                      FAIL  csaf_trusted_provider        8m 13s  202
 intevation.de                     PASS  csaf_trusted_provider            1s  2026-07-24T17:34:01  2026-07-31T17:34:02
 ```
 
+### Access log analysis
+
+`contrib/analyze_access_log.py` shows rudimentary usage statistics based on anonymized the Apache access log files.
+Start it on the machine running the Apache reverse proxy:
+
+```shell
+./contrib/analyze_access_log.py /var/log/apache2/other_vhosts_access.log*
+```
+
+It reads uncompressed and gzip-compressed log files.
+
+Use `--vhost <name>` to filter per vhost domain, if the logfile contains logs for multiple websites.
+
+Example output:
+
+```
+=== Summary ===
+Lines parsed:   82416 / 82574
+  (158 line(s) did not match the expected log format)
+Time range:     2026-09-28T00:06:45+02:00 .. 2026-09-20T00:24:34+02:00
+
+=== Requests by path ===
+Path                              Total     2xx     3xx     4xx     5xx
+/                                 16375   15713       1     660       1
+/api/health                        7142    7137       0       0       5
+/api/scan/start                     722     243       0     479       0
+/api/information                    111     111       0       0       0
+/api/openapi.json                     9       7       0       2       0
+/api/docs                             5       4       0       1       0
+
+=== Scan requests ===
+Total:          722
+observe_rerun=true:   88
+observe_rerun=false:  634
+
+Scan targets:
+     14  intevation.de
+     ...
+
+=== Blocked requests ===
+403 responses: 19
+```
+
 ### Blocking Domains
 
 Operators can block certain domains, preventing scans of them entirely.
