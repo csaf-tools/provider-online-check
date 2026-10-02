@@ -26,6 +26,9 @@ VALKEY_PORT = 6379
 RECORDED_DOMAIN_TASK_BY_UUID = "domain-task-id-to-domain:"  # keep in sync with src/database/valkey.py
 CACHE_LIFETIME = int(os.environ.get("CACHE_TIMEOUT_SECONDS", "604800"))
 
+MAX_DOMAIN_WIDTH = 80
+MIN_DOMAIN_WIDTH = len("Domain")
+
 
 def fmt_ts(ts: Optional[int]) -> str:
     if not ts:
@@ -46,6 +49,18 @@ def fmt_duration(seconds: int) -> str:
 
 def section(title: str):
     print(f"\n=== {title} ===")
+
+
+def domain_column_width(domains: list) -> int:
+    """widest domain, but at least the header width, capped at the max"""
+    widest = max((len(d) for d in domains), default=0)
+    return min(max(widest, MIN_DOMAIN_WIDTH), MAX_DOMAIN_WIDTH)
+
+
+def truncate(value: str, width: int) -> str:
+    if len(value) <= width:
+        return value
+    return value[: width - 1] + "…"  # eclipse is shorter than `...`, loosing less chars
 
 
 def print_health(client: httpx2.Client):
@@ -84,11 +99,13 @@ def print_running(client: httpx2.Client):
 
     if active_slots:
         now = int(datetime.now(tz=timezone.utc).timestamp())
-        print(f"{'Slot':>4}  {'Domain':<30}  {'Status':<20}  {'Files':>5}  {'Running':>10}  Started (UTC)")
+        domain_width = domain_column_width([slot.get('domain') or '' for slot in active_slots])
+        print(f"{'Slot':>4}  {'Domain':<{domain_width}}  {'Status':<20}  {'Files':>5}  {'Running':>10}  Started (UTC)")
         for slot in active_slots:
             start = slot.get('start_time') or 0
+            domain = truncate(slot.get('domain') or '', domain_width)
             print(
-                f"{slot['id']:>4}  {slot.get('domain') or '':<30}  "
+                f"{slot['id']:>4}  {domain:<{domain_width}}  "
                 f"{slot.get('status') or '':<20}  "
                 f"{slot.get('files_checked') or 0:>5}  "
                 f"{fmt_duration(now - start) if start else '-':>10}  "
@@ -124,12 +141,13 @@ def print_cached():
         print("  No cached scans.")
         return
 
+    domain_width = domain_column_width([t.get("domain", "?") for t in tasks])
     print(
-        f"{'Domain':<30}  {'Result':>6}  {'Role':<25}  {'Duration':>8}  "
+        f"{'Domain':<{domain_width}}  {'Result':>6}  {'Role':<25}  {'Duration':>8}  "
         f"{'Started (UTC)':<19}  {'Expires (UTC)':<19}"
     )
     for t in tasks:
-        domain = t.get("domain", "?")
+        domain = truncate(t.get("domain", "?"), domain_width)
         start = t.get("start_time")
         end = t.get("end_time")
         duration = fmt_duration(end - start) if end and start else 'unknown'
@@ -153,7 +171,7 @@ def print_cached():
         role_str = role or "-"
 
         print(
-            f"{domain:<30}  {result_str:>6}  {role_str:<25}  {duration:>8}  "
+            f"{domain:<{domain_width}}  {result_str:>6}  {role_str:<25}  {duration:>8}  "
             f"{fmt_ts(start):<19}  {expires:<19}"
         )
 
