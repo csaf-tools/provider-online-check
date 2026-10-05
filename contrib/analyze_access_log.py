@@ -26,7 +26,6 @@ from typing import Optional
 from urllib.parse import parse_qs, urlsplit
 
 SCAN_START_PATH = "/api/scan/start"
-BLOCKED_PATH = "/blocked.html"
 
 # unknown paths will be ignored
 KNOWN_PATHS = {
@@ -36,7 +35,7 @@ KNOWN_PATHS = {
     "/api/health",
     "/api/docs",
     "/api/openapi.json",
-    BLOCKED_PATH,
+    "/blocked.html",
 }
 
 # %v:%p %h %l %u %t "%r" %>s %O "%{Referer}i" "%{User-Agent}i" [%D]

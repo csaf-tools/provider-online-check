@@ -318,7 +318,7 @@ intevation.de                     PASS  csaf_trusted_provider            1s  202
 
 ### Access log analysis
 
-`contrib/analyze_access_log.py` shows rudimentary usage statistics based on anonymized the Apache access log files.
+`contrib/analyze_access_log.py` shows rudimentary usage statistics based on anonymized Apache access log files.
 Start it on the machine running the Apache reverse proxy:
 
 ```shell
