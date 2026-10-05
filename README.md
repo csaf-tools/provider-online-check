@@ -36,6 +36,17 @@ Considerations:
 
 <a href="docs/screenshots/scan-wid.cert-bund.de.png"><img src="docs/screenshots/scan-wid.cert-bund.de.png" alt="Screenshot of a scan result" width="200"></a>
 
+## Feedback & Contact
+
+Get in touch for bug reports, feature requests, and general feedback.
+
+[Open an issue on GitHub](https://github.com/csaf-tools/provider-online-check/issues) (requires an account).
+
+No GitHub account? No problem, reach us here instead:
+
+- Fediverse: [@csaf@infosec.exchange](https://infosec.exchange/@csaf)
+- Email: [swagner@intevation.de](mailto:swagner@intevation.de)
+
 ## Getting started
 
 ### Get the repository
