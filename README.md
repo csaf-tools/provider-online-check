@@ -40,7 +40,7 @@ Considerations:
 
 Get in touch for bug reports, feature requests, and general feedback.
 
-Have a GitHub account? [Open an issue](https://github.com/csaf-tools/provider-online-check/issues).
+[Open an issue on GitHub](https://github.com/csaf-tools/provider-online-check/issues) (requires an account).
 
 No GitHub account? No problem, reach us here instead:
 
