@@ -154,7 +154,7 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
                 "runtime_output_total_lines": len(full_output),
                 "runtime_output_capped": len(displayed_output) < len(full_output),
             }
-
+            
         return {
             "status": status,
             "domain": request.domain,
@@ -168,6 +168,7 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
             "latest_file_checked": data.latest_file_checked,
             "start_time": data.start_time,
             "end_time": data.end_time,
+            "dir_urls": data.dir_urls,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")
