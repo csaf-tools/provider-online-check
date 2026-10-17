@@ -154,7 +154,6 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
                 "runtime_output_total_lines": len(full_output),
                 "runtime_output_capped": len(displayed_output) < len(full_output),
             }
-            
         return {
             "status": status,
             "domain": request.domain,
