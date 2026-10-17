@@ -55,6 +55,12 @@ class ScanResponse(BaseModel):
     pmd_path: Annotated[
         str, Field(description="Path to the PMD that is being used by CSAF Checker")
     ] = ""
+    dir_urls: list[
+        Annotated[
+            str, Field(description="Dir-based provider feed")
+        ]
+    ] = []
+
 
     files_checked: Annotated[
         int, Field(description="Amount of files that have been checked so far")

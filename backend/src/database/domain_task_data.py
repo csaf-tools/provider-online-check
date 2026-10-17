@@ -85,6 +85,12 @@ class Domain_Task_Data(BaseModel):
         str, Field(description="Path to the PMD that is being used by CSAF Checker")
     ] = ""
 
+    dir_urls: list[
+        Annotated[
+            str, Field(description="Dir-based provider feed")
+        ]
+    ] = []
+
     @classmethod
     def create(cls, domain: str) -> "Domain_Task_Data":
         data = {

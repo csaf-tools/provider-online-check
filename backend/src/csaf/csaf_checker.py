@@ -282,6 +282,10 @@ class CSAF_Checker(BaseModel):
                     # Check if PMD is in blocklist
                     if Valkey_Controller().is_domain_in_domain_blocklist(data.pmd_path):
                         return (1, f"Error: PMD is in blocklist: {data.pmd_path}")
+                elif "dirURL for directory based provider:" in decoded_line:
+                    dirURL = decoded_line.split("dirURL for directory based provider:")[-1]
+                    
+                    data.dir_urls.append(dirURL)
 
         if exitCode != 0:
             if exitCode in (-9, -137):
