@@ -92,8 +92,9 @@ describe("Testing App...", () => {
                 return resolve({
                     data: {
                         status: "CACHED_CHECKER",
+                        dir_urls: ["https://test-url1.com", "https://test-url2.com", "https://test-url3.com"],
                         domain: "example.com",
-                        results_checker: '{ "domains": [{ "requirements": [{ "messages": [{ "text": "Test1", "type": 0 }], "num": 12 }] }] }'
+                        results_checker: '{ "domains": [{ "requirements": [{ "messages": [{ "text": "Test1", "type": 0 }], "num": 12 }] }]}'
                     }
                 }
             )}
@@ -105,7 +106,8 @@ describe("Testing App...", () => {
         expect(app.vm.result?.status).toBe('CACHED_CHECKER')
         expect(app.vm.messagesList).toStrictEqual([{text: 'Test1', type: 0, num: 12}])
         expect(app.vm.domain).toBe('example.com')
-
+        expect(app.vm.dir_urls).toStrictEqual(
+            ["https://test-url1.com", "https://test-url2.com", "https://test-url3.com"])
     })
     test('startScan DONE_CHECKER not a CSAF provider', async () => {
         vi.spyOn(axios, 'post').mockResolvedValue({
