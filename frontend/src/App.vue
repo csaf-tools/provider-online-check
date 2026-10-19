@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
                 </div>
                 <div v-if="result?.start_time">Duration: {{ formatDuration(result?.start_time, result?.end_time) }}</div>
                 <div v-if="pmd_path">PMD: <a :href="pmd_path" target="_blank" title="Link to PMD">{{ pmd_path }}</a></div>
-                <div v-if="dir_urls?.length">Dir Urls 
+                <div v-if="dir_urls?.length">Dir-based feed urls:
                   <ul>
                     <li v-for="url in dir_urls" :key="url"><a :href="url" target="_blank">{{ url }}</a></li>
                   </ul>
