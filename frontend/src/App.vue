@@ -184,9 +184,24 @@ SPDX-License-Identifier: Apache-2.0
                   <div :class="['alert', resultClass]" role="alert">
                     <h5 class="alert-heading">Details</h5>
                     <p v-if="result.runtime_output?.length">All timestamps are in UTC</p>
-                    <ul>
-                      <li v-for="(item, index) in result.runtime_output" :key="index">{{ item }}</li>
-                    </ul>
+                    <div v-if="(result.runtime_output?.length ?? 0) < 2000">
+                      <ul>
+                        <li v-for="(item, index) in result.runtime_output" :key="index">{{ item }}</li>
+                      </ul>
+                    </div>
+                    <div v-else>
+                      <p class="small-margin-top">
+                          <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseErrorLogOutput" role="button" aria-expanded="false" aria-controls="collapseLogOutput"
+                            key="DisplayErrorLog">
+                            Display error log (more than 2000 lines)
+                          </a>
+                      </p>
+                      <div class="collapse" id="collapseErrorLogOutput">
+                        <ul>
+                          <li v-for="(item, index) in result.runtime_output" :key="index">{{ item }}</li>
+                        </ul>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
