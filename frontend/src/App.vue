@@ -187,11 +187,28 @@ SPDX-License-Identifier: Apache-2.0
                 </div>
                 <div v-if="result.runtime_output" class="mt-4">
                   <div :class="['alert', resultClass]" role="alert">
-                    <h5 class="alert-heading">Details</h5>
-                    <p v-if="result.runtime_output?.length">All timestamps are in UTC</p>
-                    <ul>
-                      <li v-for="(item, index) in result.runtime_output" :key="index">{{ item }}</li>
-                    </ul>
+                    <div class="d-flex gap-2 mb-2">
+                      <h5 class="me-auto log-header">Details</h5>
+                      <button class="btn btn-sm btn-outline-secondary" @click="copyLogToClipboard">Copy to clipboard
+                        <span v-if="fetchLogCBStatus === 'loading'" class="spinner-border spinner-border-sm ms-2" role="status"></span>
+                        <span v-if="fetchLogCBStatus === 'done'" role="status">✓</span>
+                        <span v-if="fetchLogCBStatus === 'error'">❌</span>
+                      </button>
+                      <button class="btn btn-sm btn-outline-secondary" @click="downloadLog">Download
+                        <span v-if="fetchLogDLStatus === 'loading'" class="spinner-border spinner-border-sm ms-2" role="status"></span>
+                        <span v-if="fetchLogDLStatus === 'done'" role="status">✓</span>
+                        <span v-if="fetchLogDLStatus === 'error'">❌</span>
+                      </button>
+                    </div>
+                    <div class="log-card-size overflow-scroll">
+                      <p v-if="!result?.runtime_output_capped">This is the complete log (stderr)
+                        output of <code>csaf_checker</code> ({{ result?.runtime_output_total_lines }} lines).</p>
+                      <p v-else>This is <strong>only a portion of</strong> the log (stderr) output of <code>csaf_checker</code>,
+                        showing the last {{ result?.runtime_output?.length }} of {{ result?.runtime_output_total_lines }} lines.
+                        Use the buttons <em>Copy to clipboard</em> or <em>Download</em> to get the complete log.</p>
+                      <p>All timestamps are in UTC.</p>
+                      <pre>{{ result?.runtime_output?.join('\n') }}</pre>
+                    </div>
                   </div>
                 </div>
               </div>
