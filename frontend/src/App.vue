@@ -50,6 +50,11 @@ SPDX-License-Identifier: Apache-2.0
                 </div>
                 <div v-if="result?.start_time">Duration: {{ formatDuration(result?.start_time, result?.end_time) }}</div>
                 <div v-if="pmd_path">PMD: <a :href="pmd_path" target="_blank" title="Link to PMD">{{ pmd_path }}</a></div>
+                <div v-if="dir_urls?.length">Dir-based feed URLs:
+                  <ul>
+                    <li v-for="url in dir_urls" :key="url"><a :href="url" target="_blank">{{ url }}</a></li>
+                  </ul>
+                </div>
               </div>
 
               <!-- display of requirements messages -->
@@ -299,6 +304,7 @@ interface AppData {
   fetchLogCBStatus: string;
   fetchLogDLStatus: string;
   pmd_path: string;
+  dir_urls: string[] | null;
   observe_rerun: boolean;
   version: {
     csaf_checker_version: string;
@@ -338,6 +344,7 @@ export default defineComponent({
       fetchLogCBStatus: '',
       fetchLogDLStatus: '',
       pmd_path: '',
+      dir_urls: null,
       observe_rerun: false,
     } as AppData
   },
@@ -446,6 +453,7 @@ export default defineComponent({
           this.domain = this.result.domain
         }
         this.pmd_path = this.result?.pmd_path
+        this.dir_urls = this.result?.dir_urls
         if (['DONE_CHECKER', 'CACHED_CHECKER'].includes(this.result?.status)) {
           this.observe_rerun = false
           const parsedResultsChecker = this.parseResultsChecker(this.result.results_checker)
