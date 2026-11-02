@@ -200,7 +200,9 @@ class CSAF_Checker(BaseModel):
                         os.kill(self._running_task_checker.pid, signal.SIGSTOP)
                     except Exception as e:
                         logger.info(f"SIGSTOP failed: {e}")
-                        return (1, f"Error: Couldn't pause domain task: {e}")
+                        exitCode = 1
+                        errorMsg = f"Error: Couldn't pause domain task: {e}"
+                        break
 
                 while self._signal_paused is True:
                     await asyncio.sleep(self._wait_time_interval)
@@ -209,9 +211,7 @@ class CSAF_Checker(BaseModel):
                     if pause_timer <= 0:
                         await self.__terminate_asyncio_task()
                         exitCode = 1
-                        errorMsg = (
-                            "Error: Time Out: Domain task was paused for too long"
-                        )
+                        errorMsg = "Error: Time Out: Domain task was paused for too long"
                         break
 
                 if exitCode != 0:
@@ -242,10 +242,9 @@ class CSAF_Checker(BaseModel):
                     logger.info(
                         "Log line limit reached for CSAF Checker results -> JSON structure is broken"
                     )
-                    return (
-                        1,
-                        "Error: CSAF Checker result line has exceeded log line byte limit.",
-                    )
+                    exitCode = 1
+                    errorMsg = "Error: CSAF Checker result line has exceeded log line byte limit."
+                    break
 
                 line = await self._running_task_checker.stdout.read(
                     self._log_line_size_limit
@@ -281,10 +280,12 @@ class CSAF_Checker(BaseModel):
 
                     # Check if PMD is in blocklist
                     if Valkey_Controller().is_domain_in_domain_blocklist(data.pmd_path):
-                        return (1, f"Error: PMD is in blocklist: {data.pmd_path}")
+                        exitCode = 1
+                        errorMsg = f"Error: PMD is in blocklist: {data.pmd_path}"
+                        break
                 elif "dirURL for directory based provider:" in decoded_line:
                     dirURL = decoded_line.split("dirURL for directory based provider:")[-1]
-                    
+
                     data.dir_urls.append(dirURL)
 
         if exitCode != 0:
