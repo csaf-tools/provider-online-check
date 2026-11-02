@@ -211,7 +211,9 @@ class CSAF_Checker(BaseModel):
                     if pause_timer <= 0:
                         await self.__terminate_asyncio_task()
                         exitCode = 1
-                        errorMsg = "Error: Time Out: Domain task was paused for too long"
+                        errorMsg = (
+                            "Error: Time Out: Domain task was paused for too long"
+                        )
                         break
 
                 if exitCode != 0:
@@ -284,7 +286,9 @@ class CSAF_Checker(BaseModel):
                         errorMsg = f"Error: PMD is in blocklist: {data.pmd_path}"
                         break
                 elif "dirURL for directory based provider:" in decoded_line:
-                    dirURL = decoded_line.split("dirURL for directory based provider:")[-1]
+                    dirURL = decoded_line.split("dirURL for directory based provider:")[
+                        -1
+                    ]
 
                     data.dir_urls.append(dirURL)
 
