@@ -5,6 +5,8 @@
 
 import pytest
 import asyncio
+import os
+import signal
 import time
 import logging
 from src.csaf.csaf_checker import CSAF_Checker
@@ -174,6 +176,23 @@ class TestWorkingDomainTask:
         assert task.get_csaf_checker() is None
 
         task.status = Domain_Task_Status.ERROR
+        assert task.is_in_valid_state() is False
+
+    @pytest.mark.asyncio
+    async def test_continuing_missing_task(self):
+        """ Tests if unpausing a non-existent task causes errors """
+        task = createTask(False)
+
+        await runTaskInBackground(task)
+
+        task.pause_task()
+        await waitUntilLoopStepIncremented(task)
+        # Manually kill paused task
+        os.kill(task.csaf_checker._running_task_checker.pid, signal.SIGKILL)
+        task.unpause_task()
+        await waitUntilLoopStepIncremented(task)
+
+        assert task.get_csaf_checker() is None
         assert task.is_in_valid_state() is False
 
     @pytest.mark.asyncio
