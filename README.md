@@ -240,6 +240,7 @@ Docker Compose reads this file automatically.
 | `CSAF_CHECKER_VERSION` | Version of the [gocsaf](https://github.com/gocsaf/csaf) (`csaf_checker`) binary to use. |
 | `CSAF_VALIDATOR_VERSION` | Version of the [csaf-validator-service](https://github.com/csaf-tools/csaf-validator-service) to use for document validation. Min version: `2.0.30` |
 | `CSAF_REF` | _empty_ | Build `csaf_checker` from source at this git ref (branch, tag, or commit SHA) instead of downloading a release. |
+| `CUSTOM_CA_CERT_PATH` | _empty_ | Path (relative to `backend/`) to a custom CA certificate to install into the backend image's trust store at build time. See [Custom CA Certificates](#custom-ca-certificates). |
 | `APP_VERSION` | This App's Version. |
 | `CSAF_SHA256` | The expected checksum of the gocsaf tarball. |
 | `RUNTIME_LOG_MAX_BYTES` | 500000 | Maximum total byte size of runtime log stored per scan, 0 for unlimited. |
@@ -278,6 +279,13 @@ Run
 ```bash
 ./dev/set-release.sh
 ```
+
+### Custom CA Certificates
+
+To add one or more CA certificates to the trust store, place a file containing them in the 'backend' directory and
+set 'CUSTOM_CA_CERT_PATH' in the '.env' file to the file path relative to the 'backend' directory.
+
+Activating the changes requires a container rebuild.
 
 ### Reverse Proxy
 

@@ -68,3 +68,7 @@ frontend/.vite/*
 
 # SBOM destination directory
 /sboms/
+
+# Certificates
+*.pem
+*.crt
