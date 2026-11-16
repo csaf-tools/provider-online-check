@@ -87,9 +87,9 @@ class Slot_Manager:
                 available_slot = slot_with_identical_running_task
             else:
                 available_slot = slot_with_identical_running_task
-                domain_task_uuid = slot_with_identical_running_task.running_task.get_data(
-                    False
-                ).uuid
+                domain_task_uuid = (
+                    slot_with_identical_running_task.running_task.get_data(False).uuid
+                )
 
                 if not slot_with_identical_running_task.is_available():
                     logger.info(

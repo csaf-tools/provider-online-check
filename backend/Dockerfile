@@ -9,6 +9,7 @@ FROM ubuntu:26.04 AS base
 ARG CSAF_CHECKER_VERSION
 ENV CSAF_CHECKER_VERSION=${CSAF_CHECKER_VERSION}
 ARG CSAF_REF
+ARG CUSTOM_CA_CERT_PATH
 
 # Install Python and curl; install git and upstream Go when building from source
 RUN apt-get update && \
@@ -16,13 +17,22 @@ RUN apt-get update && \
     python3 \
     python3-pip \
     python3-venv \
-    curl && \
+    curl \
+    ca-certificates && \
     if [ -n "$CSAF_REF" ]; then \
         apt-get install -y --no-install-recommends git make && \
         curl -fsSL https://go.dev/dl/go1.25.11.linux-amd64.tar.gz \
             | tar -C /usr/local -xz; \
     fi && \
     rm -rf /var/lib/apt/lists/*
+
+# Install a custom CA into the system trust store
+# Only COPY it if CUSTOM_CA_CERT_PATH exists. Mount the context for this purpose
+RUN --mount=type=bind,source=.,target=/build-context \
+    if [ -n "$CUSTOM_CA_CERT_PATH" ]; then \
+        cp "/build-context/$CUSTOM_CA_CERT_PATH" /usr/local/share/ca-certificates/custom-ca.crt && \
+        update-ca-certificates; \
+    fi
 
 # Virtual Python Environment
 RUN python3 -m venv /opt/venv

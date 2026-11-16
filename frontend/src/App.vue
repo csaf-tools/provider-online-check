@@ -350,7 +350,7 @@ export default defineComponent({
   },
   async mounted() {
     axios
-      .get(`${this.backendUrl}/api/information/`)
+      .get(`${this.backendUrl}/api/information`)
       .then(response => this.version = response.data)
     const params = new URLSearchParams(window.location.search)
     const domainParam = params.get('domain')

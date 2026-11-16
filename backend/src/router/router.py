@@ -41,7 +41,10 @@ ENV_CSAF_PROVIDER_VERSION = "APP_VERSION"
 CSAF_CHECKER_VERSION = "unknown"
 try:
     result = subprocess.run(
-        [os.path.abspath(os.path.join(CSAF_BINARY_PATH, CSAF_CHECKER_BINARY)), "--version"],
+        [
+            os.path.abspath(os.path.join(CSAF_BINARY_PATH, CSAF_CHECKER_BINARY)),
+            "--version",
+        ],
         capture_output=True,
         text=True,
         timeout=2,

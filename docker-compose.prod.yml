@@ -13,6 +13,7 @@ services:
         - CSAF_CHECKER_VERSION=${CSAF_CHECKER_VERSION:?CSAF_CHECKER_VERSION is not set}
         - CSAF_SHA256=${CSAF_SHA256}
         - CSAF_REF=${CSAF_REF}
+        - CUSTOM_CA_CERT_PATH=${CUSTOM_CA_CERT_PATH:-}
     container_name: backend
     ports:
       - "${PORT_BACKEND:-48090}:8000"
