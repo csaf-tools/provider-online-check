@@ -173,6 +173,8 @@ class CSAF_Checker(BaseModel):
         exitCode = 0
         errorMsg = ""
         inJSONStructure = False
+        # JSON Result lines
+        result_lines = []
         while True:
             # Check signals
             # - Termination Signal
@@ -262,8 +264,8 @@ class CSAF_Checker(BaseModel):
             # Once a single '{' is read, it is assumed that the csaf results are printed out
             inJSONStructure = inJSONStructure or (decoded_line == "{")
             if inJSONStructure:
-                # Result Line
-                data.csaf_checker_output_result += decoded_line + "\n"
+                # JSON Result Line
+                result_lines.append(decoded_line)
             else:
                 # Runtime Line
                 data.append_runtime_log(decoded_line)
@@ -291,6 +293,9 @@ class CSAF_Checker(BaseModel):
                     ]
 
                     data.dir_urls.append(dirURL)
+
+        if result_lines:
+            data.csaf_checker_output_result = "\n".join(result_lines) + "\n"
 
         if exitCode != 0:
             if exitCode in (-9, -137):
